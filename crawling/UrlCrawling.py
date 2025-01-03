@@ -25,8 +25,8 @@ if not db_config:
     print("DB 설정 로드 실패. 프로그램 종료")
     exit()
 
-# DB에 temple_name, templestay_url 저장
-def save_templestay_data_to_db(temple_name, templestay_url):
+# DB에 templestay_name, templestay_url 저장
+def save_templestay_data_to_db(templestay_name, templestay_url):
     try:
         conn = mysql.connector.connect(
             host=db_config["host"],
@@ -37,17 +37,17 @@ def save_templestay_data_to_db(temple_name, templestay_url):
         cursor = conn.cursor()
 
         # 중복 여부 확인
-        check_query = "SELECT COUNT(*) FROM url WHERE temple_name = %s AND templestay_url = %s"
-        cursor.execute(check_query, (temple_name, templestay_url))
+        check_query = "SELECT COUNT(*) FROM url WHERE templestay_name = %s AND templestay_url = %s"
+        cursor.execute(check_query, (templestay_name, templestay_url))
         count = cursor.fetchone()[0]
 
         if count == 0:
-            query = "INSERT INTO url (temple_name, templestay_url) VALUES (%s, %s)"
-            cursor.execute(query, (temple_name, templestay_url))
+            query = "INSERT INTO url (templestay_name, templestay_url) VALUES (%s, %s)"
+            cursor.execute(query, (templestay_name, templestay_url))
             conn.commit()
-            print(f"데이터 저장: 사찰명='{temple_name}', URL='{templestay_url}'")
+            print(f"데이터 저장: 템플스테이='{templestay_name}', URL='{templestay_url}'")
         else:
-            print(f"사찰명 '{temple_name}'은 이미 존재합니다.")
+            print(f"템플스테이 '{templestay_name}'은 이미 존재합니다.")
 
     except mysql.connector.Error as e:
         print(f"데이터베이스 오류: {e}")
@@ -78,22 +78,22 @@ def extract_templestay_data_with_paging(url):
                 items = listings.find_all("li", {"class": "et-active-listing clearfix"})
                 for item in items:
                     h3_tag = item.find("h3")
-                    temple_name = None
+                    templestay_name = None
                     if h3_tag:
-                        match = re.search(r"\[(.*?)\]", h3_tag.text)
+                        match = re.search(r"\]\s*(.*)", h3_tag.text)
                         if match:
-                            temple_name = match.group(1)
+                            templestay_name = match.group(1)
 
-                    link_tag = item.find("a", {"class": "temple-link"})
+                    link_tag = item.find("a", {"class": "readmore-link"})
                     templestay_url = None
                     if link_tag and link_tag.get("href"):
                         base_url = "https://www.templestay.com"
                         templestay_url = base_url + link_tag["href"]
 
-                    if temple_name and templestay_url:
-                        save_templestay_data_to_db(temple_name, templestay_url)
+                    if templestay_name and templestay_url:
+                        save_templestay_data_to_db(templestay_name, templestay_url)
                     else:
-                        print(f"데이터 누락 - 사찰명: {temple_name}")
+                        print(f"데이터 누락 - 템플스테이명: {templestay_name}")
 
             try:
                 next_button = driver.find_element(By.ID, "content_LinkNext")
