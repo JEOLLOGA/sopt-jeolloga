@@ -126,7 +126,6 @@ if not connection:
     print("DB 연결 실패. 프로그램 종료")
     exit()
 
-# URL 가져오기
 urls = fetch_urls(connection)
 
 if not urls:
