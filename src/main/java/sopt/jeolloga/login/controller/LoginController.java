@@ -23,7 +23,8 @@ public class LoginController {
         String email = (String) kakaoAccount.get("email");
         String nickname = (String) properties.get("nickname");
 
-        return "Welcome, " + nickname + "! Your email is: " + email;
+//        return attributes.toString();
+        return "안녕하세요 " + nickname + "님";
     }
 
 

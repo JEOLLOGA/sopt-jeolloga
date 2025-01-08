@@ -5,6 +5,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
 import sopt.jeolloga.login.service.CustomOAuth2UserService;
+import org.springframework.security.oauth2.client.web.HttpSessionOAuth2AuthorizationRequestRepository;
+
 
 @Configuration
 public class SecurityConfig {
@@ -24,6 +26,9 @@ public class SecurityConfig {
                         .anyRequest().permitAll() // 나머지 경로는 인증 없이 허용
                 )
                 .oauth2Login(oauth2 -> oauth2
+                        .authorizationEndpoint(auth -> auth
+                                .authorizationRequestRepository(new HttpSessionOAuth2AuthorizationRequestRepository()) // 저장소 설정
+                        )
                         .userInfoEndpoint(userInfo -> userInfo
                                 .userService(customOAuth2UserService)
                         )
