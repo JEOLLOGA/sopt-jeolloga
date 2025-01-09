@@ -9,6 +9,7 @@ import yaml
 import re
 import time
 
+
 def load_db_config(file_path):
     try:
         with open(file_path, "r", encoding="utf-8") as file:
@@ -18,46 +19,30 @@ def load_db_config(file_path):
         print(f"YAML 파일 로드 오류: {e}")
         return None
 
-db_config_path = "C:\\jeolloga\\crawling\\db_config.yaml"
-db_config = load_db_config(db_config_path)
 
-if not db_config:
-    print("DB 설정 로드 실패. 프로그램 종료")
-    exit()
-
-# DB에 templestay_name, templestay_url 저장
-def save_templestay_data_to_db(templestay_name, templestay_url):
+def save_templestay_data_to_db(connection, templestay_url):
     try:
-        conn = mysql.connector.connect(
-            host=db_config["host"],
-            user=db_config["user"],
-            password=db_config["password"],
-            database=db_config["name"]
-        )
-        cursor = conn.cursor()
+        cursor = connection.cursor()
 
-        # 중복 여부 확인
-        check_query = "SELECT COUNT(*) FROM url WHERE templestay_name = %s AND templestay_url = %s"
-        cursor.execute(check_query, (templestay_name, templestay_url))
+        check_query = "SELECT COUNT(*) FROM url WHERE templestay_url = %s"
+        cursor.execute(check_query, (templestay_url,))
         count = cursor.fetchone()[0]
 
         if count == 0:
-            query = "INSERT INTO url (templestay_name, templestay_url) VALUES (%s, %s)"
-            cursor.execute(query, (templestay_name, templestay_url))
-            conn.commit()
-            print(f"데이터 저장: 템플스테이='{templestay_name}', URL='{templestay_url}'")
+            query = "INSERT INTO url (templestay_url) VALUES (%s)"
+            cursor.execute(query, (templestay_url,))
+            connection.commit()
+            print(f"데이터 저장: URL='{templestay_url}'")
         else:
-            print(f"템플스테이 '{templestay_name}'은 이미 존재합니다.")
+            print(f"중복된 URL: '{templestay_url}', 저장하지 않음.")
 
     except mysql.connector.Error as e:
         print(f"데이터베이스 오류: {e}")
     finally:
-        if 'cursor' in locals() and cursor:
-            cursor.close()
-        if 'conn' in locals() and conn.is_connected():
-            conn.close()
+        cursor.close()
 
-def extract_templestay_data_with_paging(url):
+
+def extract_templestay_data_with_paging(url, connection):
     chrome_options = Options()
     chrome_options.add_argument("--headless")
     chrome_options.add_argument("--disable-gpu")
@@ -77,24 +62,18 @@ def extract_templestay_data_with_paging(url):
             if listings:
                 items = listings.find_all("li", {"class": "et-active-listing clearfix"})
                 for item in items:
-                    h3_tag = item.find("h3")
-                    templestay_name = None
-                    if h3_tag:
-                        match = re.search(r"\]\s*(.*)", h3_tag.text)
-                        if match:
-                            templestay_name = match.group(1)
-
                     link_tag = item.find("a", {"class": "readmore-link"})
                     templestay_url = None
                     if link_tag and link_tag.get("href"):
                         base_url = "https://www.templestay.com"
                         templestay_url = base_url + link_tag["href"]
 
-                    if templestay_name and templestay_url:
-                        save_templestay_data_to_db(templestay_name, templestay_url)
+                    if templestay_url:
+                        save_templestay_data_to_db(connection, templestay_url)
                     else:
-                        print(f"데이터 누락 - 템플스테이명: {templestay_name}")
+                        print(f"데이터 누락 - URL: {templestay_url}")
 
+            # 다음 페이지로 이동
             try:
                 next_button = driver.find_element(By.ID, "content_LinkNext")
                 if "aspNetDisabled" in next_button.get_attribute("class"):
@@ -110,5 +89,27 @@ def extract_templestay_data_with_paging(url):
     finally:
         driver.quit()
 
-url = "https://www.templestay.com/reserv_search.aspx" 
-extract_templestay_data_with_paging(url)
+
+db_config_path = "C:\\jeolloga\\crawling\\db_config.yaml"
+db_config = load_db_config(db_config_path)
+
+if not db_config:
+    print("DB 설정 로드 실패. 프로그램 종료")
+    exit()
+
+try:
+    connection = mysql.connector.connect(
+        host=db_config["host"],
+        user=db_config["user"],
+        password=db_config["password"],
+        database=db_config["name"]
+    )
+    print("DB 연결 성공")
+
+    url = "https://www.templestay.com/reserv_search.aspx"
+    extract_templestay_data_with_paging(url, connection)
+
+finally:
+    if 'connection' in locals() and connection.is_connected():
+        connection.close()
+        print("DB 연결 종료")
