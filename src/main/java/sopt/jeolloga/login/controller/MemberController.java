@@ -7,10 +7,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import sopt.jeolloga.login.repository.Member;
 import sopt.jeolloga.login.service.MemberService;
-
-import javax.swing.text.html.Option;
 import java.util.List;
-import java.util.Optional;
+
 
 @RestController
 @RequestMapping("/members")
