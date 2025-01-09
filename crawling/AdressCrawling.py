@@ -9,7 +9,6 @@ import yaml
 import re
 import time
 
-# DB 설정 로드
 def load_db_config(file_path):
     try:
         with open(file_path, "r", encoding="utf-8") as file:
@@ -19,7 +18,6 @@ def load_db_config(file_path):
         print(f"YAML 파일 로드 오류: {e}")
         return None
 
-# 주소 업데이트 함수
 def update_address_in_db(templestay_name, address):
     try:
         conn = mysql.connector.connect(
@@ -52,7 +50,6 @@ def update_address_in_db(templestay_name, address):
         if 'conn' in locals() and conn.is_connected():
             conn.close()
 
-# 모든 데이터를 처리하고 업데이트
 def extract_and_update_all_templestay_data(url):
     chrome_options = Options()
     chrome_options.add_argument("--headless")
@@ -75,19 +72,17 @@ def extract_and_update_all_templestay_data(url):
                 break
 
             for listing in listings:
-                # 템플스테이명 추출
                 h3_tag = listing.find("h3")
                 templestay_name = None
                 if h3_tag:
-                    match = re.search(r"\[(.+?)\]", h3_tag.text)  # 대괄호 안의 값 추출
+                    match = re.search(r"\[(.+?)\]", h3_tag.text)
                     if match:
                         templestay_name = match.group(1)
 
-                # 두 번째 <p> 태그 값 추출 (순수 텍스트만, <br> 태그 제외)
                 p_tags = listing.find_all("p")
                 address = None
-                if len(p_tags) > 1:  # 두 번째 <p> 태그가 존재하는 경우
-                    raw_text = p_tags[1].find(text=True)  # <br> 이전의 텍스트만 가져옴
+                if len(p_tags) > 1:
+                    raw_text = p_tags[1].find(text=True)
                     address = raw_text.strip() if raw_text else None
 
                 if templestay_name and address:
@@ -112,7 +107,6 @@ def extract_and_update_all_templestay_data(url):
     finally:
         driver.quit()
 
-# Main 실행
 db_config_path = "C:\\jeolloga\\crawling\\db_config.yaml"
 db_config = load_db_config(db_config_path)
 
