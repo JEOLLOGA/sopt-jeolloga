@@ -9,48 +9,35 @@ import yaml
 import re
 import time
 
+
 def load_db_config(file_path):
     try:
         with open(file_path, "r", encoding="utf-8") as file:
             config = yaml.safe_load(file)
-            return config.get("database") if config else None
+            return config.get("database")
     except Exception as e:
         print(f"YAML 파일 로드 오류: {e}")
         return None
 
-def update_address_in_db(templestay_name, address):
-    try:
-        conn = mysql.connector.connect(
-            host=db_config["host"],
-            user=db_config["user"],
-            password=db_config["password"],
-            database=db_config["name"]
-        )
-        cursor = conn.cursor()
 
-        # temple_name 존재 여부 확인
-        check_query = "SELECT COUNT(*) FROM templestay WHERE temple_name = %s"
-        cursor.execute(check_query, (templestay_name,))
+def test_insert_or_skip_address(cursor, templestay_name, address):
+    """address가 이미 존재하면 저장하지 않고 테스트 출력"""
+    try:
+        # address 확인
+        check_query = "SELECT COUNT(*) FROM templestay WHERE address = %s"
+        cursor.execute(check_query, (address,))
         count = cursor.fetchone()[0]
 
         if count > 0:
-            # address 업데이트
-            update_query = "UPDATE templestay SET address = %s WHERE temple_name = %s"
-            cursor.execute(update_query, (address, templestay_name))
-            conn.commit()
-            print(f"주소 업데이트 성공: 사찰명='{templestay_name}', 주소='{address}'")
+            print(f"[테스트 - 건너뛰기] 이미 존재하는 주소: 사찰명='{templestay_name}', 주소='{address}'")
         else:
-            print(f"사찰명 '{templestay_name}'은 데이터베이스에 존재하지 않습니다. 주소 업데이트 불가.")
-
+            print(f"[테스트 - 삽입 가능] 사찰명='{templestay_name}', 주소='{address}'")
     except mysql.connector.Error as e:
-        print(f"데이터베이스 오류: {e}")
-    finally:
-        if 'cursor' in locals() and cursor:
-            cursor.close()
-        if 'conn' in locals() and conn.is_connected():
-            conn.close()
+        print(f"데이터베이스 처리 오류: {e}")
 
-def extract_and_update_all_templestay_data(url):
+
+def extract_and_test_templestay_data(url, cursor):
+    """템플스테이 데이터 추출 및 테스트"""
     chrome_options = Options()
     chrome_options.add_argument("--headless")
     chrome_options.add_argument("--disable-gpu")
@@ -86,10 +73,10 @@ def extract_and_update_all_templestay_data(url):
                     address = raw_text.strip() if raw_text else None
 
                 if templestay_name and address:
-                    print(f"처리 중: 사찰명='{templestay_name}', 주소='{address}'")
-                    update_address_in_db(templestay_name, address)
+                    print(f"[테스트 - 처리 중] 사찰명='{templestay_name}', 주소='{address}'")
+                    test_insert_or_skip_address(cursor, templestay_name, address)
                 else:
-                    print(f"데이터 누락 - 사찰명: {templestay_name}, 주소: {address}")
+                    print(f"[테스트 - 데이터 누락] 사찰명: {templestay_name}, 주소: {address}")
 
             # 다음 페이지로 이동
             try:
@@ -107,6 +94,7 @@ def extract_and_update_all_templestay_data(url):
     finally:
         driver.quit()
 
+
 db_config_path = "C:\\jeolloga\\crawling\\db_config.yaml"
 db_config = load_db_config(db_config_path)
 
@@ -114,5 +102,22 @@ if not db_config:
     print("DB 설정 로드 실패. 프로그램 종료")
     exit()
 
-url = "https://www.templestay.com/reserv_search.aspx"
-extract_and_update_all_templestay_data(url)
+try:
+    conn = mysql.connector.connect(
+        host=db_config["host"],
+        user=db_config["user"],
+        password=db_config["password"],
+        database=db_config["name"]
+    )
+    cursor = conn.cursor()
+    print("DB 연결 성공 (테스트 모드)")
+
+    url = "https://www.templestay.com/reserv_search.aspx"
+    extract_and_test_templestay_data(url, cursor)
+
+finally:
+    if 'cursor' in locals() and cursor:
+        cursor.close()
+    if 'conn' in locals() and conn.is_connected():
+        conn.close()
+        print("DB 연결 종료")

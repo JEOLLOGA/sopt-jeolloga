@@ -20,26 +20,25 @@ def load_db_config(file_path):
         return None
 
 
-def insert_or_update_youtube_link(connection, temple_name, youtube):
+def insert_or_skip_youtube_link(connection, temple_name, youtube):
     try:
         cursor = connection.cursor()
 
         check_query = "SELECT id FROM templestay WHERE TRIM(temple_name) = %s"
         cursor.execute(check_query, (temple_name,))
         results = cursor.fetchall()
+
         if results:
             update_query = "UPDATE templestay SET youtube = %s WHERE TRIM(temple_name) = %s"
             cursor.execute(update_query, (youtube, temple_name))
             print(f"[업데이트] temple_name: {temple_name}, youtube: {youtube}, 총 개수: {cursor.rowcount}")
         else:
-            insert_query = "INSERT INTO templestay (temple_name, youtube) VALUES (%s, %s)"
-            cursor.execute(insert_query, (temple_name, youtube))
-            print(f"[삽입] temple_name: {temple_name}, youtube: {youtube}")
+            print(f"temple_name: {temple_name}, youtube: {youtube} 사찰이 데이터베이스에 존재하지 않음")
 
         connection.commit()
 
     except mysql.connector.Error as e:
-        print(f"DB 삽입/업데이트 오류: {e}")
+        print(f"DB 처리 오류: {e}")
     finally:
         cursor.close()
 
@@ -74,7 +73,7 @@ def extract_templestay_data_with_paging(url, connection):
                 youtube = youtube_tag["href"] if youtube_tag and "youtube.com" in youtube_tag["href"] else None
 
                 if temple_name and youtube:
-                    insert_or_update_youtube_link(connection, temple_name, youtube)
+                    insert_or_skip_youtube_link(connection, temple_name, youtube)
 
             try:
                 next_button = driver.find_element(By.ID, "content_LinkNext")
