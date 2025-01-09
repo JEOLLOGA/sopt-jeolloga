@@ -45,7 +45,15 @@ def fetch_urls(connection):
 def save_data_to_db(connection, data):
     try:
         cursor = connection.cursor()
-        query = """
+        
+        check_query = "SELECT COUNT(*) FROM templestay WHERE templestay_name = %s"
+        cursor.execute(check_query, (data["templestay_name"],))
+        if cursor.fetchone()[0] > 0:
+            print(f"템플스테이 '{data['templestay_name']}'은 이미 존재합니다.")
+            cursor.close()
+            return
+        
+        insert_query = """
             INSERT INTO templestay (templestay_name, phone_number, templestay_price, introduction, temple_name, schedule)
             VALUES (%s, %s, %s, %s, %s, %s)
         """
@@ -57,12 +65,14 @@ def save_data_to_db(connection, data):
             data["temple_name"],
             data["schedule"]
         )
-        cursor.execute(query, values)
+        cursor.execute(insert_query, values)
         connection.commit()
-        cursor.close()
         print(f"데이터 저장 완료: {data['templestay_name']}")
+        cursor.close()
     except mysql.connector.Error as err:
         print(f"DB 저장 오류: {err}")
+
+
 
 def crawl_data(url):
     try:
