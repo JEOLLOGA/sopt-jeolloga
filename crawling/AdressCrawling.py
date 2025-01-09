@@ -20,24 +20,23 @@ def load_db_config(file_path):
         return None
 
 
-def test_insert_or_skip_address(cursor, templestay_name, address):
-    """address가 이미 존재하면 저장하지 않고 테스트 출력"""
+def insert_or_skip_address(cursor, templestay_name, address):
     try:
-        # address 확인
         check_query = "SELECT COUNT(*) FROM templestay WHERE address = %s"
         cursor.execute(check_query, (address,))
         count = cursor.fetchone()[0]
 
         if count > 0:
-            print(f"[테스트 - 건너뛰기] 이미 존재하는 주소: 사찰명='{templestay_name}', 주소='{address}'")
+            print(f"이미 존재하는 주소: 사찰명='{templestay_name}'")
         else:
-            print(f"[테스트 - 삽입 가능] 사찰명='{templestay_name}', 주소='{address}'")
+            insert_query = "INSERT INTO templestay (temple_name, address) VALUES (%s, %s)"
+            cursor.execute(insert_query, (templestay_name, address))
+            print(f"사찰명='{templestay_name}', 주소='{address}'")
     except mysql.connector.Error as e:
         print(f"데이터베이스 처리 오류: {e}")
 
 
-def extract_and_test_templestay_data(url, cursor):
-    """템플스테이 데이터 추출 및 테스트"""
+def extract_and_update_templestay_data(url, cursor):
     chrome_options = Options()
     chrome_options.add_argument("--headless")
     chrome_options.add_argument("--disable-gpu")
@@ -73,10 +72,10 @@ def extract_and_test_templestay_data(url, cursor):
                     address = raw_text.strip() if raw_text else None
 
                 if templestay_name and address:
-                    print(f"[테스트 - 처리 중] 사찰명='{templestay_name}', 주소='{address}'")
-                    test_insert_or_skip_address(cursor, templestay_name, address)
+                    print(f"처리중 : 사찰명='{templestay_name}', 주소='{address}'")
+                    insert_or_skip_address(cursor, templestay_name, address)
                 else:
-                    print(f"[테스트 - 데이터 누락] 사찰명: {templestay_name}, 주소: {address}")
+                    print(f"데이터 누락 : 사찰명: {templestay_name}, 주소: {address}")
 
             # 다음 페이지로 이동
             try:
@@ -110,10 +109,12 @@ try:
         database=db_config["name"]
     )
     cursor = conn.cursor()
-    print("DB 연결 성공 (테스트 모드)")
+    print("DB 연결 성공")
 
     url = "https://www.templestay.com/reserv_search.aspx"
-    extract_and_test_templestay_data(url, cursor)
+    extract_and_update_templestay_data(url, cursor)
+
+    conn.commit()
 
 finally:
     if 'cursor' in locals() and cursor:
