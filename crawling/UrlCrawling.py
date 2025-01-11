@@ -29,10 +29,15 @@ def save_templestay_data_to_db(connection, templestay_url):
         count = cursor.fetchone()[0]
 
         if count == 0:
-            query = "INSERT INTO url (templestay_url) VALUES (%s)"
-            cursor.execute(query, (templestay_url,))
+            get_max_id_query = "SELECT MAX(id) FROM url"
+            cursor.execute(get_max_id_query)
+            max_id = cursor.fetchone()[0]
+            next_id = (max_id + 1) if max_id else 1 
+
+            insert_query = "INSERT INTO url (id, templestay_url) VALUES (%s, %s)"
+            cursor.execute(insert_query, (next_id, templestay_url))
             connection.commit()
-            print(f"데이터 저장: URL='{templestay_url}'")
+            print(f"데이터 저장: ID='{next_id}', URL='{templestay_url}'")
         else:
             print(f"중복된 URL: '{templestay_url}', 저장하지 않음.")
 
@@ -40,7 +45,6 @@ def save_templestay_data_to_db(connection, templestay_url):
         print(f"데이터베이스 오류: {e}")
     finally:
         cursor.close()
-
 
 def extract_templestay_data_with_paging(url, connection):
     chrome_options = Options()
