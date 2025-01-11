@@ -9,7 +9,6 @@ import yaml
 import re
 import time
 
-
 def load_db_config(file_path):
     try:
         with open(file_path, "r", encoding="utf-8") as file:
@@ -19,30 +18,25 @@ def load_db_config(file_path):
         print(f"YAML 파일 로드 오류: {e}")
         return None
 
-
-def save_templestay_data_to_db(connection, templestay_url):
+def insert_or_skip_youtube_link(connection, temple_name, youtube):
     try:
         cursor = connection.cursor()
 
-        check_query = "SELECT COUNT(*) FROM url WHERE templestay_url = %s"
-        cursor.execute(check_query, (templestay_url,))
-        count = cursor.fetchone()[0]
+        check_query = "SELECT id FROM templestay WHERE TRIM(temple_name) = %s"
+        cursor.execute(check_query, (temple_name,))
+        results = cursor.fetchall()
 
-        if count == 0:
-            get_max_id_query = "SELECT MAX(id) FROM url"
-            cursor.execute(get_max_id_query)
-            max_id = cursor.fetchone()[0]
-            next_id = (max_id + 1) if max_id else 1 
-
-            insert_query = "INSERT INTO url (id, templestay_url) VALUES (%s, %s)"
-            cursor.execute(insert_query, (next_id, templestay_url))
-            connection.commit()
-            print(f"데이터 저장: ID='{next_id}', URL='{templestay_url}'")
+        if results:
+            update_query = "UPDATE templestay SET youtube = %s WHERE TRIM(temple_name) = %s"
+            cursor.execute(update_query, (youtube, temple_name))
+            print(f"업데이트: temple_name: {temple_name}, youtube: {youtube}, 총 개수: {cursor.rowcount}")
         else:
-            print(f"중복된 URL: '{templestay_url}', 저장하지 않음.")
+            print(f"temple_name: {temple_name}, youtube: {youtube} 사찰이 데이터베이스에 존재하지 않음")
+
+        connection.commit()
 
     except mysql.connector.Error as e:
-        print(f"데이터베이스 오류: {e}")
+        print(f"DB 처리 오류: {e}")
     finally:
         cursor.close()
 
@@ -62,22 +56,22 @@ def extract_templestay_data_with_paging(url, connection):
             html = driver.page_source
             soup = BeautifulSoup(html, "html.parser")
 
-            listings = soup.find("div", {"id": "et-listings"})
-            if listings:
-                items = listings.find_all("li", {"class": "et-active-listing clearfix"})
-                for item in items:
-                    link_tag = item.find("a", {"class": "readmore-link"})
-                    templestay_url = None
-                    if link_tag and link_tag.get("href"):
-                        base_url = "https://www.templestay.com"
-                        templestay_url = base_url + link_tag["href"]
+            listings = soup.find_all("div", {"class": "listing-text"})
+            for listing in listings:
+                h4_tag = listing.find("h4")
+                text_content = h4_tag.text.strip() if h4_tag else ""
+                temple_name_match = re.search(r"\[([^\]]+)\]", text_content)
+                if temple_name_match:
+                    temple_name = temple_name_match.group(1).strip()
+                else:
+                    temple_name = None
 
-                    if templestay_url:
-                        save_templestay_data_to_db(connection, templestay_url)
-                    else:
-                        print(f"데이터 누락 - URL: {templestay_url}")
+                youtube_tag = listing.find("a", {"href": True})
+                youtube = youtube_tag["href"] if youtube_tag and "youtube.com" in youtube_tag["href"] else None
 
-            # 다음 페이지로 이동
+                if temple_name and youtube:
+                    insert_or_skip_youtube_link(connection, temple_name, youtube)
+
             try:
                 next_button = driver.find_element(By.ID, "content_LinkNext")
                 if "aspNetDisabled" in next_button.get_attribute("class"):
@@ -110,7 +104,7 @@ try:
     )
     print("DB 연결 성공")
 
-    url = "https://www.templestay.com/reserv_search.aspx"
+    url = "https://www.templestay.com/temple_search.aspx"
     extract_templestay_data_with_paging(url, connection)
 
 finally:
