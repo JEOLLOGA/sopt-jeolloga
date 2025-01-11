@@ -32,6 +32,7 @@ def connect_to_db(config):
 def fetch_urls(connection):
     try:
         cursor = connection.cursor()
+        # 모든 URL과 templestay_id를 가져옵니다.
         query = "SELECT templestay_url, templestay_id FROM url ORDER BY id ASC"
         cursor.execute(query)
         urls = cursor.fetchall()
@@ -40,6 +41,19 @@ def fetch_urls(connection):
     except mysql.connector.Error as err:
         print(f"URL 데이터 가져오기 오류: {err}")
         return []
+
+def is_templestay_id_exist(connection, templestay_id):
+    try:
+        cursor = connection.cursor()
+        # category 테이블에서 templestay_id가 존재하는지 확인
+        query = "SELECT EXISTS(SELECT 1 FROM category WHERE templestay_id = %s)"
+        cursor.execute(query, (templestay_id,))
+        exists = cursor.fetchone()[0]  # 1이면 존재, 0이면 존재하지 않음
+        cursor.close()
+        return exists
+    except mysql.connector.Error as err:
+        print(f"templestay_id 존재 여부 확인 오류: {err}")
+        return False
 
 def crawl_data(url):
     try:
@@ -99,10 +113,10 @@ def price_to_code(price_text):
     """
     if price_text:
         cleaned_price = re.sub(r"[^\d]", "", price_text)
-        return int(cleaned_price)
+        return int(cleaned_price)  # 숫자만 반환
     return 0
 
-def update_data_in_db(connection, data, templestay_id):
+def save_data_to_db(connection, data, templestay_id):
     try:
         cursor = connection.cursor()
 
@@ -111,19 +125,18 @@ def update_data_in_db(connection, data, templestay_id):
             region_code = REGION_MAPPING.get(region_value, 0)
             price_code = price_to_code(templestay_price)
 
-            update_query = """
-                UPDATE category
-                SET type = %s, region = %s, price = %s
-                WHERE templestay_id = %s AND type = %s AND region = %s
+            category_query = """
+                INSERT INTO category (type, region, price, templestay_id)
+                VALUES (%s, %s, %s, %s)
             """
-            cursor.execute(update_query, (type_code, region_code, price_code, templestay_id, type_code, region_code))
+            cursor.execute(category_query, (type_code, region_code, price_code, templestay_id))
             connection.commit()
 
-            print(f"카테고리 테이블에 데이터 업데이트 완료: 템플스테이 ID={templestay_id}, 유형={type_value}, 지역={region_value}, 가격={templestay_price}")
+            print(f"카테고리 테이블에 데이터 저장 완료: 템플스테이 ID={templestay_id}, 유형={type_value}, 지역={region_value}, 가격={templestay_price}")
 
         cursor.close()
     except mysql.connector.Error as err:
-        print(f"DB 업데이트 오류: {err}")
+        print(f"DB 저장 오류: {err}")
 
 db_config_path = "C:\\jeolloga\\crawling\\db_config.yaml"
 
@@ -147,10 +160,14 @@ if not urls:
     exit()
 
 for url, templestay_id in urls:
+    if is_templestay_id_exist(connection, templestay_id):
+        print(f"템플스테이 ID={templestay_id}는 이미 존재합니다. 크롤링 건너뜁니다.")
+        continue
+
     print(f"크롤링 중: {url}")
     crawled_data = crawl_data(url)
     if crawled_data:
-        update_data_in_db(connection, crawled_data, templestay_id)
+        save_data_to_db(connection, crawled_data, templestay_id)
     else:
         print(f"크롤링 실패: {url}")
 

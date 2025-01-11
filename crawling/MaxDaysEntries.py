@@ -2,7 +2,6 @@ import mysql.connector
 import yaml
 import json
 
-# YAML 파일에서 DB 설정 읽기
 def load_db_config(file_path):
     try:
         with open(file_path, "r", encoding="utf-8") as file:
@@ -14,7 +13,6 @@ def load_db_config(file_path):
         print(f"YAML 파일 로드 오류: {e}")
         return None
 
-# MySQL DB 연결
 def connect_to_db(config):
     try:
         connection = mysql.connector.connect(
@@ -29,7 +27,6 @@ def connect_to_db(config):
         print(f"DB 연결 오류: {err}")
         return None
 
-# schedule 데이터를 DB에서 가져오기
 def fetch_schedules(connection):
     try:
         cursor = connection.cursor()
@@ -39,7 +36,7 @@ def fetch_schedules(connection):
             WHERE schedule IS NOT NULL AND JSON_VALID(schedule) = 1
         """
         cursor.execute(query)
-        schedules = cursor.fetchall()  # [(id, schedule_json), ...]
+        schedules = cursor.fetchall()
         cursor.close()
         return schedules
     except mysql.connector.Error as err:
@@ -56,16 +53,14 @@ def analyze_schedules(schedules):
     for record in schedules:
         templestay_id, schedule_json = record
         try:
-            schedule = json.loads(schedule_json)  # JSON 문자열을 Python 딕셔너리로 변환
-            total_days = len(schedule.keys())  # JSON 키 개수 (총 며칠치 데이터)
+            schedule = json.loads(schedule_json)
+            total_days = len(schedule.keys())
             max_entries_per_day = max(len(day) for day in schedule.values()) if schedule else 0
 
-            # 최대 며칠차 갱신
             if total_days > max_days:
                 max_days = total_days
                 max_days_id = templestay_id
 
-            # 최대 줄 수 갱신
             if max_entries_per_day > max_entries:
                 max_entries = max_entries_per_day
                 max_entries_id = templestay_id
@@ -75,12 +70,10 @@ def analyze_schedules(schedules):
 
     return max_days, max_days_id, max_entries, max_entries_id
 
-# 분석 결과 출력
 def print_results(max_days, max_days_id, max_entries, max_entries_id):
     print(f"최대 며칠차: {max_days}일차 (템플스테이 ID={max_days_id})")
     print(f"최대 항목 수: {max_entries}줄 (템플스테이 ID={max_entries_id})")
 
-# 메인 실행 함수
 def main():
     db_config_path = "C:\\jeolloga\\crawling\\db_config.yaml"
     db_config = load_db_config(db_config_path)

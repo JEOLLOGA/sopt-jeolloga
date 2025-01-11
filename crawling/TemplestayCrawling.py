@@ -42,6 +42,71 @@ def fetch_urls(connection):
         print(f"URL 데이터 가져오기 오류: {err}")
         return []
 
+def crawl_data(url):
+    try:
+        response = requests.get(url)
+        response.raise_for_status()
+
+        soup = BeautifulSoup(response.text, "html.parser")
+
+        templestay_name = soup.select_one(".page-name h1").text
+        templestay_name = re.search(r"]\s*(.+)", templestay_name).group(1)
+
+        phone_number_element = soup.select_one(".page-tag a[href^='tel:']")
+        phone_number = phone_number_element.text if phone_number_element else None
+
+        introduction_element = soup.select_one(".page-content p")
+        introduction = introduction_element.text if introduction_element else None
+
+        temple_name = soup.select_one(".page-name h1").text
+        temple_name = re.search(r"\[(.+?)\]", temple_name).group(1)
+
+        schedule = crawl_schedule_data(soup)
+
+        return {
+            "templestay_name": templestay_name,
+            "phone_number": phone_number,
+            "introduction": introduction,
+            "temple_name": temple_name,
+            "schedule": schedule
+        }
+
+    except requests.exceptions.RequestException as e:
+        print(f"요청 오류: {e}")
+        return None
+    except Exception as e:
+        print(f"크롤링 오류: {e}")
+        return None
+
+def crawl_schedule_data(soup):
+    try:
+        schedule = {}
+        day_sections = soup.select(".temple-description h4.bullet")
+
+        for day_title_element in day_sections:
+            day_title = day_title_element.text.strip() if day_title_element else "null" 
+
+            table_element = day_title_element.find_next("table") if day_title_element else None
+            if not table_element:
+                continue
+
+            day_schedule = {}
+            rows = table_element.select("tbody tr")
+            for row in rows:
+                cells = row.select("td")
+                if len(cells) >= 2:
+                    time_slot = cells[0].text.strip()
+                    activity = cells[1].text.strip()
+                    day_schedule[time_slot] = activity
+
+            schedule[day_title] = day_schedule
+
+        return json.dumps(schedule, ensure_ascii=False)
+    
+    except Exception as e:
+        print(f"Schedule 크롤링 오류: {e}")
+        return "{}"
+
 def save_data_to_db(connection, data, url):
     try:
         cursor = connection.cursor()
@@ -84,89 +149,6 @@ def save_data_to_db(connection, data, url):
     except mysql.connector.Error as err:
         print(f"DB 저장 오류: {err}")
 
-def crawl_data(url):
-    try:
-        response = requests.get(url)
-        response.raise_for_status()
-
-        soup = BeautifulSoup(response.text, "html.parser")
-
-        templestay_name = soup.select_one(".page-name h1").text
-        templestay_name = re.search(r"]\s*(.+)", templestay_name).group(1)
-
-        phone_number_element = soup.select_one(".page-tag a[href^='tel:']")
-        phone_number = phone_number_element.text if phone_number_element else None
-
-        introduction_element = soup.select_one(".page-content p")
-        introduction = introduction_element.text if introduction_element else None
-
-        temple_name = soup.select_one(".page-name h1").text
-        temple_name = re.search(r"\[(.+?)\]", temple_name).group(1)
-
-        schedule = {}
-        day_sections = soup.select(".temple-description h4.bullet")
-
-        day_mapping = {
-            "첫째날": 1,
-            "둘째날": 2,
-            "셋째날": 3,
-            "넷째날": 4,
-            "다섯째날": 5,
-            "여섯째날": 6,
-        }
-
-        day_count = 1
-        for day_title_element in day_sections:
-            day_title = day_title_element.text.strip()
-            
-            day_number_match = re.search(r"(\d+)일차", day_title)
-            if day_number_match:
-                day_number = int(day_number_match.group(1))
-            elif day_title in day_mapping:
-                day_number = day_mapping[day_title]
-            else:
-                day_number = day_count
-                day_count += 1
-
-            table_element = day_title_element.find_next("table")
-            if not table_element:
-                continue
-
-            day_schedule = {}
-            rows = table_element.select("tbody tr")
-            for row in rows:
-                time_slot_element = row.select_one(".work-title")
-                activity_element = row.select_one("td:nth-child(2)")
-
-                if not time_slot_element:
-                    cells = row.select("td")
-                    if len(cells) >= 2:
-                        time_slot_element = cells[0]
-                        activity_element = cells[1]
-
-                if time_slot_element and activity_element:
-                    time_slot = time_slot_element.text.strip()
-                    activity = activity_element.text.strip()
-                    day_schedule[time_slot] = activity
-
-            if day_number:
-                schedule[day_number] = day_schedule
-
-        return {
-            "templestay_name": templestay_name,
-            "phone_number": phone_number,
-            "introduction": introduction,
-            "temple_name": temple_name,
-            "schedule": json.dumps(schedule, ensure_ascii=False)
-        }
-
-    except requests.exceptions.RequestException as e:
-        print(f"요청 오류: {e}")
-        return None
-    except Exception as e:
-        print(f"크롤링 오류: {e}")
-        return None
-
 db_config_path = "C:\\jeolloga\\crawling\\db_config.yaml"
 
 db_config = load_db_config(db_config_path)
@@ -185,6 +167,7 @@ urls = fetch_urls(connection)
 
 if not urls:
     print("URL 데이터 없음. 프로그램 종료")
+    connection.close()
     exit()
 
 for url in urls:
