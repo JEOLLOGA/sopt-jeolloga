@@ -9,7 +9,6 @@ import yaml
 import re
 import time
 
-
 def load_db_config(file_path):
     try:
         with open(file_path, "r", encoding="utf-8") as file:
@@ -18,7 +17,6 @@ def load_db_config(file_path):
     except Exception as e:
         print(f"YAML 파일 로드 오류: {e}")
         return None
-
 
 def insert_or_skip_youtube_link(connection, temple_name, youtube):
     try:
@@ -31,7 +29,7 @@ def insert_or_skip_youtube_link(connection, temple_name, youtube):
         if results:
             update_query = "UPDATE templestay SET youtube = %s WHERE TRIM(temple_name) = %s"
             cursor.execute(update_query, (youtube, temple_name))
-            print(f"[업데이트] temple_name: {temple_name}, youtube: {youtube}, 총 개수: {cursor.rowcount}")
+            print(f"업데이트: temple_name: {temple_name}, youtube: {youtube}, 총 개수: {cursor.rowcount}")
         else:
             print(f"temple_name: {temple_name}, youtube: {youtube} 사찰이 데이터베이스에 존재하지 않음")
 
@@ -41,7 +39,6 @@ def insert_or_skip_youtube_link(connection, temple_name, youtube):
         print(f"DB 처리 오류: {e}")
     finally:
         cursor.close()
-
 
 def extract_templestay_data_with_paging(url, connection):
     chrome_options = Options()

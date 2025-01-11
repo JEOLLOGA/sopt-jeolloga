@@ -9,7 +9,6 @@ import yaml
 import re
 import time
 
-
 def load_db_config(file_path):
     try:
         with open(file_path, "r", encoding="utf-8") as file:
@@ -19,22 +18,30 @@ def load_db_config(file_path):
         print(f"YAML 파일 로드 오류: {e}")
         return None
 
-
 def insert_or_skip_address(cursor, templestay_name, address):
     try:
-        check_query = "SELECT COUNT(*) FROM templestay WHERE address = %s"
-        cursor.execute(check_query, (address,))
-        count = cursor.fetchone()[0]
+        check_query = "SELECT id, address FROM templestay WHERE templestay_name = %s"
+        cursor.execute(check_query, (templestay_name,))
+        result = cursor.fetchone()
 
-        if count > 0:
-            print(f"이미 존재하는 주소: 사찰명='{templestay_name}'")
+        if result:
+            templestay_id, existing_address = result
+            if existing_address is None:
+                update_query = "UPDATE templestay SET address = %s WHERE id = %s"
+                cursor.execute(update_query, (address, templestay_id))
+                print(f"주소 업데이트: 사찰명='{templestay_name}', 주소='{address}'")
+            else:
+                print(f"주소가 이미 존재합니다. 업데이트를 건너뜁니다: 사찰명='{templestay_name}', 기존 주소='{existing_address}'")
         else:
-            insert_query = "INSERT INTO templestay (temple_name, address) VALUES (%s, %s)"
-            cursor.execute(insert_query, (templestay_name, address))
-            print(f"사찰명='{templestay_name}', 주소='{address}'")
+            print(f"템플스테이 '{templestay_name}'이 존재하지 않아 address 업데이트를 건너뜁니다.")
     except mysql.connector.Error as e:
         print(f"데이터베이스 처리 오류: {e}")
 
+def extract_templestay_name(element_text):
+    match = re.search(r"]\s*(.+)", element_text)
+    if match:
+        return match.group(1).strip()
+    return None
 
 def extract_and_update_templestay_data(url, cursor):
     chrome_options = Options()
@@ -61,9 +68,7 @@ def extract_and_update_templestay_data(url, cursor):
                 h3_tag = listing.find("h3")
                 templestay_name = None
                 if h3_tag:
-                    match = re.search(r"\[(.+?)\]", h3_tag.text)
-                    if match:
-                        templestay_name = match.group(1)
+                    templestay_name = extract_templestay_name(h3_tag.text)
 
                 p_tags = listing.find_all("p")
                 address = None
@@ -77,7 +82,6 @@ def extract_and_update_templestay_data(url, cursor):
                 else:
                     print(f"데이터 누락 : 사찰명: {templestay_name}, 주소: {address}")
 
-            # 다음 페이지로 이동
             try:
                 next_button = driver.find_element(By.ID, "content_LinkNext")
                 if "aspNetDisabled" in next_button.get_attribute("class"):
@@ -93,6 +97,12 @@ def extract_and_update_templestay_data(url, cursor):
     finally:
         driver.quit()
 
+def extract_templestay_name_from_page(soup):
+    # beautifulsoup로 templestay_name크롤링
+    templestay_name_element = soup.select_one(".page-name h1")
+    if templestay_name_element:
+        return extract_templestay_name(templestay_name_element.text)
+    return None
 
 db_config_path = "C:\\jeolloga\\crawling\\db_config.yaml"
 db_config = load_db_config(db_config_path)

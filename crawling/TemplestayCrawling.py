@@ -42,38 +42,44 @@ def fetch_urls(connection):
         print(f"URL 데이터 가져오기 오류: {err}")
         return []
 
-
-def save_data_to_db(connection, data):
+def save_data_to_db(connection, data, url):
     try:
         cursor = connection.cursor()
 
-        check_query = "SELECT COUNT(*) FROM templestay WHERE templestay_name = %s"
+        check_query = "SELECT id FROM templestay WHERE templestay_name = %s"
         cursor.execute(check_query, (data["templestay_name"],))
-        if cursor.fetchone()[0] > 0:
-            print(f"템플스테이 '{data['templestay_name']}'은 이미 존재합니다.")
-            cursor.close()
-            return
+        result = cursor.fetchone()
 
-        get_max_id_query = "SELECT MAX(id) FROM templestay"
-        cursor.execute(get_max_id_query)
-        max_id = cursor.fetchone()[0]
-        next_id = (max_id + 1) if max_id else 1 
+        if result:
+            templestay_id = result[0]
+            print(f"템플스테이 '{data['templestay_name']}'은 이미 존재합니다. ID={templestay_id}")
+        else:
+            get_max_id_query = "SELECT MAX(id) FROM templestay"
+            cursor.execute(get_max_id_query)
+            max_id = cursor.fetchone()[0]
+            templestay_id = (max_id + 1) if max_id else 1
 
-        insert_query = """
-            INSERT INTO templestay (id, templestay_name, phone_number, introduction, temple_name, schedule)
-            VALUES (%s, %s, %s, %s, %s, %s)
-        """
-        values = (
-            next_id,
-            data["templestay_name"],
-            data["phone_number"],
-            data["introduction"],
-            data["temple_name"],
-            data["schedule"]
-        )
-        cursor.execute(insert_query, values)
+            insert_query = """
+                INSERT INTO templestay (id, templestay_name, phone_number, introduction, temple_name, schedule)
+                VALUES (%s, %s, %s, %s, %s, %s)
+            """
+            values = (
+                templestay_id,
+                data["templestay_name"],
+                data["phone_number"],
+                data["introduction"],
+                data["temple_name"],
+                data["schedule"]
+            )
+            cursor.execute(insert_query, values)
+            connection.commit()
+            print(f"데이터 저장 완료: ID='{templestay_id}', 템플스테이 이름='{data['templestay_name']}'")
+
+        update_url_query = "UPDATE url SET templestay_id = %s WHERE templestay_url = %s"
+        cursor.execute(update_url_query, (templestay_id, url))
         connection.commit()
-        print(f"데이터 저장 완료: ID='{next_id}', 템플스테이 이름='{data['templestay_name']}'")
+        print(f"URL 테이블 업데이트 완료: URL='{url}', 템플스테이 ID='{templestay_id}'")
+
         cursor.close()
     except mysql.connector.Error as err:
         print(f"DB 저장 오류: {err}")
@@ -185,7 +191,7 @@ for url in urls:
     print(f"크롤링 중: {url}")
     crawled_data = crawl_data(url)
     if crawled_data:
-        save_data_to_db(connection, crawled_data)
+        save_data_to_db(connection, crawled_data, url)
     else:
         print(f"크롤링 실패: {url}")
 
