@@ -34,7 +34,7 @@ def fetch_urls(connection):
         cursor = connection.cursor()
         query = "SELECT templestay_url, templestay_id FROM url ORDER BY id ASC"
         cursor.execute(query)
-        urls = cursor.fetchall()  # This will return both URL and templestay_id
+        urls = cursor.fetchall()
         cursor.close()
         return urls
     except mysql.connector.Error as err:
@@ -94,35 +94,36 @@ REGION_MAPPING = {
 
 def price_to_code(price_text):
     """
-    가격 문자열을 10,000원 단위로 매핑된 숫자로 변환하는 함수
+    가격 문자열에서 콤마와 '원'을 제거하고 숫자만 반환하는 함수
+    예시: "10,000원" -> 10000
     """
     if price_text:
-        price_number = int(re.sub(r"[^\d]", "", price_text))
-        return price_number // 10000  # 10,000원 단위로 나누기
+        cleaned_price = re.sub(r"[^\d]", "", price_text)
+        return int(cleaned_price)
     return 0
 
-def save_data_to_db(connection, data, templestay_id):
+def update_data_in_db(connection, data, templestay_id):
     try:
         cursor = connection.cursor()
 
-        # category 테이블에 type, region, price, templestay_id 저장
         for type_value, region_value, templestay_price in data:
             type_code = TYPE_MAPPING.get(type_value, 0)
             region_code = REGION_MAPPING.get(region_value, 0)
             price_code = price_to_code(templestay_price)
 
-            category_query = """
-                INSERT INTO category (type, region, price, templestay_id)
-                VALUES (%s, %s, %s, %s)
+            update_query = """
+                UPDATE category
+                SET type = %s, region = %s, price = %s
+                WHERE templestay_id = %s AND type = %s AND region = %s
             """
-            cursor.execute(category_query, (type_code, region_code, price_code, templestay_id))
+            cursor.execute(update_query, (type_code, region_code, price_code, templestay_id, type_code, region_code))
             connection.commit()
 
-            print(f"카테고리 테이블에 데이터 저장 완료: 템플스테이 ID={templestay_id}, 유형={type_value}, 지역={region_value}, 가격={templestay_price}")
+            print(f"카테고리 테이블에 데이터 업데이트 완료: 템플스테이 ID={templestay_id}, 유형={type_value}, 지역={region_value}, 가격={templestay_price}")
 
         cursor.close()
     except mysql.connector.Error as err:
-        print(f"DB 저장 오류: {err}")
+        print(f"DB 업데이트 오류: {err}")
 
 db_config_path = "C:\\jeolloga\\crawling\\db_config.yaml"
 
@@ -149,7 +150,7 @@ for url, templestay_id in urls:
     print(f"크롤링 중: {url}")
     crawled_data = crawl_data(url)
     if crawled_data:
-        save_data_to_db(connection, crawled_data, templestay_id)
+        update_data_in_db(connection, crawled_data, templestay_id)
     else:
         print(f"크롤링 실패: {url}")
 
