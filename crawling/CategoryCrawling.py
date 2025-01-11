@@ -32,9 +32,9 @@ def connect_to_db(config):
 def fetch_urls(connection):
     try:
         cursor = connection.cursor()
-        query = "SELECT templestay_url FROM url ORDER BY id ASC"
+        query = "SELECT templestay_url, templestay_id FROM url ORDER BY id ASC"
         cursor.execute(query)
-        urls = [row[0] for row in cursor.fetchall()]
+        urls = cursor.fetchall()  # This will return both URL and templestay_id
         cursor.close()
         return urls
     except mysql.connector.Error as err:
@@ -57,14 +57,17 @@ def crawl_data(url):
             if match:
                 type_value = match.group(1).strip()
                 region_value = match.group(2).strip()
-                extracted_data.append((type_value, region_value))
+
+                price_row = soup.select("tr:nth-of-type(2) td.work-info")
+                templestay_price = price_row[1].text if len(price_row) > 1 else None
+
+                extracted_data.append((type_value, region_value, templestay_price))
 
         return extracted_data
     except Exception as e:
         print(f"크롤링 오류: {e}")
         return None
 
-# 유형 및 지역 매핑
 TYPE_MAPPING = {
     "당일형": 1,
     "휴식형": 2,
@@ -89,6 +92,38 @@ REGION_MAPPING = {
     "충북": 15
 }
 
+def price_to_code(price_text):
+    """
+    가격 문자열을 10,000원 단위로 매핑된 숫자로 변환하는 함수
+    """
+    if price_text:
+        price_number = int(re.sub(r"[^\d]", "", price_text))
+        return price_number // 10000  # 10,000원 단위로 나누기
+    return 0
+
+def save_data_to_db(connection, data, templestay_id):
+    try:
+        cursor = connection.cursor()
+
+        # category 테이블에 type, region, price, templestay_id 저장
+        for type_value, region_value, templestay_price in data:
+            type_code = TYPE_MAPPING.get(type_value, 0)
+            region_code = REGION_MAPPING.get(region_value, 0)
+            price_code = price_to_code(templestay_price)
+
+            category_query = """
+                INSERT INTO category (type, region, price, templestay_id)
+                VALUES (%s, %s, %s, %s)
+            """
+            cursor.execute(category_query, (type_code, region_code, price_code, templestay_id))
+            connection.commit()
+
+            print(f"카테고리 테이블에 데이터 저장 완료: 템플스테이 ID={templestay_id}, 유형={type_value}, 지역={region_value}, 가격={templestay_price}")
+
+        cursor.close()
+    except mysql.connector.Error as err:
+        print(f"DB 저장 오류: {err}")
+
 db_config_path = "C:\\jeolloga\\crawling\\db_config.yaml"
 
 db_config = load_db_config(db_config_path)
@@ -110,18 +145,11 @@ if not urls:
     connection.close()
     exit()
 
-count = 0
-for url in urls:
-    if count >= 10:
-        break
+for url, templestay_id in urls:
     print(f"크롤링 중: {url}")
     crawled_data = crawl_data(url)
     if crawled_data:
-        for type_value, region_value in crawled_data:
-            type_code = TYPE_MAPPING.get(type_value, 0)
-            region_code = REGION_MAPPING.get(region_value, 0)
-            print(f"유형: {type_value} ({type_code}), 지역: {region_value} ({region_code})")
-        count += 1
+        save_data_to_db(connection, crawled_data, templestay_id)
     else:
         print(f"크롤링 실패: {url}")
 
