@@ -75,7 +75,7 @@ def print_results(max_days, max_days_id, max_entries, max_entries_id):
     print(f"최대 항목 수: {max_entries}줄 (템플스테이 ID={max_entries_id})")
 
 def main():
-    db_config_path = "C:\\jeolloga\\crawling\\db_config.yaml"
+    db_config_path = "C:\\jeolloga\\data\\db_config.yaml"
     db_config = load_db_config(db_config_path)
     if not db_config:
         print("DB 설정 로드 실패. 프로그램 종료")

@@ -32,7 +32,6 @@ def connect_to_db(config):
 def fetch_urls(connection):
     try:
         cursor = connection.cursor()
-        # 모든 URL과 templestay_id를 가져옵니다.
         query = "SELECT templestay_url, templestay_id FROM url ORDER BY id ASC"
         cursor.execute(query)
         urls = cursor.fetchall()
@@ -45,10 +44,9 @@ def fetch_urls(connection):
 def is_templestay_id_exist(connection, templestay_id):
     try:
         cursor = connection.cursor()
-        # category 테이블에서 templestay_id가 존재하는지 확인
         query = "SELECT EXISTS(SELECT 1 FROM category WHERE templestay_id = %s)"
         cursor.execute(query, (templestay_id,))
-        exists = cursor.fetchone()[0]  # 1이면 존재, 0이면 존재하지 않음
+        exists = cursor.fetchone()[0]
         cursor.close()
         return exists
     except mysql.connector.Error as err:
@@ -138,7 +136,7 @@ def save_data_to_db(connection, data, templestay_id):
     except mysql.connector.Error as err:
         print(f"DB 저장 오류: {err}")
 
-db_config_path = "C:\\jeolloga\\crawling\\db_config.yaml"
+db_config_path = "C:\\jeolloga\\data\\db_config.yaml"
 
 db_config = load_db_config(db_config_path)
 

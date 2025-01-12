@@ -104,7 +104,7 @@ def extract_templestay_name_from_page(soup):
         return extract_templestay_name(templestay_name_element.text)
     return None
 
-db_config_path = "C:\\jeolloga\\crawling\\db_config.yaml"
+db_config_path = "C:\\jeolloga\\data\\db_config.yaml"
 db_config = load_db_config(db_config_path)
 
 if not db_config:
