@@ -4,6 +4,7 @@ import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserServ
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
+import sopt.jeolloga.config.JwtTokenProvider;
 import sopt.jeolloga.login.repository.Member;
 import sopt.jeolloga.login.repository.MemberRepository;
 
@@ -13,9 +14,11 @@ import java.util.Map;
 public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
     private final MemberRepository memberRepository;
+    private final JwtTokenProvider jwtTokenProvider;
 
-    public CustomOAuth2UserService(MemberRepository memberRepository){
+    public CustomOAuth2UserService(MemberRepository memberRepository, JwtTokenProvider jwtTokenProvider){
         this.memberRepository = memberRepository;
+        this.jwtTokenProvider = jwtTokenProvider;
     }
 
     @Override
@@ -30,21 +33,20 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         Map<String, Object> properties = (Map<String, Object>) attributes.get("properties");
 
         // Kakao 사용자 정보 추출
-
-        // 카카오 ID 번호 추출
-        Long KakaoUserId = (Long) attributes.get("id");
-
-        // 이메일 추출
-        String email = (String) kakaoAccount.get("email");
-
-        // 닉네임 추출
-        String nickname = (String) properties.get("nickname");
+        Long kakaoUserId = (Long) attributes.get("id"); // 카카오 ID
+        String email = (String) kakaoAccount.get("email"); // email
+        String nickname = (String) properties.get("nickname"); // nickname
 
         // 사용자 정보를 데이터베이스에 저장하거나 추가 처리
-        Member member = findOrCreateUser(KakaoUserId, email, nickname);
+        Member member = findOrCreateUser(kakaoUserId, email, nickname);
+
+        // JWT 토큰 생성
+        String accessToken = jwtTokenProvider.createAccessToken(kakaoUserId);
+        String refreshToken = jwtTokenProvider.createRefreshToken(kakaoUserId);
+
 
         // CustomOAuth2User를 반환
-        return new CustomOAuth2User(oAuth2User.getAuthorities(), attributes, "id", email);
+        return new CustomOAuth2User(oAuth2User.getAuthorities(), attributes, "id", email, accessToken, refreshToken);
     }
 
 

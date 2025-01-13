@@ -18,7 +18,8 @@ public class JwtTokenProvider { // Jwt Token 생성
     private final Key accessTokenKey;
     private final Key refreshTokenKey;
     private final long accessTokenValidity = 7 * 24 * 60 * 60 * 1000; // 7일
-    private final long refreshTokenValidity = 30 * 24 * 60 * 60 * 1000; // 30일
+//    private final long accessTokenValidity = 100;
+    private final long refreshTokenValidity = 7 * 24 * 60 * 60 * 1000; // 30일
 
     public JwtTokenProvider(
             @Value("${jwt.access-token-secret}") String accessTokenSecret,
@@ -41,6 +42,10 @@ public class JwtTokenProvider { // Jwt Token 생성
         Date now = new Date();
         Date expiry = new Date(now.getTime() + validity);
 
+        // 디버깅 로그
+        System.out.println("Token issued at: " + now);
+        System.out.println("Token expires at: " + expiry);
+
         return Jwts.builder()
                 .setSubject(String.valueOf(userId))
                 .setIssuedAt(now)
@@ -62,9 +67,11 @@ public class JwtTokenProvider { // Jwt Token 생성
     // 공통 토큰 검증 메서드
     private boolean validateToken(String token, Key key) {
         try {
+            System.out.println("try 접근");
             Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
             return true;
         } catch (JwtException | IllegalArgumentException e) {
+            System.out.println("try 실패");
             return false;
         }
     }
@@ -82,4 +89,11 @@ public class JwtTokenProvider { // Jwt Token 생성
         return Long.parseLong(userID);
     }
 
+    public Claims getClaimsFromToken(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(accessTokenKey) // Access Token 키 사용
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+    }
 }
