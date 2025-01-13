@@ -124,6 +124,24 @@ def update_category_data(connection, file_path):
         if cursor:
             cursor.close()
 
+def update_null_to_zero(connection):
+    cursor = None
+    try:
+        update_query = """
+            UPDATE category
+            SET purpose = COALESCE(purpose, 0),
+                activity = COALESCE(activity, 0),
+                etc = COALESCE(etc, 0)
+        """
+        cursor = connection.cursor()
+        cursor.execute(update_query)
+        connection.commit()
+        print("category 테이블의 NULL 값을 0으로 업데이트 완료")
+    except Exception as e:
+        print(f"NULL 값을 0으로 업데이트 중 오류 발생: {e}")
+    finally:
+        if cursor:
+            cursor.close()
 
 def main():
     db_config_path = "C:\\jeolloga\\data\\db_config.yaml"
@@ -141,6 +159,7 @@ def main():
 
     try:
         update_category_data(connection, file_path)
+        update_null_to_zero(connection)
     finally:
         connection.close()
         print("DB 연결 종료")
