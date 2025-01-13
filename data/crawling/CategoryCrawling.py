@@ -80,28 +80,28 @@ def crawl_data(url):
         print(f"크롤링 오류: {e}")
         return None
 
-TYPE_MAPPING = {
-    "당일형": 1,
-    "휴식형": 2,
-    "체험형": 3
+REGION_BINARY_MAPPING = {
+    "강원": 0b000000000000001,
+    "경기": 0b000000000000010,
+    "경남": 0b000000000000100,
+    "경북": 0b000000000001000,
+    "광주": 0b000000000010000,
+    "대구": 0b000000000100000,
+    "대전": 0b000000001000000,
+    "부산": 0b000000010000000,
+    "서울": 0b000000100000000,
+    "인천": 0b000001000000000,
+    "전남": 0b000010000000000,
+    "전북": 0b000100000000000,
+    "제주": 0b001000000000000,
+    "충남": 0b010000000000000,
+    "충북": 0b100000000000000
 }
 
-REGION_MAPPING = {
-    "강원": 1,
-    "경기": 2,
-    "경남": 3,
-    "경북": 4,
-    "광주": 5,
-    "대구": 6,
-    "대전": 7,
-    "부산": 8,
-    "서울": 9,
-    "인천": 10,
-    "전남": 11,
-    "전북": 12,
-    "제주": 13,
-    "충남": 14,
-    "충북": 15
+TYPE_BINARY_MAPPING = {
+    "당일형": 0b001,
+    "휴식형": 0b010,
+    "체험형": 0b100
 }
 
 def price_to_code(price_text):
@@ -119,22 +119,27 @@ def save_data_to_db(connection, data, templestay_id):
         cursor = connection.cursor()
 
         for type_value, region_value, templestay_price in data:
-            type_code = TYPE_MAPPING.get(type_value, 0)
-            region_code = REGION_MAPPING.get(region_value, 0)
+            cursor.execute("SELECT IFNULL(MAX(id), 0) FROM category")
+            max_id = cursor.fetchone()[0]
+            next_id = max_id + 1
+
+            type_code = TYPE_BINARY_MAPPING.get(type_value, 0)
+            region_code = REGION_BINARY_MAPPING.get(region_value, 0)
             price_code = price_to_code(templestay_price)
 
             category_query = """
-                INSERT INTO category (type, region, price, templestay_id)
-                VALUES (%s, %s, %s, %s)
+                INSERT INTO category (id, type, region, price, templestay_id)
+                VALUES (%s, %s, %s, %s, %s)
             """
-            cursor.execute(category_query, (type_code, region_code, price_code, templestay_id))
+            cursor.execute(category_query, (next_id, type_code, region_code, price_code, templestay_id))
             connection.commit()
 
-            print(f"카테고리 테이블에 데이터 저장 완료: 템플스테이 ID={templestay_id}, 유형={type_value}, 지역={region_value}, 가격={templestay_price}")
+            print(f"카테고리 테이블에 데이터 저장 완료: ID={next_id}, 템플스테이 ID={templestay_id}, 유형={type_value}({type_code:b}), 지역={region_value}({region_code:b}), 가격={templestay_price}")
 
         cursor.close()
     except mysql.connector.Error as err:
         print(f"DB 저장 오류: {err}")
+
 
 db_config_path = "C:\\jeolloga\\data\\db_config.yaml"
 

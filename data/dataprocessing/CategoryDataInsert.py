@@ -27,76 +27,95 @@ def connect_to_db(config):
         print(f"DB 연결 오류: {err}")
         return None
 
-def map_to_int(value, mapping):
-    return mapping.get(value.strip(), 0)
+PURPOSE_MAPPING = {
+    "힐링": 0b000000001,
+    "전통문화체험": 0b000000010,
+    "심신치유": 0b000000100,
+    "자기계발": 0b000001000,
+    "여행 일정": 0b000010000,
+    "사찰순례": 0b000100000,
+    "휴식": 0b001000000,
+    "호기심": 0b010000000,
+    "기타": 0b100000000
+}
+
+ACTIVITY_MAPPING = {
+    "발우공양": 0b0000000000001,
+    "108배": 0b0000000000010,
+    "디지털 디톡스": 0b0000000000100,
+    "스님과의 차담": 0b0000000001000,
+    "새벽 예불": 0b0000000010000,
+    "사찰 탐방": 0b0000000100000,
+    "염주 만들기": 0b0000001000000,
+    "연등 만들기": 0b0000010000000,
+    "다도": 0b0000100000000,
+    "명상": 0b0001000000000,
+    "산책": 0b0010000000000,
+    "요가": 0b0100000000000,
+    "기타": 0b1000000000000
+}
+
+ETC_MAPPING = {
+    "절밥이 맛있는": 0b0000001,
+    "단체 가능": 0b0000010,
+    "TV에 나온": 0b0000100,
+    "연예인이 다녀간": 0b0001000,
+    "근처 관광지가 많은": 0b0010000,
+    "속세와 멀어지고 싶은": 0b0100000,
+    "동물친구들과 함께": 0b1000000
+}
+
+def calculate_bitwise_value(values, mapping):
+    bit_value = 0
+    for value in values:
+        bit_value |= mapping.get(value.strip(), 0)
+    return bit_value
 
 def update_category_data(connection, file_path):
-    purpose_mapping = {
-        "힐링": 1,
-        "전통문화체험": 2,
-        "심신치유": 3,
-        "자기계발": 4,
-        "여행 일정": 5,
-        "사찰순례": 6,
-        "휴식": 7,
-        "호기심": 8,
-        "기타": 9,
-    }
-    activity_mapping = {
-        "발우공양": 1,
-        "108배": 2,
-        "디지털 디톡스": 3,
-        "스님과의 차담": 4,
-        "새벽 예불": 5,
-        "사찰 탐방": 6,
-        "염주 만들기": 7,
-        "연등 만들기": 8,
-        "다도": 9,
-        "명상": 10,
-        "산책": 11,
-        "요가": 12,
-        "기타": 13,
-    }
-    etc_mapping = {
-        "절밥이 맛있는": 1,
-        "단체 가능": 2,
-        "TV에 나온": 3,
-        "연예인이 다녀간": 4,
-        "근처 관광지가 많은": 5,
-        "속세와 멀어지고 싶은": 6,
-        "동물친구들과 함께": 7,
-    }
     cursor = None
     try:
         df = pd.read_excel(file_path)
+
+        df['목적'] = df['목적'].fillna("")
+        df['체험'] = df['체험'].fillna("")
+        df['기타'] = df['기타'].fillna("")
+
         select_query = """
-        SELECT id
-        FROM templestay
-        WHERE temple_name LIKE %s
+            SELECT id
+            FROM templestay
+            WHERE templestay_name LIKE CONCAT('%', %s, '%')
         """
         update_query = """
-        UPDATE category
-        SET type = %s, purpose = %s, activity = %s, etc = %s
-        WHERE templestay_id = %s
+            UPDATE category
+            SET type = %s, purpose = %s, activity = %s, etc = %s
+            WHERE templestay_id = %s
         """
-        cursor = connection.cursor()
+
+        cursor = connection.cursor(buffered=True)
+
         for _, row in df.iterrows():
             templestay_name = row['템플스테이명']
             category_type = row['유형']
-            purpose = row['목적']
-            activity = row['체험']
-            etc = row['기타']
-            cursor.execute(select_query, (f"%{templestay_name}%",))
-            result = cursor.fetchone()
-            if result:
-                templestay_id = result[0]
-                int_purpose = map_to_int(purpose, purpose_mapping)
-                int_activity = map_to_int(activity, activity_mapping)
-                int_etc = map_to_int(etc, etc_mapping)
-                cursor.execute(update_query, (category_type, int_purpose, int_activity, int_etc, templestay_id))
-                print(f"category 데이터 삽입: {templestay_id}: {category_type}, {int_purpose}, {int_activity}, {int_etc}")
+            purposes = row['목적'].split(",") if isinstance(row['목적'], str) else []
+            activities = row['체험'].split(",") if isinstance(row['체험'], str) else []
+            etcs = row['기타'].split(",") if isinstance(row['기타'], str) else []
+
+            cursor.execute(select_query, (templestay_name,))
+            results = cursor.fetchall()
+
+            if results:
+                for result in results:
+                    templestay_id = result[0]
+
+                    purpose_bits = calculate_bitwise_value(purposes, PURPOSE_MAPPING)
+                    activity_bits = calculate_bitwise_value(activities, ACTIVITY_MAPPING)
+                    etc_bits = calculate_bitwise_value(etcs, ETC_MAPPING)
+
+                    cursor.execute(update_query, (category_type, purpose_bits, activity_bits, etc_bits, templestay_id))
+                    print(f"category 데이터 업데이트 완료: ID={templestay_id}")
             else:
                 print(f"존재하지 않는 템플스테이: '{templestay_name}'")
+
         connection.commit()
         print("category 데이터 업데이트 완료")
     except Exception as e:
@@ -105,17 +124,21 @@ def update_category_data(connection, file_path):
         if cursor:
             cursor.close()
 
+
 def main():
     db_config_path = "C:\\jeolloga\\data\\db_config.yaml"
     file_path = "C:\\Users\\didek\\OneDrive\\문서\\jeolloga-data.xlsx"
+
     db_config = load_db_config(db_config_path)
     if not db_config:
         print("DB 설정 로드 실패. 프로그램 종료")
         return
+
     connection = connect_to_db(db_config)
     if not connection:
         print("DB 연결 실패. 프로그램 종료")
         return
+
     try:
         update_category_data(connection, file_path)
     finally:
