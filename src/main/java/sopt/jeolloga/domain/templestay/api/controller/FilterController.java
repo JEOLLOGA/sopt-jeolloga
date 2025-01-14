@@ -50,18 +50,12 @@ public class FilterController {
         return ResponseEntity.ok(filterCountRes);
     }
 
-//    @GetMapping("filter/list")
-//    public TemplestayRes getFilteredTemplestay(@RequestBody Map<String, Object> filter){
-//
-//        List<Map<String, Object>> filteredCategory = filterService.getFiteredTemplestayCategory(filter);
-//        List<TemplestayRes> templestays = filterService.getFiteredTemplestay(filteredCategory);
-//
-//        // paging
-//        int pageSize = 20;
-//        int totalPages = (int) Math.ceil((double) templestays.stream().count()/pageSize);
-//
-//        return ResponseEntity.ok(templestayList);
-//
-//    }
+    @GetMapping("filter/list")
+    public ResponseEntity<List<TemplestayRes>> getFilteredTemplestay(@RequestBody Map<String, Object> filter){
 
+        List<Map<String, Object>> filteredCategory = filterService.getFiteredTemplestayCategory(filter);
+        List<TemplestayRes> templestayList = filterService.getFilteredTemplestay(filteredCategory);
+
+      return ResponseEntity.ok(templestayList);
+    }
 }

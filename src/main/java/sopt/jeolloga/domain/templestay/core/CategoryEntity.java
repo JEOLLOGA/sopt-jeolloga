@@ -23,25 +23,25 @@ public class CategoryEntity {
 //    @JoinColumn(name = "templestay_id", nullable = false)
 //    private TemplestayEntity templestay;
 
-    @Column(name = "templestay_id", nullable = false)
+    @Column(name = "templestay_id")
     private Long templestayId;
 
-    @Column(name = "region", nullable = false)
+    @Column(name = "region")
     private Integer region; // 지역
 
-    @Column(name = "type", nullable = false)
+    @Column(name = "type")
     private Integer type; // 유형
 
-    @Column(name = "purpose", nullable = false)
+    @Column(name = "purpose")
     private Integer purpose; // 목적
 
-    @Column(name = "activity", nullable = false)
+    @Column(name = "activity")
     private Integer activity; // 체험
 
-    @Column(name = "price", nullable = false)
+    @Column(name = "price")
     private Integer price; // 가격
 
-    @Column(name = "etc", nullable = false)
+    @Column(name = "etc")
     private Integer etc; // 기타
 
     public CategoryEntity(Long id, Long templestayId, int region, int type, int purpose, int activity, int price, int etc) {

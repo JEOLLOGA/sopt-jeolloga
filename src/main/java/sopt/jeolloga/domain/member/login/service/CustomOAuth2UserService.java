@@ -44,7 +44,6 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         String accessToken = jwtTokenProvider.createAccessToken(kakaoUserId);
         String refreshToken = jwtTokenProvider.createRefreshToken(kakaoUserId);
 
-
         // CustomOAuth2User를 반환
         return new CustomOAuth2User(oAuth2User.getAuthorities(), attributes, "id", email, accessToken, refreshToken);
     }
