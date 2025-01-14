@@ -25,7 +25,9 @@ import sopt.jeolloga.exception.ErrorCode;
 
 import java.io.IOException;
 import java.net.URI;
+import java.time.LocalDate;
 import java.util.List;
+import java.time.format.DateTimeFormatter;
 
 @Service
 @RequiredArgsConstructor
@@ -92,8 +94,17 @@ public class ReviewService {
             item.setThumbnail(fetchFirstImageFromBlog(item.getLink()));
         }
 
-        return resultVO.getItems();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
+
+        return resultVO.getItems().stream()
+                .sorted((o1, o2) -> {
+                    LocalDate date1 = LocalDate.parse(o1.getPostdate(), formatter);
+                    LocalDate date2 = LocalDate.parse(o2.getPostdate(), formatter);
+                    return date2.compareTo(date1);
+                })
+                .toList();
     }
+
 
     private String fetchFirstImageFromBlog(String blogUrl) {
         try {
