@@ -78,7 +78,7 @@ def crawl_images(url):
         print(f"크롤링 오류: {e}")
         return []
 
-db_config_path = "C:\\jeolloga\\crawling\\db_config.yaml"
+db_config_path = "C:\\jeolloga\\data\\db_config.yaml"
 
 db_config = load_db_config(db_config_path)
 if not db_config:
