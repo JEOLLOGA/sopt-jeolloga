@@ -46,9 +46,9 @@ public class ReviewApiService {
     }
 
     private void saveReviewToRepository(String templeName, TemplestayVO blog) {
-        String truncatedDescription = truncateToLength(blog.getDescription(), 255);
-        String truncatedTitle = truncateToLength(blog.getTitle(), 255);
-        String truncatedBloggerName = truncateToLength(blog.getBloggername(), 45);
+        String truncatedDescription = truncateToLength(removeUnwantedCharacters(blog.getDescription()), 255);
+        String truncatedTitle = truncateToLength(removeUnwantedCharacters(blog.getTitle()), 255);
+        String truncatedBloggerName = truncateToLength(removeUnwantedCharacters(blog.getBloggername()), 45);
         String truncatedLink = truncateToLength(blog.getLink(), 500);
 
         if (templeName == null || templeName.isEmpty()) {
@@ -83,8 +83,15 @@ public class ReviewApiService {
         if (input == null) {
             return null;
         }
-        // 유니코드 범위를 사용해 하트, 한자, 이모지 제거
-        return input.replaceAll("[\\p{InCJKUnifiedIdeographs}\\p{So}]", "");
+        // 유니코드 범위로 한자 및 이모지 제거
+        return input.replaceAll(
+                "[\\p{InCJKUnifiedIdeographs}" +
+                        "\\p{So}" +
+                        "\\x{1F300}-\\x{1F5FF}" +
+                        "\\x{1F600}-\\x{1F64F}" +
+                        "\\x{1F680}-\\x{1F6FF}" +
+                        "\\x{2600}-\\x{26FF}" +
+                        "]", "");
     }
 
     private List<TemplestayVO> fetchBlogsFromNaverApi(String templeName) {
