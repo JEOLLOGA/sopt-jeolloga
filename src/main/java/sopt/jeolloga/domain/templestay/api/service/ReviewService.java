@@ -1,4 +1,4 @@
-package sopt.jeolloga;
+package sopt.jeolloga.domain.templestay.api.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -14,6 +14,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
+import sopt.jeolloga.domain.templestay.api.vo.NaverResultVO;
+import sopt.jeolloga.domain.templestay.api.vo.TemplestayVO;
+import sopt.jeolloga.domain.templestay.core.Templestay;
+import sopt.jeolloga.domain.templestay.core.TemplestayRepository;
 
 import java.io.IOException;
 import java.net.URI;
@@ -30,7 +34,7 @@ public class ReviewService {
     public List<TemplestayVO> getBlogsByTemplestayId(Long templestayId) {
         logger.info("Fetching templestay reviews for ID: {}", templestayId);
 
-        TemplestayEntity templestayEntity = templestayRepository.findById(templestayId)
+        Templestay templestayEntity = templestayRepository.findById(templestayId)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid templestay ID: " + templestayId));
 
         String templeName = templestayEntity.getTempleName();

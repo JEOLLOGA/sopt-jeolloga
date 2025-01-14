@@ -1,10 +1,11 @@
-package sopt.jeolloga;
+package sopt.jeolloga.domain.templestay.api.vo;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import sopt.jeolloga.domain.templestay.api.vo.ImageItemVO;
 
 import java.util.List;
 

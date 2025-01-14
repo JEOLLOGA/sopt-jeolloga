@@ -1,4 +1,4 @@
-package sopt.jeolloga;
+package sopt.jeolloga.domain.templestay.api.vo;
 
 import lombok.*;
 
