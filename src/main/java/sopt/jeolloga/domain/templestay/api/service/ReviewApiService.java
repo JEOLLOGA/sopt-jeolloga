@@ -3,39 +3,30 @@ package sopt.jeolloga.domain.templestay.api.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 import sopt.jeolloga.domain.templestay.api.vo.NaverResultVO;
 import sopt.jeolloga.domain.templestay.api.vo.TemplestayVO;
-import sopt.jeolloga.domain.templestay.core.Templestay;
+import sopt.jeolloga.domain.templestay.core.Review;
+import sopt.jeolloga.domain.templestay.core.ReviewRepository;
 import sopt.jeolloga.domain.templestay.core.TemplestayRepository;
-import sopt.jeolloga.domain.templestay.core.exception.TemplestayCoreException;
-import sopt.jeolloga.domain.templestay.core.exception.TemplestayNotFoundException;
-import sopt.jeolloga.exception.ErrorCode;
 
-import java.io.IOException;
 import java.net.URI;
-import java.time.LocalDate;
 import java.util.List;
-import java.time.format.DateTimeFormatter;
 
-@Component
+@Service
 @RequiredArgsConstructor
 public class ReviewApiService {
 
     private static final Logger logger = LoggerFactory.getLogger(ReviewApiService.class);
-
     private final TemplestayRepository templestayRepository;
+    private final ReviewRepository reviewRepository;
 
     @Value("${naver.api.client-id}")
     private String clientId;
@@ -43,18 +34,67 @@ public class ReviewApiService {
     @Value("${naver.api.client-secret}")
     private String clientSecret;
 
-    public List<TemplestayVO> getBlogsByTemplestayId(Long templestayId) {
-        logger.info("Fetching templestay reviews for ID: {}", templestayId);
+    public void saveBlogsToReviewTable() {
+        logger.info("Fetching unique temple names from templestay table");
 
-        Templestay templestay = templestayRepository.findById(templestayId)
-                .orElseThrow(() -> new TemplestayNotFoundException());
+        List<String> distinctTempleNames = templestayRepository.findDistinctTempleNames();
+        logger.info("Distinct temple names: {}", distinctTempleNames);
 
-        String templeName = templestay.getTempleName();
-        logger.info("Temple name: {}", templeName);
-
-        return fetchBlogsFromNaverApi(templeName);
+        distinctTempleNames.forEach(templeName -> {
+            List<TemplestayVO> blogs = fetchBlogsFromNaverApi(templeName);
+            blogs.stream()
+                    .filter(blog -> blog.getPostdate().compareTo("20220101") > 0)
+                    .forEach(blog -> saveReviewToRepository(templeName, blog));
+        });
     }
 
+    private void saveReviewToRepository(String templeName, TemplestayVO blog) {
+        String truncatedDescription = truncateToLength(blog.getDescription(), 255);
+        String truncatedTitle = truncateToLength(blog.getTitle(), 255);
+        String truncatedBloggerName = truncateToLength(blog.getBloggername(), 45);
+        String truncatedLink = truncateToLength(blog.getLink(), 500);
+
+        // 필수 값 확인
+        if (templeName == null || templeName.isEmpty()) {
+            logger.warn("Temple name is missing. Skipping this entry.");
+            return;
+        }
+        if (truncatedTitle == null || truncatedTitle.isEmpty()) {
+            logger.warn("Title is missing for temple: {}. Skipping this entry.", templeName);
+            return;
+        }
+
+        // Review 객체 생성 및 저장
+        Review review = new Review(
+                templeName,
+                truncatedTitle,
+                truncatedDescription,
+                truncatedBloggerName,
+                blog.getPostdate(),
+                truncatedLink,
+                null
+        );
+        reviewRepository.save(review);
+        logger.info("Saved review to repository: {}", review);
+    }
+
+
+    // 길이 제한 메서드
+    private String truncateToLength(String input, int maxLength) {
+        if (input == null) {
+            return null;
+        }
+        return input.length() > maxLength ? input.substring(0, maxLength) : input;
+    }
+
+
+    private String removeUnwantedCharacters(String input) {
+        if (input == null) {
+            return null;
+        }
+        // 유니코드 범위를 사용해 하트, 한자, 이모지 제거
+        return input.replaceAll("[\\p{InCJKUnifiedIdeographs}\\p{So}]", "");
+    }
     private List<TemplestayVO> fetchBlogsFromNaverApi(String templeName) {
         logger.info("Fetching blogs from Naver API for temple name: {}", templeName);
 
@@ -80,72 +120,16 @@ public class ReviewApiService {
         RestTemplate restTemplate = new RestTemplate();
         ResponseEntity<String> response = restTemplate.exchange(requestEntity, String.class);
 
-        ObjectMapper objectMapper = new ObjectMapper();
-        NaverResultVO resultVO;
+        logger.info("Response Status: {}", response.getStatusCode());
 
         try {
-            resultVO = objectMapper.readValue(response.getBody(), NaverResultVO.class);
+            ObjectMapper objectMapper = new ObjectMapper();
+            NaverResultVO resultVO = objectMapper.readValue(response.getBody(), NaverResultVO.class);
+            return resultVO.getItems();
         } catch (JsonProcessingException e) {
-            logger.error("Error while processing Naver API response", e);
-            throw new TemplestayCoreException(ErrorCode.JSON_FIELD_ERROR);
+            logger.error("Error processing Naver API response", e);
+            throw new RuntimeException("JSON Processing Error");
         }
-
-        // 네이버 블로그 링크만 필터링
-        List<TemplestayVO> filteredItems = resultVO.getItems().stream()
-                .filter(item -> item.getLink().contains("https://blog.naver.com"))
-                .toList();
-
-        for (TemplestayVO item : filteredItems) {
-            item.setThumbnail(fetchFirstImageFromBlog(item.getLink()));
-        }
-
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
-
-        return filteredItems.stream()
-                .sorted((o1, o2) -> {
-                    LocalDate date1 = LocalDate.parse(o1.getPostdate(), formatter);
-                    LocalDate date2 = LocalDate.parse(o2.getPostdate(), formatter);
-                    return date2.compareTo(date1);
-                })
-                .toList();
-    }
-
-    private String fetchFirstImageFromBlog(String blogUrl) {
-        try {
-            Document document = Jsoup.connect(blogUrl).get();
-
-            Element iframe = document.selectFirst("iframe#mainFrame");
-            if (iframe != null) {
-                String iframeSrc = iframe.attr("src");
-
-                String fullIframeUrl = "https://blog.naver.com" + iframeSrc;
-
-                Document iframeDocument = Jsoup.connect(fullIframeUrl).get();
-
-                Elements imageElements = iframeDocument.select("div.se-module.se-module-image img");
-                for (Element imgTag : imageElements) {
-                    String imageUrl = imgTag.attr("data-lazy-src");
-                    if (imageUrl.isEmpty()) {
-                        imageUrl = imgTag.attr("src");
-                    }
-                    if (!imageUrl.isEmpty()) {
-                        return imageUrl; // 첫 번째 이미지 URL 반환
-                    }
-                }
-            } else {
-                logger.warn("No iframe found in blog page: {}", blogUrl);
-            }
-        } catch (IOException e) {
-            logger.error("Error fetching the blog page HTML", e);
-            throw new TemplestayCoreException(ErrorCode.INTERNAL_SERVER_ERROR);
-        }
-
-        return null;
-    }
-
-    public String getTempleNameById(Long templestayId) {
-        Templestay templestay = templestayRepository.findById(templestayId)
-                .orElseThrow(() -> new TemplestayNotFoundException());
-        return templestay.getTempleName();
     }
 }
+

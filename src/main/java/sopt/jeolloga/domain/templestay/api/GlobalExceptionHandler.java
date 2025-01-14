@@ -26,7 +26,6 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(errorCode.getHttpStatus()).body(response);
     }
 
-
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ResponseDto<Void>> handlerGeneralException(Exception e) {
         e.printStackTrace();

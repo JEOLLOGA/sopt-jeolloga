@@ -10,4 +10,3 @@ public record ReviewDto(
         String reviewImgUrl
 ) {
 }
-
