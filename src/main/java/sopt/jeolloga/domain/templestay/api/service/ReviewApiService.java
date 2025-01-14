@@ -35,10 +35,7 @@ public class ReviewApiService {
     private String clientSecret;
 
     public void saveBlogsToReviewTable() {
-        logger.info("Fetching unique temple names from templestay table");
-
         List<String> distinctTempleNames = templestayRepository.findDistinctTempleNames();
-        logger.info("Distinct temple names: {}", distinctTempleNames);
 
         distinctTempleNames.forEach(templeName -> {
             List<TemplestayVO> blogs = fetchBlogsFromNaverApi(templeName);
@@ -54,7 +51,6 @@ public class ReviewApiService {
         String truncatedBloggerName = truncateToLength(blog.getBloggername(), 45);
         String truncatedLink = truncateToLength(blog.getLink(), 500);
 
-        // 필수 값 확인
         if (templeName == null || templeName.isEmpty()) {
             logger.warn("Temple name is missing. Skipping this entry.");
             return;
@@ -64,7 +60,6 @@ public class ReviewApiService {
             return;
         }
 
-        // Review 객체 생성 및 저장
         Review review = new Review(
                 templeName,
                 truncatedTitle,
@@ -75,18 +70,14 @@ public class ReviewApiService {
                 null
         );
         reviewRepository.save(review);
-        logger.info("Saved review to repository: {}", review);
     }
 
-
-    // 길이 제한 메서드
     private String truncateToLength(String input, int maxLength) {
         if (input == null) {
             return null;
         }
         return input.length() > maxLength ? input.substring(0, maxLength) : input;
     }
-
 
     private String removeUnwantedCharacters(String input) {
         if (input == null) {
@@ -95,9 +86,8 @@ public class ReviewApiService {
         // 유니코드 범위를 사용해 하트, 한자, 이모지 제거
         return input.replaceAll("[\\p{InCJKUnifiedIdeographs}\\p{So}]", "");
     }
-    private List<TemplestayVO> fetchBlogsFromNaverApi(String templeName) {
-        logger.info("Fetching blogs from Naver API for temple name: {}", templeName);
 
+    private List<TemplestayVO> fetchBlogsFromNaverApi(String templeName) {
         URI uri = UriComponentsBuilder
                 .fromUriString("https://openapi.naver.com")
                 .path("/v1/search/blog.json")
@@ -109,8 +99,6 @@ public class ReviewApiService {
                 .build()
                 .toUri();
 
-        logger.info("Generated URI: {}", uri);
-
         RequestEntity<Void> requestEntity = RequestEntity
                 .get(uri)
                 .header("X-Naver-Client-Id", clientId)
@@ -120,14 +108,11 @@ public class ReviewApiService {
         RestTemplate restTemplate = new RestTemplate();
         ResponseEntity<String> response = restTemplate.exchange(requestEntity, String.class);
 
-        logger.info("Response Status: {}", response.getStatusCode());
-
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             NaverResultVO resultVO = objectMapper.readValue(response.getBody(), NaverResultVO.class);
             return resultVO.getItems();
         } catch (JsonProcessingException e) {
-            logger.error("Error processing Naver API response", e);
             throw new RuntimeException("JSON Processing Error");
         }
     }
