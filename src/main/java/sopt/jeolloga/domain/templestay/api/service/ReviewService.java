@@ -9,6 +9,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -34,6 +35,12 @@ public class ReviewService {
 
     private final TemplestayRepository templestayRepository;
 
+    @Value("${naver.api.client-id}")
+    private String clientId;
+
+    @Value("${naver.api.client-secret}")
+    private String clientSecret;
+
     public List<TemplestayVO> getBlogsByTemplestayId(Long templestayId) {
         logger.info("Fetching templestay reviews for ID: {}", templestayId);
 
@@ -48,9 +55,6 @@ public class ReviewService {
 
     private List<TemplestayVO> fetchBlogsFromNaverApi(String templeName) {
         logger.info("Fetching blogs from Naver API for temple name: {}", templeName);
-
-        String clientId = "kwWkZv4rtI3mEdO04fAR";
-        String clientSecret = "yBTo19o1kx";
 
         URI uri = UriComponentsBuilder
                 .fromUriString("https://openapi.naver.com")
