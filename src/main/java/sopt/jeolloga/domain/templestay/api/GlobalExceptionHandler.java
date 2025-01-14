@@ -15,21 +15,21 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(TemplestayBaseException.class)
     public ResponseEntity<ResponseDto<Void>> handlerTemplestayBaseException(TemplestayBaseException e) {
         ErrorCode errorCode = e.getErrorCode();
-        ResponseDto<Void> response = new ResponseDto<>(errorCode.getCode(), null, errorCode.getMsg());
+        ResponseDto<Void> response = new ResponseDto<>(null, errorCode.getMsg());
         return ResponseEntity.status(errorCode.getHttpStatus()).body(response);
     }
 
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
     public ResponseEntity<ResponseDto<Void>> handleMethodNotAllowedException(HttpRequestMethodNotSupportedException ex) {
         ErrorCode errorCode = ErrorCode.METHOD_NOT_ALLOWED;
-        ResponseDto<Void> response = new ResponseDto<>(errorCode.getCode(), null, errorCode.getMsg());
+        ResponseDto<Void> response = new ResponseDto<>(null, errorCode.getMsg());
         return ResponseEntity.status(errorCode.getHttpStatus()).body(response);
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ResponseDto<Void>> handlerGeneralException(Exception e) {
         e.printStackTrace();
-        ResponseDto<Void> response = new ResponseDto<>(5000, null, "서버 내부 오류 입니다.");
+        ResponseDto<Void> response = new ResponseDto<>(null, "서버 내부 오류 입니다.");
         return ResponseEntity.status(500).body(response);
     }
 }
