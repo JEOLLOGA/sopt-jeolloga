@@ -87,7 +87,7 @@ def update_category_data(connection, file_path):
         """
         update_query = """
             UPDATE category
-            SET type = %s, purpose = %s, activity = %s, etc = %s
+            SET purpose = %s, activity = %s, etc = %s
             WHERE templestay_id = %s
         """
 
@@ -95,7 +95,6 @@ def update_category_data(connection, file_path):
 
         for _, row in df.iterrows():
             templestay_name = row['템플스테이명']
-            category_type = row['유형']
             purposes = row['목적'].split(",") if isinstance(row['목적'], str) else []
             activities = row['체험'].split(",") if isinstance(row['체험'], str) else []
             etcs = row['기타'].split(",") if isinstance(row['기타'], str) else []
@@ -111,7 +110,7 @@ def update_category_data(connection, file_path):
                     activity_bits = calculate_bitwise_value(activities, ACTIVITY_MAPPING)
                     etc_bits = calculate_bitwise_value(etcs, ETC_MAPPING)
 
-                    cursor.execute(update_query, (category_type, purpose_bits, activity_bits, etc_bits, templestay_id))
+                    cursor.execute(update_query, (purpose_bits, activity_bits, etc_bits, templestay_id))
                     print(f"category 데이터 업데이트 완료: ID={templestay_id}")
             else:
                 print(f"존재하지 않는 템플스테이: '{templestay_name}'")
