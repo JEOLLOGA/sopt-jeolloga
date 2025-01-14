@@ -18,6 +18,9 @@ import sopt.jeolloga.domain.templestay.api.vo.NaverResultVO;
 import sopt.jeolloga.domain.templestay.api.vo.TemplestayVO;
 import sopt.jeolloga.domain.templestay.core.Templestay;
 import sopt.jeolloga.domain.templestay.core.TemplestayRepository;
+import sopt.jeolloga.domain.templestay.core.exception.TemplestayCoreException;
+import sopt.jeolloga.domain.templestay.core.exception.TemplestayNotFoundException;
+import sopt.jeolloga.exception.ErrorCode;
 
 import java.io.IOException;
 import java.net.URI;
@@ -34,10 +37,10 @@ public class ReviewService {
     public List<TemplestayVO> getBlogsByTemplestayId(Long templestayId) {
         logger.info("Fetching templestay reviews for ID: {}", templestayId);
 
-        Templestay templestayEntity = templestayRepository.findById(templestayId)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid templestay ID: " + templestayId));
+        Templestay templestay = templestayRepository.findById(templestayId)
+                .orElseThrow(() -> new TemplestayNotFoundException());
 
-        String templeName = templestayEntity.getTempleName();
+        String templeName = templestay.getTempleName();
         logger.info("Temple name: {}", templeName);
 
         return fetchBlogsFromNaverApi(templeName);
@@ -71,9 +74,6 @@ public class ReviewService {
         RestTemplate restTemplate = new RestTemplate();
         ResponseEntity<String> response = restTemplate.exchange(requestEntity, String.class);
 
-        logger.info("Response status: {}", response.getStatusCode());
-        logger.info("Response body: {}", response.getBody());
-
         ObjectMapper objectMapper = new ObjectMapper();
         NaverResultVO resultVO;
 
@@ -81,7 +81,7 @@ public class ReviewService {
             resultVO = objectMapper.readValue(response.getBody(), NaverResultVO.class);
         } catch (JsonProcessingException e) {
             logger.error("Error while processing Naver API response", e);
-            throw new RuntimeException("Error while processing Naver API response", e);
+            throw new TemplestayCoreException(ErrorCode.JSON_FIELD_ERROR);
         }
 
         for (TemplestayVO item : resultVO.getItems()) {
@@ -93,8 +93,6 @@ public class ReviewService {
 
     private String fetchFirstImageFromBlog(String blogUrl) {
         try {
-            logger.info("Connecting to blog URL: {}", blogUrl);
-
             Document document = Jsoup.connect(blogUrl).get();
 
             Element iframe = document.selectFirst("iframe#mainFrame");
@@ -102,7 +100,6 @@ public class ReviewService {
                 String iframeSrc = iframe.attr("src");
 
                 String fullIframeUrl = "https://blog.naver.com" + iframeSrc;
-                logger.info("Extracting iframe URL: {}", fullIframeUrl);
 
                 Document iframeDocument = Jsoup.connect(fullIframeUrl).get();
 
@@ -113,7 +110,6 @@ public class ReviewService {
                         imageUrl = imgTag.attr("src");
                     }
                     if (!imageUrl.isEmpty()) {
-                        logger.info("Extracted Image URL: {}", imageUrl);
                         return imageUrl; // 첫 번째 이미지 URL 반환
                     }
                 }
@@ -122,22 +118,9 @@ public class ReviewService {
             }
         } catch (IOException e) {
             logger.error("Error fetching the blog page HTML", e);
+            throw new TemplestayCoreException(ErrorCode.INTERNAL_SERVER_ERROR);
         }
 
         return null;
-    }
-
-
-    private String resolveRedirectedUrl(String blogUrl) {
-        try {
-            return Jsoup.connect(blogUrl)
-                    .followRedirects(true)
-                    .execute()
-                    .url()
-                    .toString(); // 리디렉션된 URL 반환
-        } catch (IOException e) {
-            logger.error("Error resolving redirected URL", e);
-        }
-        return blogUrl;
     }
 }
