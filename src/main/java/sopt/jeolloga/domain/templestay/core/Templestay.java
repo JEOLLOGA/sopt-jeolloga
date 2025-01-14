@@ -49,8 +49,7 @@ public class Templestay {
     @Column(name = "tag", length = 255)
     private String tag;
 
-    public Templestay(Long id, String templestayName, String organizedName, String phoneNumber, String introduction, String address, String youtube, String templeName, String schedule, BigDecimal latitude, BigDecimal longitude, String tag) {
-        this.id = id;
+    public Templestay(String templestayName, String organizedName, String phoneNumber, String introduction, String address, String youtube, String templeName, String schedule, BigDecimal latitude, BigDecimal longitude, String tag) {
         this.templestayName = templestayName;
         this.organizedName = organizedName;
         this.phoneNumber = phoneNumber;
