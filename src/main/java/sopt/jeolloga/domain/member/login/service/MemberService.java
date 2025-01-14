@@ -1,11 +1,10 @@
-package sopt.jeolloga.login.service;
+package sopt.jeolloga.domain.member.login.service;
 
 import org.springframework.stereotype.Service;
-import sopt.jeolloga.login.repository.Member;
-import sopt.jeolloga.login.repository.MemberRepository;
+import sopt.jeolloga.domain.member.login.repository.Member;
+import sopt.jeolloga.domain.member.login.repository.MemberRepository;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class MemberService {

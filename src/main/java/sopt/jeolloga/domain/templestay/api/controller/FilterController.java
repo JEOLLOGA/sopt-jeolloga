@@ -1,14 +1,16 @@
 package sopt.jeolloga.domain.templestay.api.controller;
 
-import lombok.NoArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-import sopt.jeolloga.domain.templestay.api.dto.FilterRequestDto;
-import sopt.jeolloga.domain.templestay.api.dto.FilterResponseDto;
+import sopt.jeolloga.domain.templestay.api.dto.FilterCountRes;
+import sopt.jeolloga.domain.templestay.api.dto.FilterRes;
+import sopt.jeolloga.domain.templestay.api.dto.ResetFilterRes;
+import sopt.jeolloga.domain.templestay.api.dto.TemplestayRes;
 import sopt.jeolloga.domain.templestay.api.service.FilterService;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -23,9 +25,43 @@ public class FilterController {
 
     // 템플스테이 필터 반환
     @GetMapping("public/filter")
-    public ResponseEntity<Map<String, List<String>>> getFilters() {
-        Map<String, List<String>> filters = filterService.getFilters();
-        return ResponseEntity.ok(filters);
+    public ResponseEntity<FilterRes> getFilters() {
+
+        FilterRes filterList = filterService.getFilters();
+
+        return ResponseEntity.ok(filterList);
     }
+
+    // 필터 초기화
+    @GetMapping("filter/reset")
+    public ResponseEntity<ResetFilterRes> getResetFilter() {
+
+        ResetFilterRes resetFilterRes = filterService.getFilterReset();
+
+        return ResponseEntity.ok(resetFilterRes);
+    }
+
+    @GetMapping("public/filter/count")
+    public ResponseEntity<FilterCountRes> getFilteredTemplestayNum(@RequestBody Map<String, Object> filter) {
+
+        List<Map<String, Object>> filteredCategory = filterService.getFiteredTemplestayCategory(filter);
+        FilterCountRes filterCountRes = filterService.getFilteredTemplestayNum(filteredCategory);
+
+        return ResponseEntity.ok(filterCountRes);
+    }
+
+//    @GetMapping("filter/list")
+//    public TemplestayRes getFilteredTemplestay(@RequestBody Map<String, Object> filter){
+//
+//        List<Map<String, Object>> filteredCategory = filterService.getFiteredTemplestayCategory(filter);
+//        List<TemplestayRes> templestays = filterService.getFiteredTemplestay(filteredCategory);
+//
+//        // paging
+//        int pageSize = 20;
+//        int totalPages = (int) Math.ceil((double) templestays.stream().count()/pageSize);
+//
+//        return ResponseEntity.ok(templestayList);
+//
+//    }
 
 }

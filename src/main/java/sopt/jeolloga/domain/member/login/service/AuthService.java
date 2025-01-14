@@ -1,8 +1,8 @@
-package sopt.jeolloga.login.service;
+package sopt.jeolloga.domain.member.login.service;
 
 import org.springframework.stereotype.Service;
 import sopt.jeolloga.config.JwtTokenProvider;
-import sopt.jeolloga.login.repository.MemberRepository;
+import sopt.jeolloga.domain.member.login.repository.MemberRepository;
 
 @Service
 public class AuthService {

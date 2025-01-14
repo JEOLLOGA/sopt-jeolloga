@@ -1,4 +1,4 @@
-package sopt.jeolloga.login.controller;
+package sopt.jeolloga.domain.member.login.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -6,8 +6,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import sopt.jeolloga.login.dto.JwtResponse;
-import sopt.jeolloga.login.service.AuthService;
+import sopt.jeolloga.domain.member.login.dto.JwtResponse;
+import sopt.jeolloga.domain.member.login.service.AuthService;
 
 @RestController
 @RequestMapping("/auth")

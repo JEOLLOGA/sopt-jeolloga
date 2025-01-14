@@ -1,4 +1,4 @@
-package sopt.jeolloga.login.service;
+package sopt.jeolloga.domain.member.login.service;
 
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;

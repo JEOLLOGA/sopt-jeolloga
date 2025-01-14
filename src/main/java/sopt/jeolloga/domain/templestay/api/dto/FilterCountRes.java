@@ -1,4 +1,5 @@
 package sopt.jeolloga.domain.templestay.api.dto;
 
-public class FilterRequestDto {
+public record FilterCountRes(int count) {
+
 }

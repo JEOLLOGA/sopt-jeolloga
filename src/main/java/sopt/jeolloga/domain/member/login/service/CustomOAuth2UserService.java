@@ -1,12 +1,12 @@
-package sopt.jeolloga.login.service;
+package sopt.jeolloga.domain.member.login.service;
 
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import sopt.jeolloga.config.JwtTokenProvider;
-import sopt.jeolloga.login.repository.Member;
-import sopt.jeolloga.login.repository.MemberRepository;
+import sopt.jeolloga.domain.member.login.repository.Member;
+import sopt.jeolloga.domain.member.login.repository.MemberRepository;
 
 import java.util.Map;
 

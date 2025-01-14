@@ -1,12 +1,12 @@
-package sopt.jeolloga.login.controller;
+package sopt.jeolloga.domain.member.login.controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import sopt.jeolloga.login.repository.Member;
-import sopt.jeolloga.login.service.MemberService;
+import sopt.jeolloga.domain.member.login.repository.Member;
+import sopt.jeolloga.domain.member.login.service.MemberService;
 import java.util.List;
 
 

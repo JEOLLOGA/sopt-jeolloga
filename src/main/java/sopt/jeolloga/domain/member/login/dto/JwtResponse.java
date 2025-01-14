@@ -1,4 +1,4 @@
-package sopt.jeolloga.login.dto;
+package sopt.jeolloga.domain.member.login.dto;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
