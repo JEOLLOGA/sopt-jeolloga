@@ -170,7 +170,7 @@ public class Filters {
         int position = 0;
 
         // key-value enumerate
-        for (Map.Entry<String, Object> entry : this.typeFilter.entrySet()) {
+        for (Map.Entry<String, Object> entry : this.regionFilter.entrySet()) {
             if ((binaryFilter & (1 << position)) != 0) {
                 regionName = entry.getKey();
                 break;
@@ -225,7 +225,7 @@ public class Filters {
         return this.priceFilter.get("maxPrice");
     }
 
-    public List<Map<String, Object>> getFilteredCategory(List<CategoryEntity> categoryEntityList) {
+    public List<Long> getFilteredCategory(List<CategoryEntity> categoryEntityList) {
 
         // client's binary filter
         Integer requestBinaryRegionFilter = convertToBinaryFilter(this.regionFilter);
@@ -257,13 +257,7 @@ public class Filters {
                             price >= requestMinPrice &&
                             price <= requestMaxPrice;
                 })
-                .map(category -> {
-                    Map<String, Object> result = new HashMap<>();
-                    result.put("id", category.getId());
-                    result.put("type", category.getType());
-                    result.put("region", category.getRegion());
-                    return result;
-                })
+                .map(CategoryEntity::getId)
                 .collect(Collectors.toList());
     }
 }

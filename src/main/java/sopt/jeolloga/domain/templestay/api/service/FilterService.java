@@ -39,19 +39,18 @@ public class FilterService {
         return filterRes;
     }
 
-    public List<Map<String, Object>> getFiteredTemplestayCategory(Map<String, Object> filter) {
+    public List<Long> getFiteredTemplestayCategory(Map<String, Object> filter) {
 
         this.filters = new Filters(filter);
-
         List<CategoryEntity> categoryEntityList = categoryRepository.findAll();
-        List<Map<String, Object>> filteredCategory = filters.getFilteredCategory(categoryEntityList);
+        List<Long> filteredId = filters.getFilteredCategory(categoryEntityList);
 
-        return filteredCategory;
+        return filteredId;
     }
 
-    public FilterCountRes getFilteredTemplestayNum(List<Map<String, Object>> filteredCategory){
+    public FilterCountRes getFilteredTemplestayNum(List<Long> filteredId){
 
-        FilterCountRes filterCountRes = new FilterCountRes(filteredCategory.size());
+        FilterCountRes filterCountRes = new FilterCountRes(filteredId.size());
         return filterCountRes;
     }
 
@@ -77,50 +76,55 @@ public class FilterService {
     }
 
 
-
-//    public List<TemplestayRes> getFilteredTemplestay(List<Map<String, Object>> filteredCategory) {
-//
-//        return filteredCategory.stream()
-//                .map(this::getTemplestayRes) // 각 Map을 getTemplestayRes 호출
-//                .collect(Collectors.toList()); // 결과 리스트로 변환
-//    }
-
-    public List<TemplestayRes> getFilteredTemplestay(List<Map<String, Object>> filteredCategory) {
-
-        // id 값만 추출
-        List<Long> ids = filteredCategory.stream()
-                .map(entry -> (Long) entry.get("id"))
-                .collect(Collectors.toList());
+    public List<TemplestayRes> getFilteredTemplestay(List<Long> ids) {
 
         // 조인된 데이터 조회
-        List<Object[]> results = templestayRepository.findTemplestayWithImageUrls(ids);
+        List<Object[]> results = templestayRepository.findTemplestayWithDetails(ids);
+
+//        for (Object[] row : results) {
+//            // 각 배열 원소의 값을 로그로 출력하여 확인
+//            for (int i = 0; i < row.length; i++) {
+//                System.out.println("Index " + i + ": " + row[i]);
+//                Object obj = row[i];
+//                System.out.println(obj.getClass().getName());
+//            }
+//        }
 
         // 결과 매핑
         return results.stream()
                 .map(result -> {
-                    TemplestayEntity templestayEntity = (TemplestayEntity) result[0];
-                    ImageUrlEntity imageUrlEntity = (ImageUrlEntity) result[1];
 
-                    Long id = templestayEntity.getId();
-                    String region = filteredCategory.stream()
-                            .filter(entry -> id.equals(entry.get("id")))
-                            .map(entry -> filters.getRegionFilterKey((Integer) entry.get("region")))
-                            .findFirst()
-                            .orElse(null);
+                    // 필터링 처리 (필요한 값 추출)
+                    Long id = (Long) result[0];
+                    String templeName = Optional.ofNullable(result[1]).map(Object::toString).orElse("null");
+                    String templestayName = Optional.ofNullable(result[2]).map(Object::toString).orElse("null");
+                    String tag = Optional.ofNullable(result[3]).map(Object::toString).orElse("null");
 
-                    String type = filteredCategory.stream()
-                            .filter(entry -> id.equals(entry.get("id")))
-                            .map(entry -> filters.getTypeFilterKey((Integer) entry.get("type")))
-                            .findFirst()
-                            .orElse(null);
+                    Integer binaryRegionFilter = result[4] != null ? ((Long) result[4]).intValue() : 0;
+                    Integer binarTypeFilter = result[5] != null ? ((Long) result[5]).intValue() : 0;
 
-                    String imgUrl = imageUrlEntity != null ? imageUrlEntity.getImgUrl() : null;
+                    String region = "";
+                    if(binaryRegionFilter == 0){
+                        region = "null";
+                    } else {
+                        region = filters.getRegionFilterKey(binaryRegionFilter);
+                    }
 
+                    String type = "";
+                    if(binarTypeFilter == 0){
+                        type = "null";
+                    } else {
+                        type = filters.getTypeFilterKey(binarTypeFilter);
+                    }
+
+                    String imgUrl = Optional.ofNullable(result[6]).map(Object::toString).orElse("null");
+
+                    // TemplestayRes 객체 생성
                     return new TemplestayRes(
                             id,
-                            templestayEntity.getTempleName(),
-                            templestayEntity.getTemplestayName(),
-                            templestayEntity.getTag(),
+                            templeName,
+                            templestayName,
+                            tag,
                             region,
                             type,
                             imgUrl
@@ -135,14 +139,4 @@ public class FilterService {
         return resetFilterRes;
     }
 
-
-
-//    // 특정 값으로 각 필터 value를 설정
-//    private Map<String, Integer> convertListToMap(List<String> list, int value) {
-//        Map<String, Integer> map = new HashMap<>();
-//        for (String item : list) {
-//            map.put(item, value);
-//        }
-//        return map;
-//    }
 }

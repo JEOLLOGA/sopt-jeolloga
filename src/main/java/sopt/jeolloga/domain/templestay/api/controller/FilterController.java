@@ -10,7 +10,6 @@ import sopt.jeolloga.domain.templestay.api.dto.ResetFilterRes;
 import sopt.jeolloga.domain.templestay.api.dto.TemplestayRes;
 import sopt.jeolloga.domain.templestay.api.service.FilterService;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -28,7 +27,6 @@ public class FilterController {
     public ResponseEntity<FilterRes> getFilters() {
 
         FilterRes filterList = filterService.getFilters();
-
         return ResponseEntity.ok(filterList);
     }
 
@@ -37,25 +35,22 @@ public class FilterController {
     public ResponseEntity<ResetFilterRes> getResetFilter() {
 
         ResetFilterRes resetFilterRes = filterService.getFilterReset();
-
         return ResponseEntity.ok(resetFilterRes);
     }
 
     @GetMapping("public/filter/count")
     public ResponseEntity<FilterCountRes> getFilteredTemplestayNum(@RequestBody Map<String, Object> filter) {
 
-        List<Map<String, Object>> filteredCategory = filterService.getFiteredTemplestayCategory(filter);
-        FilterCountRes filterCountRes = filterService.getFilteredTemplestayNum(filteredCategory);
-
+        List<Long> filteredId = filterService.getFiteredTemplestayCategory(filter);
+        FilterCountRes filterCountRes = filterService.getFilteredTemplestayNum(filteredId);
         return ResponseEntity.ok(filterCountRes);
     }
 
     @GetMapping("filter/list")
     public ResponseEntity<List<TemplestayRes>> getFilteredTemplestay(@RequestBody Map<String, Object> filter){
 
-        List<Map<String, Object>> filteredCategory = filterService.getFiteredTemplestayCategory(filter);
-        List<TemplestayRes> templestayList = filterService.getFilteredTemplestay(filteredCategory);
-
-      return ResponseEntity.ok(templestayList);
+        List<Long> filteredId = filterService.getFiteredTemplestayCategory(filter);
+        List<TemplestayRes> templestayList = filterService.getFilteredTemplestay(filteredId);
+        return ResponseEntity.ok(templestayList);
     }
 }

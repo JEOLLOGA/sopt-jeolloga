@@ -12,13 +12,21 @@ import java.util.List;
 
 @Repository
 public interface TemplestayRepository extends JpaRepository<TemplestayEntity, Long> {
-//
-//    @Query("SELECT c FROM TemplestayEntity c WHERE c.id IN :ids")
-//    Page<TemplestayEntity> findByIdIn(@Param("ids") List<Long> ids, Pageable pageable);
 
-    @Query("SELECT c FROM TemplestayEntity c WHERE c.id IN :ids")
-    List<TemplestayEntity> findByIdIn(@Param("ids") List<Long> ids);
+    @Query(value = "SELECT t.id AS templestay_id, t.temple_name, t.templestay_name, t.tag, CAST(c.region AS SIGNED) AS region, CAST(c.type AS SIGNED) AS type, i.img_url " +
+            "FROM templestay t " +
+            "LEFT JOIN category c ON t.id = c.templestay_id " +
+            "LEFT JOIN ( " +
+            "    SELECT templestay_id, MIN(id) AS min_id " +
+            "    FROM templestay_image " +
+            "    GROUP BY templestay_id " +
+            ") min_img ON t.id = min_img.templestay_id " +
+            "LEFT JOIN templestay_image i ON min_img.min_id = i.id " +
+            "WHERE t.id IN :ids", nativeQuery = true)
+    List<Object[]> findTemplestayWithDetails(@Param("ids") List<Long> ids);
 
-    @Query("SELECT t, i FROM TemplestayEntity t LEFT JOIN ImageUrlEntity i ON t.id = i.id WHERE t.id IN :ids")
-    List<Object[]> findTemplestayWithImageUrls(@Param("ids") List<Long> ids);
+
 }
+
+
+
