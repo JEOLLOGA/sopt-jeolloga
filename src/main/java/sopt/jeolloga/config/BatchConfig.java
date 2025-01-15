@@ -1,21 +1,18 @@
 package sopt.jeolloga.config;
 
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-
-package sopt.jeolloga.config;
-
 import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
-import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
-import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
+import org.springframework.batch.core.job.builder.JobBuilder;
+import org.springframework.batch.core.repository.JobRepository;
+import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.transaction.PlatformTransactionManager;
 import sopt.jeolloga.domain.templestay.api.service.ReviewApiService;
 
 import java.util.List;
@@ -25,21 +22,21 @@ import java.util.List;
 @RequiredArgsConstructor
 public class BatchConfig {
 
-    private final JobBuilderFactory jobBuilderFactory;
-    private final StepBuilderFactory stepBuilderFactory;
+    private final JobRepository jobRepository;
+    private final PlatformTransactionManager transactionManager;
     private final ReviewApiService reviewApiService;
 
     @Bean
     public Job processReviewsJob() {
-        return jobBuilderFactory.get("processReviewsJob")
+        return new JobBuilder("processReviewsJob", jobRepository)
                 .start(processReviewsStep())
                 .build();
     }
 
     @Bean
     public Step processReviewsStep() {
-        return stepBuilderFactory.get("processReviewsStep")
-                .<String, String>chunk(10) // Process 10 temple names at a time
+        return new StepBuilder("processReviewsStep", jobRepository)
+                .<String, String>chunk(100, transactionManager) // 한 번에 100개의 데이터를 처리
                 .reader(templeNamesReader())
                 .processor(reviewProcessor())
                 .writer(reviewWriter())
@@ -57,7 +54,7 @@ public class BatchConfig {
                 if (currentIndex < templeNames.size()) {
                     return templeNames.get(currentIndex++);
                 }
-                return null; // All temple names processed
+                return null;
             }
         };
     }
@@ -66,13 +63,13 @@ public class BatchConfig {
     public ItemProcessor<String, String> reviewProcessor() {
         return templeName -> {
             reviewApiService.processReviewsByTempleName(templeName);
-            return templeName; // Returning the processed temple name for logging
+            return templeName;
         };
     }
 
     @Bean
     public ItemWriter<String> reviewWriter() {
         return templeNames -> templeNames.forEach(templeName ->
-                System.out.println("Processed temple reviews for: " + templeName));
+                System.out.println("Processed reviews for temple: " + templeName));
     }
 }

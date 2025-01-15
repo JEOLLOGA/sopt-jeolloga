@@ -37,6 +37,9 @@ public class ReviewApiService {
     @Value("${naver.api.client-secret}")
     private String clientSecret;
 
+    public List<String> getDistinctTempleNames() {
+        return templestayRepository.findDistinctTempleNames();
+    }
     public ResponseDto<?> saveBlogsToReviewTable() {
         try {
             List<String> distinctTempleNames = templestayRepository.findDistinctTempleNames();
@@ -46,31 +49,28 @@ public class ReviewApiService {
                 throw new TemplestayCoreException(ErrorCode.NOT_FOUND_TEMPLESTAY);
             }
 
-            distinctTempleNames.forEach(templeName -> {
-                try {
-                    List<TemplestayVO> blogs = fetchBlogsFromNaverApi(templeName);
-                    blogs.stream()
-                            .filter(blog -> blog.getLink().contains("naver.com"))
-                            .filter(blog -> blog.getPostdate().compareTo("20220101") > 0)
-                            .forEach(blog -> {
-                                try {
-                                    saveReviewToRepository(templeName, blog);
-                                } catch (TemplestayCoreException e) {
-                                    logger.warn("Skipping blog due to validation error: {}", e.getErrorCode().getMsg());
-                                }
-                            });
-                } catch (TemplestayCoreException e) {
-                    logger.error("Failed to fetch blogs for temple: {} - {}", templeName, e.getErrorCode().getMsg());
-                }
-            });
-
-            return ResponseDto.success("Reviews successfully saved.");
-        } catch (TemplestayCoreException e) {
-            logger.error("TemplestayCoreException: {}", e.getErrorCode().getMsg());
-            return ResponseDto.fail(e.getErrorCode().getMsg());
+            distinctTempleNames.forEach(this::processReviewsByTempleName);
+            return ResponseDto.success("블로그 데이터를 성공적으로 저장했습니다.");
         } catch (Exception e) {
-            logger.error("Unexpected error occurred: {}", e.getMessage());
-            return ResponseDto.fail(ErrorCode.INTERNAL_SERVER_ERROR.getMsg());
+            return ResponseDto.fail("리뷰 데이터를 저장하는 중 문제가 발생했습니다.");
+        }
+    }
+
+    public void processReviewsByTempleName(String templeName) {
+        try {
+            List<TemplestayVO> blogs = fetchBlogsFromNaverApi(templeName);
+            blogs.stream()
+                    .filter(blog -> blog.getLink().contains("naver.com"))
+                    .filter(blog -> blog.getLink().compareTo("20220101") > 0)
+                    .forEach(blog -> {
+                        try {
+                            saveReviewToRepository(templeName, blog);
+                        } catch (TemplestayCoreException e) {
+                            logger.warn("Skipping blog due to validation error: {}", e.getErrorCode());
+                        }
+                    });
+        } catch (TemplestayCoreException e) {
+            logger.error("Failed to porcess reviews for temple: {} - {}", templeName, e.getErrorCode());
         }
     }
 
@@ -80,10 +80,6 @@ public class ReviewApiService {
         }
 
         String truncatedTitle = truncateToLength(blog.getTitle(), 255);
-        if (truncatedTitle == null || truncatedTitle.isEmpty()) {
-            throw new TemplestayCoreException(ErrorCode.MISSING_TITLE);
-        }
-
         String truncatedDescription = truncateToLength(blog.getDescription(), 255);
         String truncatedBloggerName = truncateToLength(blog.getBloggername(), 45);
         String truncatedLink = truncateToLength(blog.getLink(), 500);
@@ -135,10 +131,6 @@ public class ReviewApiService {
             ObjectMapper objectMapper = new ObjectMapper();
             return objectMapper.readValue(response.getBody(), NaverResultVO.class).getItems();
         } catch (JsonProcessingException e) {
-            logger.error("JSON processing error: {}", e.getMessage());
-            throw new TemplestayCoreException(ErrorCode.JSON_FIELD_ERROR);
-        } catch (Exception e) {
-            logger.error("Error fetching blogs from Naver API: {}", e.getMessage());
             throw new TemplestayCoreException(ErrorCode.API_CALL_FAILED);
         }
     }
