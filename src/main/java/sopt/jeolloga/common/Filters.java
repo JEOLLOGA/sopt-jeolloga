@@ -1,6 +1,5 @@
 package sopt.jeolloga.common;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Component;
 import sopt.jeolloga.domain.templestay.core.CategoryEntity;
 

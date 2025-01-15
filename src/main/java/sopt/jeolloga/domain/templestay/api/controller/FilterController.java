@@ -1,13 +1,12 @@
 package sopt.jeolloga.domain.templestay.api.controller;
 
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import sopt.jeolloga.domain.templestay.api.dto.FilterCountRes;
-import sopt.jeolloga.domain.templestay.api.dto.FilterRes;
-import sopt.jeolloga.domain.templestay.api.dto.ResetFilterRes;
-import sopt.jeolloga.domain.templestay.api.dto.TemplestayRes;
+import sopt.jeolloga.domain.templestay.api.dto.*;
 import sopt.jeolloga.domain.templestay.api.service.FilterService;
 
 import java.util.List;
@@ -47,10 +46,12 @@ public class FilterController {
     }
 
     @GetMapping("filter/list")
-    public ResponseEntity<List<TemplestayRes>> getFilteredTemplestay(@RequestBody Map<String, Object> filter){
+    public ResponseEntity<PagingRes> getFilteredTemplestay(@RequestBody Map<String, Object> filter, @RequestParam int page){
 
         List<Long> filteredId = filterService.getFiteredTemplestayCategory(filter);
-        List<TemplestayRes> templestayList = filterService.getFilteredTemplestay(filteredId);
-        return ResponseEntity.ok(templestayList);
+        int size = 10;
+        PagingRes templestayWithPage = filterService.getFilteredTemplestay(filteredId, page-1, size);
+
+        return ResponseEntity.ok(templestayWithPage);
     }
 }

@@ -6,10 +6,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import sopt.jeolloga.common.Filters;
-import sopt.jeolloga.domain.templestay.api.dto.FilterCountRes;
-import sopt.jeolloga.domain.templestay.api.dto.FilterRes;
-import sopt.jeolloga.domain.templestay.api.dto.ResetFilterRes;
-import sopt.jeolloga.domain.templestay.api.dto.TemplestayRes;
+import sopt.jeolloga.domain.templestay.api.dto.*;
 import sopt.jeolloga.domain.templestay.core.*;
 
 import java.util.HashMap;
@@ -25,20 +22,20 @@ public class FilterService {
     private Filters filters;
     private final CategoryRepository categoryRepository;
     private final TemplestayRepository templestayRepository;
-    private final ImageUrlRepository imageUrlRepository;
 
     public FilterService(Filters filters, CategoryRepository categoryRepository, TemplestayRepository templestaryRepository, ImageUrlRepository imageUrlRepository) {
         this.filters = filters;
         this.categoryRepository = categoryRepository;
         this.templestayRepository = templestaryRepository;
-        this.imageUrlRepository = imageUrlRepository;
     }
 
+    // 사용 중인 필터 목록 반환
     public FilterRes getFilters() {
         FilterRes filterRes = new FilterRes(this.filters.getFilterKey());
         return filterRes;
     }
 
+    // 필터에 의해 걸러진 id 리스트 반환
     public List<Long> getFiteredTemplestayCategory(Map<String, Object> filter) {
 
         this.filters = new Filters(filter);
@@ -48,89 +45,42 @@ public class FilterService {
         return filteredId;
     }
 
+    // 필터에 의해 걸러진 id 개수 반환
     public FilterCountRes getFilteredTemplestayNum(List<Long> filteredId){
 
         FilterCountRes filterCountRes = new FilterCountRes(filteredId.size());
         return filterCountRes;
     }
 
-    public List<Long> categoryToId(List<Map<String, Object>> filteredCategory) {
+    // 필터에 의해 걸러진 템플스테이 리스트 반환
+    public PagingRes getFilteredTemplestay(List<Long> ids, int page, int size) {
 
-        return filteredCategory.stream()
-                .map(entry -> Long.valueOf(entry.get("id").toString()))
-                .collect(Collectors.toList());
-    }
-
-    public TemplestayRes getTemplestayRes(Map<String, Object> category){
-
-        Long id = (Long)category.get("id");
-        String region = filters.getRegionFilterKey((Integer)category.get("region"));
-        String type = filters.getTypeFilterKey((Integer)category.get("type"));
-
-        TemplestayEntity templestayEntity = templestayRepository.findById(id).orElse(null);
-        ImageUrlEntity imageUrlEntity = imageUrlRepository.findById(id).orElse(null);
-
-        TemplestayRes templestayRes = new TemplestayRes(id,templestayEntity.getTempleName(), templestayEntity.getTemplestayName(), templestayEntity.getTag(), region, type, imageUrlEntity.getImgUrl());
-
-        return templestayRes;
-    }
-
-
-    public List<TemplestayRes> getFilteredTemplestay(List<Long> ids) {
+        // Paging 처리
+        Pageable pageable = PageRequest.of(page, size);
 
         // 조인된 데이터 조회
-        List<Object[]> results = templestayRepository.findTemplestayWithDetails(ids);
+        Page<Object[]> resultsPage = templestayRepository.findTemplestayWithDetails(ids, pageable);
 
-//        for (Object[] row : results) {
-//            // 각 배열 원소의 값을 로그로 출력하여 확인
-//            for (int i = 0; i < row.length; i++) {
-//                System.out.println("Index " + i + ": " + row[i]);
-//                Object obj = row[i];
-//                System.out.println(obj.getClass().getName());
-//            }
-//        }
+        Page<TemplestayRes> templestayResListPage = resultsPage.map(result -> {
 
-        // 결과 매핑
-        return results.stream()
-                .map(result -> {
+            Long id = (Long) result[0];
+            String templeName = Optional.ofNullable(result[1]).map(Object::toString).orElse("null");
+            String organizedName = Optional.ofNullable(result[2]).map(Object::toString).orElse("null");
+            String tags = Optional.ofNullable(result[3]).map(Object::toString).orElse("null");
+            String tag = tags.split(",")[0];
 
-                    // 필터링 처리 (필요한 값 추출)
-                    Long id = (Long) result[0];
-                    String templeName = Optional.ofNullable(result[1]).map(Object::toString).orElse("null");
-                    String templestayName = Optional.ofNullable(result[2]).map(Object::toString).orElse("null");
-                    String tag = Optional.ofNullable(result[3]).map(Object::toString).orElse("null");
+            Integer binaryRegionFilter = result[4] != null ? ((Long) result[4]).intValue() : 0;
+            Integer binaryTypeFilter = result[5] != null ? ((Long) result[5]).intValue() : 0;
 
-                    Integer binaryRegionFilter = result[4] != null ? ((Long) result[4]).intValue() : 0;
-                    Integer binarTypeFilter = result[5] != null ? ((Long) result[5]).intValue() : 0;
+            String region = (binaryRegionFilter == 0) ? "null" : filters.getRegionFilterKey(binaryRegionFilter);
+            String type = (binaryTypeFilter == 0) ? "null" : filters.getTypeFilterKey(binaryTypeFilter);
+            String imgUrl = Optional.ofNullable(result[6]).map(Object::toString).orElse("null");
 
-                    String region = "";
-                    if(binaryRegionFilter == 0){
-                        region = "null";
-                    } else {
-                        region = filters.getRegionFilterKey(binaryRegionFilter);
-                    }
+            return new TemplestayRes(id, templeName, organizedName, tag, region, type, imgUrl);
 
-                    String type = "";
-                    if(binarTypeFilter == 0){
-                        type = "null";
-                    } else {
-                        type = filters.getTypeFilterKey(binarTypeFilter);
-                    }
+        });
 
-                    String imgUrl = Optional.ofNullable(result[6]).map(Object::toString).orElse("null");
-
-                    // TemplestayRes 객체 생성
-                    return new TemplestayRes(
-                            id,
-                            templeName,
-                            templestayName,
-                            tag,
-                            region,
-                            type,
-                            imgUrl
-                    );
-                })
-                .collect(Collectors.toList());
+        return new PagingRes(templestayResListPage.getNumber() + 1, templestayResListPage.getSize(), templestayResListPage.getTotalPages(), templestayResListPage.getContent());
     }
 
     // 초기화 상태의 필터를 반환
