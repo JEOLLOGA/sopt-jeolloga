@@ -50,6 +50,7 @@ public class ReviewApiService {
                 try {
                     List<TemplestayVO> blogs = fetchBlogsFromNaverApi(templeName);
                     blogs.stream()
+                            .filter(blog -> blog.getLink().contains("naver.com"))
                             .filter(blog -> blog.getPostdate().compareTo("20220101") > 0)
                             .forEach(blog -> {
                                 try {
@@ -73,7 +74,7 @@ public class ReviewApiService {
         }
     }
 
-    private void saveReviewToRepository(String templeName, TemplestayVO blog) {
+        private void saveReviewToRepository(String templeName, TemplestayVO blog) {
         if (templeName == null || templeName.isEmpty()) {
             throw new TemplestayCoreException(ErrorCode.MISSING_TEMPLE_NAME);
         }
@@ -86,6 +87,11 @@ public class ReviewApiService {
         String truncatedDescription = truncateToLength(blog.getDescription(), 255);
         String truncatedBloggerName = truncateToLength(blog.getBloggername(), 45);
         String truncatedLink = truncateToLength(blog.getLink(), 500);
+
+        if (reviewRepository.existsByReviewLink(truncatedLink)) {
+            logger.info("Skipping duplicate review with link: {}", truncatedLink);
+            return; // 중복된 링크인 경우 저장하지 않음
+        }
 
         Review review = new Review(
                 templeName,
@@ -106,7 +112,7 @@ public class ReviewApiService {
                     .fromUriString("https://openapi.naver.com")
                     .path("/v1/search/blog.json")
                     .queryParam("query", templeName + " 템플스테이")
-                    .queryParam("display", 50)
+                    .queryParam("display", 70)
                     .queryParam("start", 1)
                     .queryParam("sort", "sim")
                     .encode()
