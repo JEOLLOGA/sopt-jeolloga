@@ -1,17 +1,19 @@
 package sopt.jeolloga.domain.templestay.api.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
+import sopt.jeolloga.domain.templestay.api.dto.PageReviewRes;
 import sopt.jeolloga.domain.templestay.api.dto.ReviewRes;
 import sopt.jeolloga.domain.templestay.core.Review;
 import sopt.jeolloga.domain.templestay.core.ReviewRepository;
-import sopt.jeolloga.domain.templestay.core.Templestay;
 import sopt.jeolloga.domain.templestay.core.TemplestayRepository;
 import sopt.jeolloga.domain.templestay.core.exception.TemplestayCoreException;
+import sopt.jeolloga.domain.templestay.core.exception.TemplestayNotFoundException;
 import sopt.jeolloga.exception.ErrorCode;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Component
@@ -20,19 +22,21 @@ public class ReviewService {
     private final ReviewRepository reviewRepository;
     private final TemplestayRepository templestayRepository;
 
-    public List<ReviewRes> getReviewsByTemplestayId(Long templestayId) {
-        Templestay templestay = templestayRepository.findById(templestayId)
-                .orElseThrow(() -> new TemplestayCoreException(ErrorCode.NOT_FOUND_TEMPLESTAY));
+    public PageReviewRes<ReviewRes> getPagedReviewsByTemplestayId(Long templestayId, int page, int size) {
 
-        String templeName = templestay.getTempleName();
+        String templeName = templestayRepository.findById(templestayId)
+                .orElseThrow(TemplestayNotFoundException::new)
+                .getTempleName();
 
-        List<Review> reviews = reviewRepository.findByTempleName(templeName);
+        PageRequest pageRequest = PageRequest.of(page-1,size);
+
+        Page<Review> reviews = reviewRepository.findByTempleName(templeName, pageRequest);
 
         if (reviews.isEmpty()) {
             throw new TemplestayCoreException(ErrorCode.REVIEW_NOT_FOUND);
         }
 
-        return reviews.stream()
+        List<ReviewRes> reviewDtos = reviews.getContent().stream()
                 .map(review -> new ReviewRes(
                         review.getId(),
                         review.getReviewTitle(),
@@ -42,7 +46,14 @@ public class ReviewService {
                         review.getReviewDate(),
                         review.getReviewImgUrl()
                 ))
-                .collect(Collectors.toList());
-    }
+                .toList();
 
+        return new PageReviewRes<>(
+                templestayId,
+                page,
+                size,
+                reviews.getTotalPages(),
+                reviewDtos
+        );
+    }
 }
