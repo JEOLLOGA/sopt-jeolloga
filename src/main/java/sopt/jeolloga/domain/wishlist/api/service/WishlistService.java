@@ -29,6 +29,10 @@ public class WishlistService {
         Templestay templestay = templestayRepository.findById(templestayId)
                 .orElseThrow(() -> new WishlistCoreException(ErrorCode.NOT_FOUND_TARGET));
 
+        boolean exists = wishlistRepository.findByMemberAndTemplestay(member, templestay).isPresent();
+        if (exists) {
+            throw new WishlistCoreException(ErrorCode.DUPLICATE_WISHLIST);
+        }
         Wishlist wishlist = new Wishlist(member, templestay);
         wishlistRepository.save(wishlist);
     }
