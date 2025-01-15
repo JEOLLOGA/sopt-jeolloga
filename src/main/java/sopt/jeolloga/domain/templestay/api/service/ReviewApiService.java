@@ -46,7 +46,7 @@ public class ReviewApiService {
 
             if (distinctTempleNames.isEmpty()) {
                 logger.warn("No distinct temple names found in TemplestayRepository.");
-                throw new TemplestayCoreException(ErrorCode.NOT_FOUND_TEMPLESTAY);
+                throw new TemplestayCoreException(ErrorCode.NOT_FOUND_TARGET);
             }
 
             distinctTempleNames.forEach(this::processReviewsByTempleName);

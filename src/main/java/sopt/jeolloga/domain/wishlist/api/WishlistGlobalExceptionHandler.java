@@ -1,19 +1,17 @@
-package sopt.jeolloga.domain.templestay.api;
+package sopt.jeolloga.domain.wishlist.api;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.ErrorResponse;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import sopt.jeolloga.common.ResponseDto;
-import sopt.jeolloga.domain.templestay.TemplestayBaseException;
+import sopt.jeolloga.domain.wishlist.WishlistBaseException;
 import sopt.jeolloga.exception.ErrorCode;
 
-
 @RestControllerAdvice
-public class GlobalExceptionHandler {
-    @ExceptionHandler(TemplestayBaseException.class)
-    public ResponseEntity<ResponseDto<Void>> handlerTemplestayBaseException(TemplestayBaseException e) {
+public class WishlistGlobalExceptionHandler {
+    @ExceptionHandler(WishlistBaseException.class)
+    public ResponseEntity<ResponseDto<Void>> handlerWishlistBaseException(WishlistBaseException e) {
         ErrorCode errorCode = e.getErrorCode();
         ResponseDto<Void> response = new ResponseDto<>(null, errorCode.getMsg());
         return ResponseEntity.status(errorCode.getHttpStatus()).body(response);
