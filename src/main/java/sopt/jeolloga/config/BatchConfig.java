@@ -1,8 +1,24 @@
-/*
 package sopt.jeolloga.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+package sopt.jeolloga.config;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.batch.core.Job;
+import org.springframework.batch.core.Step;
+import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
+import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
+import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
+import org.springframework.batch.item.ItemProcessor;
+import org.springframework.batch.item.ItemReader;
+import org.springframework.batch.item.ItemWriter;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import sopt.jeolloga.domain.templestay.api.service.ReviewApiService;
+
+import java.util.List;
 
 @Configuration
 @EnableBatchProcessing
@@ -23,7 +39,7 @@ public class BatchConfig {
     @Bean
     public Step processReviewsStep() {
         return stepBuilderFactory.get("processReviewsStep")
-                .<String, Void>chunk(100) // 청크 크기를 100으로 설정
+                .<String, String>chunk(10) // Process 10 temple names at a time
                 .reader(templeNamesReader())
                 .processor(reviewProcessor())
                 .writer(reviewWriter())
@@ -41,23 +57,22 @@ public class BatchConfig {
                 if (currentIndex < templeNames.size()) {
                     return templeNames.get(currentIndex++);
                 }
-                return null; // 모든 데이터가 처리되었음을 나타냄
+                return null; // All temple names processed
             }
         };
     }
 
     @Bean
-    public ItemProcessor<String, Void> reviewProcessor() {
+    public ItemProcessor<String, String> reviewProcessor() {
         return templeName -> {
             reviewApiService.processReviewsByTempleName(templeName);
-            return null;
+            return templeName; // Returning the processed temple name for logging
         };
     }
 
     @Bean
-    public ItemWriter<Void> reviewWriter() {
-        return items -> {
-        };
+    public ItemWriter<String> reviewWriter() {
+        return templeNames -> templeNames.forEach(templeName ->
+                System.out.println("Processed temple reviews for: " + templeName));
     }
 }
-*/
