@@ -11,6 +11,7 @@ public enum ErrorCode {
     JSON_FIELD_ERROR(40005, HttpStatus.BAD_REQUEST, "JSON 오류 혹은 Request Body 필드 오류입니다."),
     MISSING_TEMPLE_NAME(40001, HttpStatus.BAD_REQUEST, "템플스테이 이름이 누락되었습니다."),
     MISSING_TITLE(40002, HttpStatus.BAD_REQUEST, "블로그 제목이 누락되었습니다."),
+    INVALID_DATE_FORMAT(40006, HttpStatus.BAD_REQUEST, "날짜 형식이 잘못되었습니다."),
     BAD_REQUEST_PARAMETER(40010, HttpStatus.BAD_REQUEST, "필수 요청 파라미터가 누락되었습니다."),
 
     // 404번대: 리소스 찾기 오류
