@@ -51,10 +51,10 @@ public class FilterService {
     }
 
 
-    public PagingRes getFilteredTemplestay(List<Long> ids, int page, int size) {
+    public PageTemplesayRes getFilteredTemplestay(List<Long> ids, int page, int size) {
 
 
-        Pageable pageable = PageRequest.of(page, size);
+        Pageable pageable = PageRequest.of(page - 1, size);
         Page<Object[]> resultsPage = templestayRepository.findTemplestayWithDetails(ids, pageable);
 
         Page<TemplestayRes> templestayResListPage = resultsPage.map(result -> {
@@ -76,7 +76,7 @@ public class FilterService {
 
         });
 
-        return new PagingRes(templestayResListPage.getNumber() + 1, templestayResListPage.getSize(), templestayResListPage.getTotalPages(), templestayResListPage.getContent());
+        return new PageTemplesayRes(templestayResListPage.getNumber() + 1, templestayResListPage.getSize(), templestayResListPage.getTotalPages(), templestayResListPage.getContent());
     }
 
 

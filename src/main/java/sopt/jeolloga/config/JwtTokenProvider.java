@@ -14,12 +14,10 @@ import java.util.Date;
 @Component
 public class JwtTokenProvider { // Jwt Token 생성
 
-    private String refreshTokenSecret;
     private final Key accessTokenKey;
     private final Key refreshTokenKey;
-    private final long accessTokenValidity = 7 * 24 * 60 * 60 * 1000; // 7일
-//    private final long accessTokenValidity = 100;
-    private final long refreshTokenValidity = 7 * 24 * 60 * 60 * 1000; // 30일
+    private final long accessTokenValidity = 1 * 60 * 60 * 1000; // 1시간
+    private final long refreshTokenValidity = 14 * 24 * 60 * 60 * 1000; // 14일
 
     public JwtTokenProvider(
             @Value("${jwt.access-token-secret}") String accessTokenSecret,
@@ -67,11 +65,9 @@ public class JwtTokenProvider { // Jwt Token 생성
     // 공통 토큰 검증 메서드
     private boolean validateToken(String token, Key key) {
         try {
-            System.out.println("try 접근");
             Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
             return true;
         } catch (JwtException | IllegalArgumentException e) {
-            System.out.println("try 실패");
             return false;
         }
     }

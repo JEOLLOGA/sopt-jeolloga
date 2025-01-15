@@ -1,4 +1,4 @@
-package sopt.jeolloga.domain.member.login.repository;
+package sopt.jeolloga.domain.member.api.repository;
 
 import jakarta.persistence.*;
 import lombok.Getter;

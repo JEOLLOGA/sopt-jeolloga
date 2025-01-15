@@ -11,6 +11,10 @@ public enum ErrorCode {
     JSON_FIELD_ERROR(40005, HttpStatus.BAD_REQUEST, "JSON 오류 혹은 Request Body 필드 오류입니다."),
     MISSING_TEMPLE_NAME(40001, HttpStatus.BAD_REQUEST, "템플스테이 이름이 누락되었습니다."),
     MISSING_TITLE(40002, HttpStatus.BAD_REQUEST, "블로그 제목이 누락되었습니다."),
+    MISSING_ACCESS_TOKEN(40003, HttpStatus.BAD_REQUEST, "액세스 토큰이 누락되었습니다"),
+
+    // 401번대: 권한 오류
+    UNAUTHORIZED(40100,HttpStatus.UNAUTHORIZED,"서비스 이용 권한이 없습니다"),
 
     // 404번대: 리소스 찾기 오류
     NOT_FOUND_TEMPLESTAY(40400, HttpStatus.NOT_FOUND, "대상을 찾을 수 없습니다."),

@@ -45,11 +45,11 @@ public class FilterController {
     }
 
     @GetMapping("/filter/list")
-    public ResponseEntity<PagingRes> getFilteredTemplestay(@RequestBody Map<String, Object> filter, @RequestParam int page){
+    public ResponseEntity<PageTemplesayRes> getFilteredTemplestay(@RequestBody Map<String, Object> filter, @RequestParam int page){
 
         List<Long> filteredId = filterService.getFiteredTemplestayCategory(filter);
         int size = 10;
-        PagingRes templestayWithPage = filterService.getFilteredTemplestay(filteredId, page-1, size);
+        PageTemplesayRes templestayWithPage = filterService.getFilteredTemplestay(filteredId, page, size);
 
         return ResponseEntity.ok(templestayWithPage);
     }

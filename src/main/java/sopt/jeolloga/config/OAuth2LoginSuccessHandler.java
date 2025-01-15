@@ -5,7 +5,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
-import sopt.jeolloga.domain.member.login.service.CustomOAuth2User;
+import sopt.jeolloga.domain.member.api.service.CustomOAuth2User;
 
 import java.io.IOException;
 
@@ -25,5 +25,6 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
                 user.getAccessToken(),
                 user.getRefreshToken()
         ));
+
     }
 }

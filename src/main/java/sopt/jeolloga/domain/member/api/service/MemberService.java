@@ -1,8 +1,8 @@
-package sopt.jeolloga.domain.member.login.service;
+package sopt.jeolloga.domain.member.api.service;
 
 import org.springframework.stereotype.Service;
-import sopt.jeolloga.domain.member.login.repository.Member;
-import sopt.jeolloga.domain.member.login.repository.MemberRepository;
+import sopt.jeolloga.domain.member.api.repository.Member;
+import sopt.jeolloga.domain.member.api.repository.MemberRepository;
 
 import java.util.List;
 
