@@ -1,16 +1,13 @@
 package sopt.jeolloga.domain.member.login.controller;
 
-
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
-
 
 import java.util.Map;
 
 @RestController
 public class LoginController {
-
 
     @GetMapping("/login/success")
     public String loginSuccess(OAuth2AuthenticationToken authentication) {
@@ -25,7 +22,6 @@ public class LoginController {
         String email = (String) kakaoAccount.get("email");
         String nickname = (String) properties.get("nickname");
 
-//        return attributes.toString();
         return "안녕하세요 " + nickname + "님";
     }
 

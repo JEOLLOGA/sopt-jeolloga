@@ -18,11 +18,6 @@ public class CategoryEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-//    @OneToOne(fetch = FetchType.LAZY)
-//    @ToString.Exclude
-//    @JoinColumn(name = "templestay_id", nullable = false)
-//    private TemplestayEntity templestay;
-
     @Column(name = "templestay_id")
     private Long templestayId;
 
@@ -44,8 +39,7 @@ public class CategoryEntity {
     @Column(name = "etc")
     private Integer etc; // 기타
 
-    public CategoryEntity(Long id, Long templestayId, int region, int type, int purpose, int activity, int price, int etc) {
-        this.id = id;
+    public CategoryEntity(Long templestayId, int region, int type, int purpose, int activity, int price, int etc) {
         this.templestayId = templestayId;
         this.region = region;
         this.type = type;

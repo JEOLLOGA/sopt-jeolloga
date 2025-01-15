@@ -24,9 +24,8 @@ public class ImageUrlEntity {
     @Column(name = "img_url")
     private String imgUrl;
 
-    public ImageUrlEntity(Long id, Long templestayId, String imgUrl) {
-        this.id = id;
+    public ImageUrlEntity(Long templestayId, String imgUrl) {
         this.templestayId = templestayId;
         this.imgUrl = imgUrl;
     }
-}
+    }

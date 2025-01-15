@@ -9,7 +9,6 @@ import sopt.jeolloga.domain.member.login.repository.Member;
 import sopt.jeolloga.domain.member.login.service.MemberService;
 import java.util.List;
 
-
 @RestController
 @RequestMapping("/members")
 public class MemberController {

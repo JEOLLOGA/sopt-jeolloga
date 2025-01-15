@@ -5,35 +5,35 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "member") // 연결될 테이블 이름
+@Table(name = "member")
 @Getter
 @NoArgsConstructor
 public class Member {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY) // AUTO_INCREMENT
-    private Long id; // 사용자 ID
+    private Long id;
 
     @Column(name = "kakao_user_id", nullable = false)
-    private Long kakaoUserId; // 카카오 사용자 ID
+    private Long kakaoUserId;
 
     @Column(nullable = false, length = 45)
-    private String nickname; // 사용자 닉네임
+    private String nickname;
 
     @Column(nullable = false, length = 45, unique = true)
-    private String email; // 이메일
+    private String email;
 
     @Column(name = "age_range", length = 45)
-    private String ageRange; // 연령대
+    private String ageRange;
 
     @Column(length = 45)
-    private String gender; // 성별
+    private String gender;
 
     @Column(length = 45)
-    private String religion; // 종교
+    private String religion;
 
     @Column(name = "has_experience")
-    private Boolean hasExperience; // 템플스테이 경험 여부
+    private Boolean hasExperience;
 
     public Member(Long kakaoUserId, String email, String nickname){
         this.kakaoUserId = kakaoUserId;

@@ -9,10 +9,8 @@ import java.util.stream.Collectors;
 @Component
 public class Filters {
 
-    // naming convention
-    // filter : json type individual category filter
-    // unified filter : json type unified category filter
-    // binary filter : binary type individual category filter
+    private static final int MAX_PRICE = Integer.MAX_VALUE;
+    private static final int DEFAULT_MIN_PRICE = 0;
 
     private Map<String, Object> regionFilter;
     private Map<String, Object> typeFilter;
@@ -20,115 +18,128 @@ public class Filters {
     private Map<String, Object> activityFilter;
     private Map<String, Object> priceFilter;
     private Map<String, Object> etcFilter;
-//    private Map<String, Object> resetFilter;
 
     public Filters() {
-
-        this.regionFilter = Arrays.asList("강원", "경기", "경남", "경북", "광주", "대구", "대전", "부산", "서울", "인천", "전남", "전북", "제주", "충남", "충북").stream()
-                .collect(Collectors.toMap(
-                        key -> key,
-                        key -> 1
-                ));
-
-        this.typeFilter = Arrays.asList("당일형", "휴식형", "체험형").stream()
-                .collect(Collectors.toMap(
-                        key -> key,
-                        key -> 1
-                ));
-
-        this.purposeFilter = Arrays.asList("힐링", "전통문화 체험", "심신치유", "자기계발", "여행 일정", "사찰순례", "휴식", "호기심", "기타").stream()
-                .collect(Collectors.toMap(
-                        key -> key,
-                        key -> 1
-                ));
-
-        this.activityFilter = Arrays.asList("발우공양", "108배", "스님과의 차담", "등산", "새벽 예불", "사찰 탐방", "염주 만들기", "연등 만들기", "다도", "명상", "산책", "요가", "기타").stream()
-                .collect(Collectors.toMap(
-                        key -> key,
-                        key -> 1
-                ));
-
-        this.priceFilter = new HashMap<String, Object>();
-        this.priceFilter.put("minPrice", 0);
-        this.priceFilter.put("maxPrice", Integer.MAX_VALUE);
-
-        this.etcFilter = Arrays.asList("절밥이 맛있는", "TV에 나온", "연예인이 다녀간", "근처 관광지가 많은", "속세와 멀어지고 싶은", "동물 친구들과 함께", "유튜브 운영 중인", "단체 가능").stream()
-                .collect(Collectors.toMap(
-                        key -> key,
-                        key -> 1
-                ));
-
-        // resetFilter setting
-//        this.resetFilter = new HashMap<>();
-//        resetFilter.put("region", this.regionFilter);
-//        resetFilter.put("type", typeFilter);
-//        resetFilter.put("purpose", purposeFilter);
-//        resetFilter.put("activity", activityFilter);
-
-//        Map<String, Object> resetPriceFilter = new HashMap<>();
-//        resetPriceFilter.put("minPrice",0);
-//        resetPriceFilter.put("maxPrice", 300000);
-
-//        resetFilter.put("price", resetPriceFilter);
-//        resetFilter.put("etc", etcFilter);
+        this.regionFilter = initializeFilter(Arrays.asList("강원", "경기", "경남", "경북", "광주", "대구", "대전", "부산", "서울", "인천", "전남", "전북", "제주", "충남", "충북"));
+        this.typeFilter = initializeFilter(Arrays.asList("당일형", "휴식형", "체험형"));
+        this.purposeFilter = initializeFilter(Arrays.asList("힐링", "전통문화 체험", "심신치유", "자기계발", "여행 일정", "사찰순례", "휴식", "호기심", "기타"));
+        this.activityFilter = initializeFilter(Arrays.asList("발우공양", "108배", "스님과의 차담", "등산", "새벽 예불", "사찰 탐방", "염주 만들기", "연등 만들기", "다도", "명상", "산책", "요가", "기타"));
+        this.etcFilter = initializeFilter(Arrays.asList("절밥이 맛있는", "TV에 나온", "연예인이 다녀간", "근처 관광지가 많은", "속세와 멀어지고 싶은", "동물 친구들과 함께", "유튜브 운영 중인", "단체 가능"));
+        this.priceFilter = initializePriceFilter(DEFAULT_MIN_PRICE, MAX_PRICE);
     }
 
-    // Separate client's unified filter request into individual filters
-    public Filters(Map<String, Object> unifiedFilter) {
+    public Filters(Map<String, Object> filter) {
 
-        this.regionFilter = (Map<String, Object>) unifiedFilter.get("region");
-        this.typeFilter = (Map<String, Object>) unifiedFilter.get("type");
-        this.purposeFilter = (Map<String, Object>) unifiedFilter.get("purpose");
-        this.activityFilter = (Map<String, Object>) unifiedFilter.get("activity");
+        this.regionFilter = (Map<String, Object>) filter.get("region");
+        this.typeFilter = (Map<String, Object>) filter.get("type");
+        this.purposeFilter = (Map<String, Object>) filter.get("purpose");
+        this.activityFilter = (Map<String, Object>) filter.get("activity");
+        this.priceFilter = (Map<String, Object>) filter.get("price");
+        priceFilter.put("maxPrice", priceFilter.get("maxPrice").equals(300000) ? Integer.MAX_VALUE : priceFilter.get("maxPrice"));
+        this.etcFilter = (Map<String, Object>) filter.get("etc");
+    }
 
-        this.priceFilter = (Map<String, Object>) unifiedFilter.get("price");
-        if(priceFilter.get("maxPrice").equals(300000)){
-            priceFilter.put("maxPrice", Integer.MAX_VALUE);
+
+    private Map<String, Object> initializeFilter(List<String> options) {
+        return options.stream().collect(Collectors.toMap(option -> option, option -> 1));
+    }
+
+    private Map<String, Object> initializePriceFilter(int minPrice, int maxPrice) {
+        Map<String, Object> priceFilter = new HashMap<>();
+        priceFilter.put("minPrice", minPrice);
+        priceFilter.put("maxPrice", maxPrice);
+        return priceFilter;
+    }
+
+    public void setFilterValue(Map<String, Object> filter, int value) {
+        filter.replaceAll((key, oldValue) -> value);
+    }
+
+    public Map<String, Object> getResetFilter() {
+        setFilterValue(regionFilter, 0);
+        setFilterValue(typeFilter, 0);
+        setFilterValue(purposeFilter, 0);
+        setFilterValue(activityFilter, 0);
+        setFilterValue(etcFilter, 0);
+
+        Map<String, Object> resetPriceFilter = initializePriceFilter(DEFAULT_MIN_PRICE, 300000);
+
+        Map<String, Object> resetFilter = new HashMap<>();
+        resetFilter.put("region", regionFilter);
+        resetFilter.put("type", typeFilter);
+        resetFilter.put("purpose", purposeFilter);
+        resetFilter.put("activity", activityFilter);
+        resetFilter.put("etc", etcFilter);
+        resetFilter.put("price", resetPriceFilter);
+
+        return resetFilter;
+    }
+
+    public List<Long> getFilteredCategory(List<CategoryEntity> categoryEntities) {
+        Integer binaryRegionFilter = convertToBinaryFilter(regionFilter);
+        Integer binaryTypeFilter = convertToBinaryFilter(typeFilter);
+        Integer binaryPurposeFilter = convertToBinaryFilter(purposeFilter);
+        Integer binaryActivityFilter = convertToBinaryFilter(activityFilter);
+        Integer binaryEtcFilter = convertToBinaryFilter(etcFilter);
+        Integer minPrice = (Integer) priceFilter.getOrDefault("minPrice", DEFAULT_MIN_PRICE);
+        Integer maxPrice = (Integer) priceFilter.getOrDefault("maxPrice", MAX_PRICE);
+
+        return categoryEntities.stream()
+                .filter(category -> matchesFilter(category, binaryRegionFilter, binaryTypeFilter, binaryPurposeFilter, binaryActivityFilter, binaryEtcFilter, minPrice, maxPrice))
+                .map(CategoryEntity::getId)
+                .collect(Collectors.toList());
+    }
+
+    private boolean matchesFilter(CategoryEntity category, int binaryRegionFilter, int binaryTypeFilter, int binaryPurposeFilter, int binaryActivityFilter, int binaryEtcFilter, int minPrice, int maxPrice) {
+        return (category.getRegion() & binaryRegionFilter) != 0 &&
+                (category.getType() & binaryTypeFilter) != 0 &&
+                (category.getPurpose() & binaryPurposeFilter) != 0 &&
+                (category.getActivity() & binaryActivityFilter) != 0 &&
+                (category.getEtc() & binaryEtcFilter) != 0 &&
+                category.getPrice() >= minPrice &&
+                category.getPrice() <= maxPrice;
+    }
+
+    public Integer convertToBinaryFilter(Map<String, Object> filterMap) {
+
+        Integer binaryValue = 0;
+        int position = 0;
+
+        for(Map.Entry<String, Object> entry : filterMap.entrySet()) {
+            if((Integer) entry.getValue() == 1) {
+                binaryValue |= (1 << position);
+            }
+            position ++;
         }
-
-        this.etcFilter = (Map<String, Object>) unifiedFilter.get("etc");
+        return binaryValue;
     }
 
-    public void setFilter(Integer value){
+    public String getFilterKey(int binaryFilter, Map<String, Object> filterMap) {
 
-        this.regionFilter = Arrays.asList("강원", "경기", "경남", "경북", "광주", "대구", "대전", "부산", "서울", "인천", "전남", "전북", "제주", "충남", "충북").stream()
-                .collect(Collectors.toMap(
-                        key -> key,
-                        key -> value
-                ));
+        String filterKey = "";
+        int position = 0;
 
-        this.typeFilter = Arrays.asList("당일형", "휴식형", "체험형").stream()
-                .collect(Collectors.toMap(
-                        key -> key,
-                        key -> value
-                ));
+        for (Map.Entry<String, Object> entry : filterMap.entrySet()) {
+            if ((binaryFilter & (1 << position)) != 0) {
+                filterKey = entry.getKey();
+                break;
+            }
+            position++;
+        }
+        return filterKey;
+    }
 
-        this.purposeFilter = Arrays.asList("힐링", "전통문화 체험", "심신치유", "자기계발", "여행 일정", "사찰순례", "휴식", "호기심", "기타").stream()
-                .collect(Collectors.toMap(
-                        key -> key,
-                        key -> value
-                ));
 
-        this.activityFilter = Arrays.asList("발우공양", "108배", "스님과의 차담", "등산", "새벽 예불", "사찰 탐방", "염주 만들기", "연등 만들기", "다도", "명상", "산책", "요가", "기타").stream()
-                .collect(Collectors.toMap(
-                        key -> key,
-                        key -> value
-                ));
-
-        this.priceFilter = new HashMap<String, Object>();
-        this.priceFilter.put("minPrice", 0);
-        this.priceFilter.put("maxPrice", Integer.MAX_VALUE);
-
-        this.etcFilter = Arrays.asList("절밥이 맛있는", "TV에 나온", "연예인이 다녀간", "근처 관광지가 많은", "속세와 멀어지고 싶은", "동물 친구들과 함께", "유튜브 운영 중인", "단체 가능").stream()
-                .collect(Collectors.toMap(
-                        key -> key,
-                        key -> value
-                ));
+    private Map<String, Object> convertToResponse(CategoryEntity category) {
+        Map<String, Object> response = new HashMap<>();
+        response.put("id", category.getId());
+        response.put("type", category.getType());
+        response.put("region", category.getRegion());
+        return response;
     }
 
     public Map<String, List<String>> getFilterKey() {
 
-        // 필터들을 담은 맵
         Map<String, Map<String, Object>> filters = new HashMap<>();
         filters.put("region", this.regionFilter);
         filters.put("type", this.typeFilter);
@@ -136,127 +147,21 @@ public class Filters {
         filters.put("activity", this.activityFilter);
         filters.put("etc", this.etcFilter);
 
-        // 키 추출 및 변환
         Map<String, List<String>> filterKeys = filters.entrySet().stream()
                 .collect(Collectors.toMap(
-                        Map.Entry::getKey, // 필터의 이름 (region, type 등)
-                        entry -> new ArrayList<>(entry.getValue().keySet()) // 해당 필터의 key 리스트
+                        Map.Entry::getKey,
+                        entry -> new ArrayList<>(entry.getValue().keySet())
                 ));
 
         return filterKeys;
     }
 
-    // convert filter into binary filter
-    public Integer convertToBinaryFilter(Map<String, Object> filterMap) {
-
-        Integer binaryValue = 0;
-        int position = 0;
-
-        // 맵의 key를 순회하며 값을 2진수로 변환
-        for(Map.Entry<String, Object> entry : filterMap.entrySet()) {
-            if((Integer) entry.getValue() == 1) {
-                binaryValue |= (1 << position); // set 1
-            }
-            position ++;
-        }
-        return binaryValue;
+    public Map<String, Object> getTypeFilter() {
+        return typeFilter;
     }
 
-    // convert region binary filter into region filter key
-    public String getRegionFilterKey(int binaryFilter) {
-
-        String regionName = "";
-        int position = 0;
-
-        // key-value enumerate
-        for (Map.Entry<String, Object> entry : this.regionFilter.entrySet()) {
-            if ((binaryFilter & (1 << position)) != 0) {
-                regionName = entry.getKey();
-                break;
-            }
-            position++;
-        }
-        return regionName;
+    public Map<String, Object> getRegionFilter() {
+        return regionFilter;
     }
 
-    // convert type binary filter into type filter key
-    public String getTypeFilterKey(int binaryFilter) {
-
-        String typeName = "";
-        int position = 0;
-
-        // key-value enumerate
-        for (Map.Entry<String, Object> entry : this.typeFilter.entrySet()) {
-            if ((binaryFilter & (1 << position)) != 0) {
-                typeName = entry.getKey();
-                break;
-            }
-            position++;
-        }
-        return typeName;
-    }
-
-    public Map<String, Object> getResetFilter() {
-
-        setFilter(0);
-
-        Map<String, Object> resetFilter = new HashMap<>();
-        resetFilter.put("region", this.regionFilter);
-        resetFilter.put("type", typeFilter);
-        resetFilter.put("purpose", purposeFilter);
-        resetFilter.put("activity", activityFilter);
-        resetFilter.put("etc", etcFilter);
-
-        Map<String, Object> resetPriceFilter = new HashMap<>();
-        resetPriceFilter.put("minPrice",0);
-        resetPriceFilter.put("maxPrice", 300000);
-
-        resetFilter.put("price", resetPriceFilter);
-
-        return resetFilter;
-    }
-
-    public Object getMinPrice() {
-        return this.priceFilter.get("minPrice");
-    }
-
-    public Object getMaxPrice() {
-        return this.priceFilter.get("maxPrice");
-    }
-
-    public List<Long> getFilteredCategory(List<CategoryEntity> categoryEntityList) {
-
-        // client's binary filter
-        Integer requestBinaryRegionFilter = convertToBinaryFilter(this.regionFilter);
-        Integer requestBinaryTypeFilter = convertToBinaryFilter(this.typeFilter);
-        Integer requestBinaryPurposeFilter = convertToBinaryFilter(this.purposeFilter);
-        Integer requestBinaryActivityFilter = convertToBinaryFilter(this.activityFilter);
-        Integer requestMinPrice = Optional.ofNullable((Integer) this.priceFilter.get("minPrice")).orElse(0);
-        Integer requestMaxPrice = Optional.ofNullable((Integer) this.priceFilter.get("maxPrice")).orElse(0);
-        Integer requestBinaryEtcFilter = convertToBinaryFilter(this.etcFilter);
-
-        // 필터링 로직
-        return categoryEntityList.stream()
-                .filter(category -> {
-
-                    // database binary filter
-                    Integer binaryRegionFilter = Optional.ofNullable(category.getRegion()).orElse(0);
-                    Integer binaryTypeFilter = Optional.ofNullable(category.getType()).orElse(0);
-                    Integer binaryPurposeFilter = Optional.ofNullable(category.getPurpose()).orElse(0);
-                    Integer binaryActivityFilter = Optional.ofNullable(category.getActivity()).orElse(0);
-                    Integer binaryEtcFilter = Optional.ofNullable(category.getEtc()).orElse(0);
-                    Integer price = Optional.ofNullable(category.getPrice()).orElse(0);
-
-                    // 필터 조건 확인
-                    return (binaryRegionFilter & requestBinaryRegionFilter) != 0 &&
-                            (binaryTypeFilter & requestBinaryTypeFilter) != 0 &&
-                            (binaryPurposeFilter & requestBinaryPurposeFilter) != 0 &&
-                            (binaryActivityFilter & requestBinaryActivityFilter) != 0 &&
-                            (binaryEtcFilter & requestBinaryEtcFilter) != 0 &&
-                            price >= requestMinPrice &&
-                            price <= requestMaxPrice;
-                })
-                .map(CategoryEntity::getId)
-                .collect(Collectors.toList());
-    }
 }

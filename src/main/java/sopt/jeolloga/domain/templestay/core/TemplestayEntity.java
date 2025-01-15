@@ -50,8 +50,7 @@ public class TemplestayEntity {
     @Column(name = "tag", length = 255)
     private String tag;
 
-    public TemplestayEntity(Long id, String templestayName, String organizedName, String phoneNumber, String introduction, String address, String youtube, String templeName, String schedule, BigDecimal latitude, BigDecimal longitude, String tag) {
-        this.id = id;
+    public TemplestayEntity(String templestayName, String organizedName, String phoneNumber, String introduction, String address, String youtube, String templeName, String schedule, BigDecimal latitude, BigDecimal longitude, String tag) {
         this.templestayName = templestayName;
         this.organizedName = organizedName;
         this.phoneNumber = phoneNumber;

@@ -1,6 +1,5 @@
 package sopt.jeolloga.domain.templestay.api.controller;
 
-import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -22,7 +21,7 @@ public class FilterController {
     }
 
     // 템플스테이 필터 반환
-    @GetMapping("public/filter")
+    @GetMapping("/public/filter")
     public ResponseEntity<FilterRes> getFilters() {
 
         FilterRes filterList = filterService.getFilters();
@@ -30,14 +29,14 @@ public class FilterController {
     }
 
     // 필터 초기화
-    @GetMapping("filter/reset")
+    @GetMapping("/filter/reset")
     public ResponseEntity<ResetFilterRes> getResetFilter() {
 
         ResetFilterRes resetFilterRes = filterService.getFilterReset();
         return ResponseEntity.ok(resetFilterRes);
     }
 
-    @GetMapping("public/filter/count")
+    @GetMapping("/public/filter/count")
     public ResponseEntity<FilterCountRes> getFilteredTemplestayNum(@RequestBody Map<String, Object> filter) {
 
         List<Long> filteredId = filterService.getFiteredTemplestayCategory(filter);
@@ -45,7 +44,7 @@ public class FilterController {
         return ResponseEntity.ok(filterCountRes);
     }
 
-    @GetMapping("filter/list")
+    @GetMapping("/filter/list")
     public ResponseEntity<PagingRes> getFilteredTemplestay(@RequestBody Map<String, Object> filter, @RequestParam int page){
 
         List<Long> filteredId = filterService.getFiteredTemplestayCategory(filter);

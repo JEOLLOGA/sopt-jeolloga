@@ -8,8 +8,7 @@ import sopt.jeolloga.domain.member.login.repository.MemberRepository;
 public class AuthService {
 
     private final JwtTokenProvider jwtTokenProvider;
-    private final MemberRepository memberRepository; // 사용자 정보 확인용 (선택 사항)
-
+    private final MemberRepository memberRepository;
     public AuthService(JwtTokenProvider jwtTokenProvider, MemberRepository memberRepository) {
         this.jwtTokenProvider = jwtTokenProvider;
         this.memberRepository = memberRepository;
