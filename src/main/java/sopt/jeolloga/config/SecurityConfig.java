@@ -8,7 +8,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import sopt.jeolloga.domain.member.login.service.CustomOAuth2UserService;
 import org.springframework.security.oauth2.client.web.HttpSessionOAuth2AuthorizationRequestRepository;
 
-
 @Configuration
 public class SecurityConfig {
 
@@ -45,3 +44,6 @@ public class SecurityConfig {
         return http.build();
     }
 }
+
+
+

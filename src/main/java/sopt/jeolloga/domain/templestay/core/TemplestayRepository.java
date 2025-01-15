@@ -23,9 +23,9 @@ public interface TemplestayRepository extends JpaRepository<TemplestayEntity, Lo
             "LEFT JOIN templestay_image i ON min_img.min_id = i.id " +
             "WHERE t.id IN :ids", nativeQuery = true)
     Page<Object[]> findTemplestayWithDetails(@Param("ids") List<Long> ids, Pageable pageable);
-//    List<Object[]> findTemplestayWithDetails(@Param("ids") List<Long> ids);
+
+    @Query("SELECT DISTINCT t.templeName FROM Templestay t")
+    List<String> findDistinctTempleNames();
 
 }
-
-
 
