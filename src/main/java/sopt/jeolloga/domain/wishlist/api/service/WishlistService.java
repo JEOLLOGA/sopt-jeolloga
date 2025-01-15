@@ -7,12 +7,14 @@ import sopt.jeolloga.domain.member.Member;
 import sopt.jeolloga.domain.member.MemberRepository;
 import sopt.jeolloga.domain.templestay.core.Templestay;
 import sopt.jeolloga.domain.templestay.core.TemplestayRepository;
+import sopt.jeolloga.domain.wishlist.api.dto.WishlistTemplestayRes;
 import sopt.jeolloga.domain.wishlist.core.Wishlist;
 import sopt.jeolloga.domain.wishlist.core.WishlistRepository;
 import sopt.jeolloga.domain.wishlist.core.exception.WishlistCoreException;
 import sopt.jeolloga.exception.ErrorCode;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Component
@@ -49,5 +51,26 @@ public class WishlistService {
                 .orElseThrow(() -> new WishlistCoreException(ErrorCode.NOT_FOUND_TEMPLESTAY));
 
         wishlistRepository.delete(wishlist);
+    }
+
+    @Transactional
+    public List<WishlistTemplestayRes> getWishlist(Long userId) {
+        Member member = memberRepository.findById(userId)
+                .orElseThrow(() -> new WishlistCoreException(ErrorCode.NOT_FOUND_TARGET));
+
+        List<Wishlist> wishlist = wishlistRepository.findAllByMember(member);
+
+        return wishlist.stream()
+                .map(w-> {
+                    Templestay templestay=w.getTemplestay();
+                    String tag = templestay.getTag() != null && !templestay.getTag().isEmpty()
+                            ? templestay.getTag().split(",")[0] : null;
+                    return new WishlistTemplestayRes(
+                            templestay.getId(),
+                            templestay.getTempleName(),
+                            templestay.getOrganizedName(),
+                            tag
+                    );
+                }) .collect(Collectors.toList());
     }
 }
