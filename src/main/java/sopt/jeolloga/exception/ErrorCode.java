@@ -13,7 +13,7 @@ public enum ErrorCode {
     MISSING_TITLE(40002, HttpStatus.BAD_REQUEST, "블로그 제목이 누락되었습니다."),
 
     // 404번대: 리소스 찾기 오류
-    NOT_FOUND_TEMPLESTAY(40400, HttpStatus.NOT_FOUND, "대상을 찾을 수 없습니다."),
+    NOT_FOUND_TARGET(40400, HttpStatus.NOT_FOUND, "대상을 찾을 수 없습니다."),
     INVALID_API(40401, HttpStatus.NOT_FOUND, "잘못된 API입니다."),
     FILTERED_TEMPLESTAY_NOT_FOUND(40403, HttpStatus.NOT_FOUND, "필터가 적용된 템플스테이를 찾을 수 없습니다."),
     REVIEW_NOT_FOUND(40404, HttpStatus.NOT_FOUND, "리뷰를 찾을 수 없습니다."),
