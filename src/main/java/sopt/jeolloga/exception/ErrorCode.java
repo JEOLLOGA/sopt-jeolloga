@@ -17,6 +17,7 @@ public enum ErrorCode {
     INVALID_API(40401, HttpStatus.NOT_FOUND, "잘못된 API입니다."),
     FILTERED_TEMPLESTAY_NOT_FOUND(40403, HttpStatus.NOT_FOUND, "필터가 적용된 템플스테이를 찾을 수 없습니다."),
     REVIEW_NOT_FOUND(40404, HttpStatus.NOT_FOUND, "리뷰를 찾을 수 없습니다."),
+    NOT_FOUND_TEMPLESTAY(40405, HttpStatus.NOT_FOUND, "존재하지 않는 템플스테이 ID입니다."),
 
     // 405번대: HTTP 메서드 오류
     METHOD_NOT_ALLOWED(40500, HttpStatus.METHOD_NOT_ALLOWED, "잘못된 HTTP Method 요청입니다."),
