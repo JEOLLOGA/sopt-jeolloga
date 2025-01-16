@@ -9,10 +9,13 @@ public enum ErrorCode {
     // 400번대: 클라이언트 요청 오류
     BAD_REQUEST(40000, HttpStatus.BAD_REQUEST, "잘못된 요청입니다."),
     JSON_FIELD_ERROR(40005, HttpStatus.BAD_REQUEST, "JSON 오류 혹은 Request Body 필드 오류입니다."),
-    MISSING_TEMPLE_NAME(40001, HttpStatus.BAD_REQUEST, "템플스테이 이름이 누락되었습니다."),
+    MISSING_TARGET_NAME(40001, HttpStatus.BAD_REQUEST, "템플스테이 이름이 누락되었습니다."),
     MISSING_TITLE(40002, HttpStatus.BAD_REQUEST, "블로그 제목이 누락되었습니다."),
     INVALID_DATE_FORMAT(40006, HttpStatus.BAD_REQUEST, "날짜 형식이 잘못되었습니다."),
     BAD_REQUEST_PARAMETER(40010, HttpStatus.BAD_REQUEST, "필수 요청 파라미터가 누락되었습니다."),
+    MISSING_USER_ID(40001, HttpStatus.BAD_REQUEST, "userId가 없습니다."),
+    INVALID_SEARCH_CONTENT(40002, HttpStatus.BAD_REQUEST, "검색어가 비어 있습니다."),
+    NOT_FOUND_USER(40402, HttpStatus.NOT_FOUND, "사용자를 찾을 수 없습니다."),
 
     // 404번대: 리소스 찾기 오류
     NOT_FOUND_TARGET(40400, HttpStatus.NOT_FOUND, "대상을 찾을 수 없습니다."),

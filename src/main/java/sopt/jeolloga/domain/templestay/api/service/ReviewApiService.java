@@ -76,7 +76,7 @@ public class ReviewApiService {
 
         private void saveReviewToRepository(String templeName, TemplestayVO blog) {
         if (templeName == null || templeName.isEmpty()) {
-            throw new TemplestayCoreException(ErrorCode.MISSING_TEMPLE_NAME);
+            throw new TemplestayCoreException(ErrorCode.MISSING_TARGET_NAME);
         }
 
         String truncatedTitle = truncateToLength(blog.getTitle(), 255);
