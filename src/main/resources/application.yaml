@@ -34,13 +34,9 @@ spring:
             user-info-uri: https://kapi.kakao.com/v2/user/me
             user-name-attribute: id
 
-#logging:
-#  level:
-#    org.springframework.security: DEBUG
 
 jwt:
-  access-token-secret: thisIsJeollogaAccessTokenSecretKeyHowAboutThat
-  refresh-token-secret: thisIsJeollogaRefreshTokenSecretKeyHowAboutThat
+  secret: MinjeongDajinSeonghuiTaewookAyoungHoyoungGahyeonGayoonSoyoungSeunghyunYoungkeongYoumin
 
 naver:
   api:

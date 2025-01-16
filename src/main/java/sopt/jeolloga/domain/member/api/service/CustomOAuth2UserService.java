@@ -5,8 +5,8 @@ import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import sopt.jeolloga.domain.member.api.utils.JwtTokenProvider;
-import sopt.jeolloga.domain.member.api.repository.Member;
-import sopt.jeolloga.domain.member.api.repository.MemberRepository;
+import sopt.jeolloga.domain.member.core.Member;
+import sopt.jeolloga.domain.member.core.MemberRepository;
 
 import java.util.Map;
 

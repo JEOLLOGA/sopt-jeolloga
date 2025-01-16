@@ -1,4 +1,4 @@
-package sopt.jeolloga.domain.member.api.repository;
+package sopt.jeolloga.domain.member.core;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;

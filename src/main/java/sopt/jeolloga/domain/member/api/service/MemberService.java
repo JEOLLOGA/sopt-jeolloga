@@ -4,8 +4,8 @@ import org.springframework.stereotype.Service;
 import sopt.jeolloga.domain.member.api.dto.MemberNameRes;
 import sopt.jeolloga.domain.member.api.dto.MemberReq;
 import sopt.jeolloga.domain.member.api.dto.MemberRes;
-import sopt.jeolloga.domain.member.api.repository.Member;
-import sopt.jeolloga.domain.member.api.repository.MemberRepository;
+import sopt.jeolloga.domain.member.core.Member;
+import sopt.jeolloga.domain.member.core.MemberRepository;
 
 import java.util.List;
 

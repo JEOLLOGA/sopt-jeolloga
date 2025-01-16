@@ -1,7 +1,7 @@
 package sopt.jeolloga.common;
 
 import org.springframework.stereotype.Component;
-import sopt.jeolloga.domain.templestay.core.CategoryEntity;
+import sopt.jeolloga.domain.templestay.core.Category;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -75,7 +75,7 @@ public class Filters {
         return resetFilter;
     }
 
-    public List<Long> getFilteredCategory(List<CategoryEntity> categoryEntities) {
+    public List<Long> getFilteredCategory(List<Category> categoryEntities) {
         Integer binaryRegionFilter = convertToBinaryFilter(regionFilter);
         Integer binaryTypeFilter = convertToBinaryFilter(typeFilter);
         Integer binaryPurposeFilter = convertToBinaryFilter(purposeFilter);
@@ -86,11 +86,11 @@ public class Filters {
 
         return categoryEntities.stream()
                 .filter(category -> matchesFilter(category, binaryRegionFilter, binaryTypeFilter, binaryPurposeFilter, binaryActivityFilter, binaryEtcFilter, minPrice, maxPrice))
-                .map(CategoryEntity::getId)
+                .map(Category::getId)
                 .collect(Collectors.toList());
     }
 
-    private boolean matchesFilter(CategoryEntity category, int binaryRegionFilter, int binaryTypeFilter, int binaryPurposeFilter, int binaryActivityFilter, int binaryEtcFilter, int minPrice, int maxPrice) {
+    private boolean matchesFilter(Category category, int binaryRegionFilter, int binaryTypeFilter, int binaryPurposeFilter, int binaryActivityFilter, int binaryEtcFilter, int minPrice, int maxPrice) {
         return (category.getRegion() & binaryRegionFilter) != 0 &&
                 (category.getType() & binaryTypeFilter) != 0 &&
                 (category.getPurpose() & binaryPurposeFilter) != 0 &&
@@ -130,7 +130,7 @@ public class Filters {
     }
 
 
-    private Map<String, Object> convertToResponse(CategoryEntity category) {
+    private Map<String, Object> convertToResponse(Category category) {
         Map<String, Object> response = new HashMap<>();
         response.put("id", category.getId());
         response.put("type", category.getType());

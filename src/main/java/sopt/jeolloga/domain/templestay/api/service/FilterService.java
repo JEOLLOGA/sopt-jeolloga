@@ -37,7 +37,7 @@ public class FilterService {
     public List<Long> getFiteredTemplestayCategory(Map<String, Object> filter) {
 
         this.filters = new Filters(filter);
-        List<CategoryEntity> categoryEntityList = categoryRepository.findAll();
+        List<Category> categoryEntityList = categoryRepository.findAll();
         List<Long> filteredId = filters.getFilteredCategory(categoryEntityList);
 
         return filteredId;
