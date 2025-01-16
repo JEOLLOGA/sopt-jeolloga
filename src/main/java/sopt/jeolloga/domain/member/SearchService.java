@@ -1,0 +1,38 @@
+package sopt.jeolloga.domain.member;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+import sopt.jeolloga.domain.templestay.core.exception.TemplestayCoreException;
+import sopt.jeolloga.exception.ErrorCode;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+@RequiredArgsConstructor
+@Component
+public class SearchService {
+    private final SearchRepository searchRepository;
+    private final MemberRepository memberRepository;
+
+    @Transactional
+    public SearchListRes getSearchHistory(Long userId) {
+        if (userId == null) {
+            throw new TemplestayCoreException(ErrorCode.MISSING_USER_ID);
+        }
+
+        Member member = memberRepository.findById(userId)
+                .orElseThrow(() -> new TemplestayCoreException(ErrorCode.NOT_FOUND_USER));
+
+        List<Object[]> searchRecords = searchRepository.findTop10ByMemberIdOrderByIdDesc(userId);
+
+        List<SearchRes> searchList = searchRecords.stream()
+                .map(record -> new SearchRes(
+                        ((Number) record[0]).longValue(),
+                        (String) record[1]
+                ))
+                .collect(Collectors.toList());
+
+        return new SearchListRes(searchList);
+    }
+}
