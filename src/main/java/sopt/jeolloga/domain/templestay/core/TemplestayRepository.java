@@ -10,4 +10,6 @@ import java.util.List;
 public interface TemplestayRepository extends JpaRepository<Templestay, Long> {
     @Query("SELECT DISTINCT t.templeName FROM Templestay t")
     List<String> findDistinctTempleNames();
+
+    List<Templestay> findAllById(Iterable<Long> id);
 }
