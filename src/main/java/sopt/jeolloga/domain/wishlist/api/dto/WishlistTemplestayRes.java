@@ -6,6 +6,8 @@ public record WishlistTemplestayRes(
         Long id,
         String templeName,
         String templestayName,
-        String tag
+        String tag,
+        String region,
+        String type
 ) {
 }

@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import sopt.jeolloga.common.ResponseDto;
+import sopt.jeolloga.domain.wishlist.api.dto.WishlistListRes;
 import sopt.jeolloga.domain.wishlist.api.dto.WishlistTemplestayRes;
 import sopt.jeolloga.domain.wishlist.api.service.WishlistService;
 
@@ -31,9 +32,9 @@ public class WishlistController {
     }
 
     @GetMapping("/user/wishlist")
-    public ResponseEntity<ResponseDto<List<WishlistTemplestayRes>>> getWishlist(
+    public ResponseEntity<WishlistListRes> getWishlist(
             @RequestHeader("userId") Long userId) {
         List<WishlistTemplestayRes> wishlist = wishlistService.getWishlist(userId);
-        return ResponseEntity.ok(ResponseDto.success(wishlist));
+        return ResponseEntity.ok(WishlistListRes.of(wishlist));
     }
 }

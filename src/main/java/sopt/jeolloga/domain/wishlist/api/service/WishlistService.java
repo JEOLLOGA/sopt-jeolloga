@@ -3,8 +3,11 @@ package sopt.jeolloga.domain.wishlist.api.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import sopt.jeolloga.common.CategoryUtils;
 import sopt.jeolloga.domain.member.Member;
 import sopt.jeolloga.domain.member.MemberRepository;
+import sopt.jeolloga.domain.templestay.core.Category;
+import sopt.jeolloga.domain.templestay.core.CategoryRepository;
 import sopt.jeolloga.domain.templestay.core.Templestay;
 import sopt.jeolloga.domain.templestay.core.TemplestayRepository;
 import sopt.jeolloga.domain.wishlist.api.dto.WishlistTemplestayRes;
@@ -22,6 +25,7 @@ public class WishlistService {
     private final WishlistRepository wishlistRepository;
     private final MemberRepository memberRepository;
     private final TemplestayRepository templestayRepository;
+    private final CategoryRepository categoryRepository;
 
     @Transactional
     public void addWishlist(Long userId, Long templestayId) {
@@ -63,13 +67,22 @@ public class WishlistService {
         return wishlist.stream()
                 .map(w-> {
                     Templestay templestay=w.getTemplestay();
+                    Category category = categoryRepository.findByTemplestayId(templestay.getId())
+                            .orElseThrow(() -> new WishlistCoreException(ErrorCode.NOT_FOUND_TARGET));
+
                     String tag = templestay.getTag() != null && !templestay.getTag().isEmpty()
                             ? templestay.getTag().split(",")[0] : null;
+
+                    String region = CategoryUtils.getRegionName(category.getRegion());
+                    String type = CategoryUtils.getTypeName(category.getType());
+
                     return new WishlistTemplestayRes(
                             templestay.getId(),
                             templestay.getTempleName(),
                             templestay.getOrganizedName(),
-                            tag
+                            tag,
+                            region,
+                            type
                     );
                 }) .collect(Collectors.toList());
     }
