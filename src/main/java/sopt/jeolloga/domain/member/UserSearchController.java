@@ -21,9 +21,9 @@ public class UserSearchController {
     @DeleteMapping("/user/search/record/delete")
     public ResponseEntity<ResponseDto<Void>> deleteSearchRecord(
             @RequestHeader(value = "userId") Long userId,
-            @RequestBody Long searchId
+            @RequestBody DeleteSearchReq req
     ) {
-        searchService.deleteSearchRecord(userId, searchId);
+        searchService.deleteSearchRecord(userId, req.searchId());
         return ResponseEntity.ok(ResponseDto.success(null));
     }
 
