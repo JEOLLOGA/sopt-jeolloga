@@ -1,16 +1,25 @@
 package sopt.jeolloga.common;
 
+import sopt.jeolloga.domain.templestay.core.exception.TemplestayCoreException;
+import sopt.jeolloga.exception.ErrorCode;
+
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
 public class DataUtils {
-    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd");
 
-    public static String formatDate(LocalDate date) {
-        return date.format(formatter);
+    private static final DateTimeFormatter INPUT_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd");
+    private static final DateTimeFormatter OUTPUT_FORMATTER = DateTimeFormatter.ofPattern("yyyy.MM.dd");
+
+    private DataUtils() {
     }
 
-    public static LocalDate parseDate(String dateStr) {
-        return LocalDate.parse(dateStr, formatter);
+    public static String formatReviewDate(String reviewDate) {
+        try {
+            LocalDate date = LocalDate.parse(reviewDate, INPUT_FORMATTER);
+            return date.format(OUTPUT_FORMATTER);
+        } catch (Exception e) {
+            throw new TemplestayCoreException(ErrorCode.INVALID_DATE_FORMAT);
+        }
     }
 }

@@ -1,12 +1,12 @@
 package sopt.jeolloga.domain.templestay.api.dto;
 
-public record ReviewDto(
-        String templeName,
+public record ReviewRes(
+        Long reviewId,
         String reviewTitle,
-        String reviewDescription,
+        String reviewLink,
         String reviewName,
+        String reviewDescription,
         String reviewDate,
-        String reviewRink,
         String reviewImgUrl
 ) {
 }
