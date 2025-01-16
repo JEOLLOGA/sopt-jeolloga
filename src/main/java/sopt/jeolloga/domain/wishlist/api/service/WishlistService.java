@@ -66,7 +66,7 @@ public class WishlistService {
         Member member = memberRepository.findById(userId)
                 .orElseThrow(() -> new WishlistCoreException(ErrorCode.NOT_FOUND_TARGET));
 
-        Pageable pageable = PageRequest.of(page, pageSize);
+        Pageable pageable = PageRequest.of(page-1, pageSize);
 
         Page<Wishlist> wishlistPage = wishlistRepository.findAllByMember(member, pageable);
 
