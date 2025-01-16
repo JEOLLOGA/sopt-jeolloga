@@ -12,6 +12,6 @@ public interface TemplestayRepository extends JpaRepository<Templestay, Long> {
     @Query("SELECT DISTINCT t.templeName FROM Templestay t")
     List<String> findDistinctTempleNames();
 
-    @Query(value = "SELECT id, temple_name FROM templestay WHERE MATCH(temple_name) AGAINST (:query IN BOOLEAN MODE)", nativeQuery = true)
+    @Query("SELECT t.id, t.templeName, t.organizedName FROM Templestay t WHERE t.templeName LIKE %:query%")
     List<Object[]> searchByTempleName(@Param("query") String query);
 }

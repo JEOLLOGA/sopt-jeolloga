@@ -2,6 +2,12 @@ package sopt.jeolloga.domain.templestay.api.dto;
 
 public record TemplestaySearchRes(
         Long id,
-        String templeName
+        String templeName,
+        String templstayName,
+        String tag,
+        String region,
+        String type,
+        String imgUrl,
+        boolean liked
 ) {
 }
