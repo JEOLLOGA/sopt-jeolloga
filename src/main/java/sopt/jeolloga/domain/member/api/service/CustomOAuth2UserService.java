@@ -4,7 +4,7 @@ import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserServ
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
-import sopt.jeolloga.config.JwtTokenProvider;
+import sopt.jeolloga.domain.member.api.utils.JwtTokenProvider;
 import sopt.jeolloga.domain.member.api.repository.Member;
 import sopt.jeolloga.domain.member.api.repository.MemberRepository;
 
@@ -33,12 +33,12 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         Map<String, Object> properties = (Map<String, Object>) attributes.get("properties");
 
         // Kakao 사용자 정보 추출
-        Long kakaoUserId = (Long) attributes.get("id"); // 카카오 ID
+        String kakaoUserId = (String) attributes.get("id"); // 카카오 ID
         String email = (String) kakaoAccount.get("email"); // email
         String nickname = (String) properties.get("nickname"); // nickname
 
         // 사용자 정보를 데이터베이스에 저장하거나 추가 처리
-        Member member = findOrCreateUser(kakaoUserId, email, nickname);
+        Member member = findOrCreateUser(Long.parseLong(kakaoUserId), email, nickname);
 
         // JWT 토큰 생성
         String accessToken = jwtTokenProvider.createAccessToken(kakaoUserId);

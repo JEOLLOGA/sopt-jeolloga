@@ -1,16 +1,14 @@
 package sopt.jeolloga.domain.member.api.controller;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import sopt.jeolloga.domain.member.api.dto.MemberNameRes;
+import sopt.jeolloga.domain.member.api.dto.MemberReq;
+import sopt.jeolloga.domain.member.api.dto.MemberRes;
 import sopt.jeolloga.domain.member.api.repository.Member;
 import sopt.jeolloga.domain.member.api.service.MemberService;
-import java.util.List;
 
 @RestController
-@RequestMapping("/members")
 public class MemberController {
 
     private final MemberService memberService;
@@ -19,16 +17,26 @@ public class MemberController {
         this.memberService = memberService;
     }
 
-    @GetMapping
-    public ResponseEntity<List<Member>> getAllmembers() {
-        List<Member> members = memberService.getAllMembers();
-        return ResponseEntity.ok(members);
+    @PostMapping("/user/register")
+    public ResponseEntity<String> saveInfo(@RequestHeader Long id, @RequestBody MemberReq memberReq) {
+
+        MemberReq memberNameReq = new MemberReq(id, memberReq.ageRange(), memberReq.gender(), memberReq.religion(), memberReq.hasExperience());
+        memberService.saveInfo(memberNameReq);
+
+        return ResponseEntity.ok("Member information update sucess");
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<Member> getMemeberById(@PathVariable Long id) {
-        Member member = memberService.getMember(id);
-        return ResponseEntity.ok(member);
+    @GetMapping("/user/register/success")
+    public ResponseEntity<MemberNameRes> getUserName(@RequestHeader Long id) {
+
+        MemberNameRes memberNameRes = memberService.getMemberName(id);
+        return ResponseEntity.ok(memberNameRes);
+    }
+
+    @GetMapping("/user/mypage")
+    public ResponseEntity<MemberRes> getMemeberById(@RequestHeader Long id) {
+        MemberRes memberRes = memberService.getMember(id);
+        return ResponseEntity.ok(memberRes);
     }
 
 }

@@ -1,7 +1,7 @@
 package sopt.jeolloga.domain.member.api.service;
 
 import org.springframework.stereotype.Service;
-import sopt.jeolloga.config.JwtTokenProvider;
+import sopt.jeolloga.domain.member.api.utils.JwtTokenProvider;
 import sopt.jeolloga.domain.member.api.repository.MemberRepository;
 
 @Service
@@ -15,11 +15,11 @@ public class AuthService {
         this.memberRepository = memberRepository;
     }
 
-    public String createAccessToken(Long kakaoUserID){
+    public String createAccessToken(String kakaoUserID){
         return jwtTokenProvider.createAccessToken(kakaoUserID);
     }
 
-    public String createRefreshToken(Long kakaoUserID){
+    public String createRefreshToken(String kakaoUserID){
         return jwtTokenProvider.createRefreshToken(kakaoUserID);
     }
 
@@ -32,16 +32,16 @@ public class AuthService {
     public String refreshAccessToken(String refreshToken) {
 
         // Refresh Token 검증
-        if (!jwtTokenProvider.validateRefreshToken(refreshToken)) {
+        if (!jwtTokenProvider.validateToken(refreshToken)) {
             throw new IllegalArgumentException("Invalid or expired Refresh Token"); // refresh Token 만료 -> 재로그인 필요
         }
 
         // 사용자 kakao ID 추출
-        Long kakaoUserId = jwtTokenProvider.getUserIdFromToken(refreshToken, false);
+        String kakaoUserId = jwtTokenProvider.getMemberIdFromToken(refreshToken);
         System.out.println("kakaoUserID : " + kakaoUserId);
 
         // 사용자 유효성 확인
-        memberRepository.findByKakaoUserId(kakaoUserId)
+        memberRepository.findByKakaoUserId(Long.parseLong(kakaoUserId))
                 .orElseThrow(() -> new IllegalArgumentException("Member not found with kakaoUserId: " + kakaoUserId));
 
 

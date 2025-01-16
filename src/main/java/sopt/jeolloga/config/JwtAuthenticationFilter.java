@@ -1,15 +1,15 @@
 package sopt.jeolloga.config;
 
-import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
-import sopt.jeolloga.domain.member.core.exception.AccessTokenNotFound;
+import sopt.jeolloga.domain.member.api.utils.JwtTokenProvider;
+import sopt.jeolloga.domain.member.core.exception.CustomAuthenticationCoreException;
 import sopt.jeolloga.exception.ErrorCode;
 
 import java.io.IOException;
@@ -19,7 +19,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtTokenProvider jwtTokenProvider;
 
-
     public JwtAuthenticationFilter(JwtTokenProvider jwtTokenProvider) {
         this.jwtTokenProvider = jwtTokenProvider;
     }
@@ -27,95 +26,29 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getRequestURI();
-        return path.startsWith("/public/") || path.startsWith("/auth/") || path.startsWith("/test/");
+        return path.startsWith("/public/") || path.startsWith("/auth/") || path.startsWith("/login/");
     }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws ServletException, IOException {
 
-        String authHeader = request.getHeader("Authorization");
+        // Authorization 헤더에서 JWT 토큰 추출
+        String accessToken = jwtTokenProvider.resolveToken(request);
 
-        // accessToken 존재하지 않는 경우
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            throw new AccessTokenNotFound(ErrorCode.MISSING_ACCESS_TOKEN);
+        // token 존재
+        if(accessToken != null) {
+
+            if(jwtTokenProvider.validateToken(accessToken)) {
+                // 유효한 토큰 -> SecurityContext에 인증 정보 저장
+                Authentication authentication = jwtTokenProvider.getAuthentication(accessToken);
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+            } else {
+                // 유효하지 않은 토큰 -> 401 응답 반환
+                throw new CustomAuthenticationCoreException(ErrorCode.UNAUTHORIZED);
+            }
         }
 
-
-        String accessToken = authHeader.substring(7);
-
-        if (jwtTokenProvider.validateAccessToken(accessToken)) {
-            // accessToken 유효한 경우
-            setAuthentication(accessToken);
-            chain.doFilter(request, response);
-        } else {
-            // accessToken 유효하지 않은 경우
-            sendUnauthorized(response, "Access Token is invalid or expired");
-        }
+        // 토큰이 없으면 SecurityContext에 인증 정보를 설정하지 않고 다음 필터/비즈니스 로직으로 전달
+        chain.doFilter(request, response);
     }
-
-    private void setAuthentication(String token) {
-        Claims claims = jwtTokenProvider.getClaimsFromToken(token);
-        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                claims.getSubject(), null, null);
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-    }
-
-    private void sendUnauthorized(HttpServletResponse response, String message) throws IOException {
-        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        response.setContentType("application/json");
-        response.getWriter().write("{\"error\": \"Unauthorized\", \"message\": \"" + message + "\"}");
-    }
-//
-//    private void handleUserRequest(String authHeader, HttpServletResponse response, FilterChain chain, HttpServletRequest request) throws IOException, ServletException {
-//
-//        // 토큰 전달 여부 판정
-//        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-//            sendUnauthorized(response, "Access Token missing or invalid"); // Unauthorized
-//            return;
-//        }
-//
-//        // jwt 추출
-//        String accessToken = authHeader.substring(7);
-//
-//        if(jwtTokenProvider.validateRefreshToken(accessToken)) {
-//            // accessToken이 유효함
-//            setAuthentication(accessToken);
-//            chain.doFilter(request, response);
-//        } else {
-//
-//
-//        }
-//
-//    }
-//
-//
-//
-//        // jwt에서 토큰 추출
-//        String token = authHeader.substring(7);
-//
-//        // 토큰 검증 및 사용자 정보 설정
-//        if(jwtTokenProvider.validateAccessToken(token)){
-//
-//            Claims claims = jwtTokenProvider.getClaimsFromToken(token);
-//
-//            // Spring Security 인증 객체 생성
-//            // 커스텀으로 설정할 수도 있음
-//            UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-//                    claims.getSubject(), // Principal: 사용자 ID
-//                    null, // Credentials: 보통 null로 설정
-//                    null // Authorities: 권한 정보가 없으면 null
-//            );
-//            // SecurityContext에 인증 정보 설정
-//            SecurityContextHolder.getContext().setAuthentication(authentication);
-//
-//        } else {
-//            // 401 Unauthorized
-//            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED); // 401 Unauthorized
-//            response.setContentType("application/json");
-//            response.getWriter().write("{\"error\": \"Unauthorized\", \"message\": \"Invalid or expired token\"}");
-//            return;
-//        }
-//
-//        chain.doFilter(request, response);
-//    }
 }

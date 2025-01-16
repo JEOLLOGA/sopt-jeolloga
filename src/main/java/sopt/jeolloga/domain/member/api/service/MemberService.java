@@ -1,6 +1,9 @@
 package sopt.jeolloga.domain.member.api.service;
 
 import org.springframework.stereotype.Service;
+import sopt.jeolloga.domain.member.api.dto.MemberNameRes;
+import sopt.jeolloga.domain.member.api.dto.MemberReq;
+import sopt.jeolloga.domain.member.api.dto.MemberRes;
 import sopt.jeolloga.domain.member.api.repository.Member;
 import sopt.jeolloga.domain.member.api.repository.MemberRepository;
 
@@ -15,15 +18,39 @@ public class MemberService {
         this.memberRepository = memberRepository;
     }
 
-    // 모든 유저 조회
-    public List<Member> getAllMembers() {
-        return memberRepository.findAll();
+    public void saveInfo(MemberReq memberReq){
+
+        Member member = memberRepository.findById(memberReq.id())
+                .orElseThrow(() -> new IllegalArgumentException("Member not found for id: " + memberReq.id()));
+
+        // 요청 데이터를 사용하여 엔티티의 값 업데이트
+        member.setNickname(member.getNickname());
+        member.setEmail(member.getEmail());
+        member.setAgeRange(memberReq.ageRange());
+        member.setGender(memberReq.gender());
+        member.setReligion(memberReq.religion());
+        member.setHasExperience(memberReq.hasExperience());
+
+        // 엔티티 저장
+        memberRepository.save(member);
+    }
+
+    public MemberRes getMember(Long id) {
+
+        Member member = memberRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Member not found for id: " + id));
+        MemberRes memberRes = new MemberRes(member.getId(), member.getNickname(), member.getEmail(), member.getAgeRange(), member.getGender() , member.getReligion(), member.getHasExperience());
+        return memberRes;
     }
 
     // 특정 유저 조회
-    public Member getMember(Long id) {
-        return memberRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("User with ID" + id + " not found"));
+    public MemberNameRes getMemberName(Long id) {
+
+        Member member = memberRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Nickname not found for id: " + id));
+
+        MemberNameRes memberNameRes = new MemberNameRes(member.getNickname());
+        return memberNameRes;
     }
 
 }

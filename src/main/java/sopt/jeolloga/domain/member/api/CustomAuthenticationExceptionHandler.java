@@ -1,36 +1,26 @@
 package sopt.jeolloga.domain.member.api;
 
-import org.apache.coyote.Response;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import sopt.jeolloga.common.ResponseDto;
-import sopt.jeolloga.domain.member.MemberBaseException;
-import sopt.jeolloga.domain.member.core.exception.AccessTokenNotFoundException;
+import sopt.jeolloga.domain.member.CustomAuthenticationBaseException;
 import sopt.jeolloga.domain.member.core.exception.InvalidAccessTokenException;
 import sopt.jeolloga.exception.ErrorCode;
 
 @RestControllerAdvice
-public class MemberGlobalExceptionHandler {
+public class CustomAuthenticationExceptionHandler {
 
-    @ExceptionHandler(MemberBaseException.class)
-    public ResponseEntity<ResponseDto<Void>>handlerMemberBaseException(MemberBaseException e){
+    @ExceptionHandler(CustomAuthenticationBaseException.class)
+    public ResponseEntity<ResponseDto<Void>>handlerMemberBaseException(CustomAuthenticationBaseException e){
         ErrorCode errorCode = e.getErrorCode();
         ResponseDto<Void> response = new ResponseDto<>(null, errorCode.getMsg());
         return ResponseEntity.status(errorCode.getHttpStatus()).body(response);
     }
-
-    @ExceptionHandler(AccessTokenNotFoundException.class)
-    public ResponseEntity<ResponseDto<Void>> handlerAccesssTokenNotFound(AccessTokenNotFoundException e){
-        ErrorCode errorCode = e.getErrorCode();
-        ResponseDto<Void> response = new ResponseDto<>(null, errorCode.getMsg());
-        return ResponseEntity.status(errorCode.getHttpStatus()).body(response);
-    }
-
 
     @ExceptionHandler(InvalidAccessTokenException.class)
-    public ResponseEntity<ResponseDto<Void>> handlerInvalidAccessTokenException(InvalidAccessTokenException e){
-        ErrorCode errorCode = ErrorCode.UNAUTHORIZED;
+    public ResponseEntity<ResponseDto<Void>> handlerAccesssTokenNotFound(InvalidAccessTokenException e){
+        ErrorCode errorCode = e.getErrorCode();
         ResponseDto<Void> response = new ResponseDto<>(null, errorCode.getMsg());
         return ResponseEntity.status(errorCode.getHttpStatus()).body(response);
     }
