@@ -2,9 +2,8 @@ package sopt.jeolloga.domain.member;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import sopt.jeolloga.common.ResponseDto;
 
 @RequiredArgsConstructor
 @RestController
@@ -15,8 +14,16 @@ public class UserSearchController {
     public ResponseEntity<SearchListRes> getSearchHistory(
             @RequestHeader(value = "userId") Long userId
     ) {
-        // 인스턴스를 통해 메서드 호출
         SearchListRes searchHistory = searchService.getSearchHistory(userId);
         return ResponseEntity.ok(searchHistory);
+    }
+
+    @DeleteMapping("/user/search/record/delete")
+    public ResponseEntity<ResponseDto<Void>> deleteSearchRecord(
+            @RequestHeader(value = "userId") Long userId,
+            @RequestBody Long searchId
+    ) {
+        searchService.deleteSearchRecord(userId, searchId);
+        return ResponseEntity.ok(ResponseDto.success(null));
     }
 }

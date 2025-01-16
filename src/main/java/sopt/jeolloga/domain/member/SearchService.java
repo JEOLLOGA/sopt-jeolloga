@@ -35,4 +35,24 @@ public class SearchService {
 
         return new SearchListRes(searchList);
     }
+
+    @Transactional
+    public void deleteSearchRecord(Long userId, Long searchId) {
+        if (userId == null) {
+            throw new TemplestayCoreException(ErrorCode.MISSING_USER_ID);
+        }
+
+        Member member = memberRepository.findById(userId)
+                .orElseThrow(() -> new TemplestayCoreException(ErrorCode.NOT_FOUND_TARGET));
+
+        Search search = searchRepository.findById(searchId)
+                .orElseThrow(() -> new TemplestayCoreException(ErrorCode.NOT_FOUND_TARGET));
+
+
+        if (!search.getMember().getId().equals(userId)) {
+            throw new TemplestayCoreException(ErrorCode.NOT_FOUND_USER);
+        }
+
+        searchRepository.delete(search);
+    }
 }
