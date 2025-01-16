@@ -55,4 +55,15 @@ public class SearchService {
 
         searchRepository.delete(search);
     }
+
+    @Transactional
+    public void deleteAllSearchRecords(Long userId) {
+        if (userId == null) {
+            throw new TemplestayCoreException(ErrorCode.NOT_FOUND_TARGET);
+        }
+
+        Member member = memberRepository.findById(userId)
+                .orElseThrow(() -> new TemplestayCoreException(ErrorCode.NOT_FOUND_USER));
+        searchRepository.deleteAllByMemberId(userId);
+    }
 }
