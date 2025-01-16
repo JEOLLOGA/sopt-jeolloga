@@ -1,19 +1,21 @@
 package sopt.jeolloga.domain.wishlist.api.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import sopt.jeolloga.common.CategoryUtils;
 import sopt.jeolloga.domain.member.Member;
 import sopt.jeolloga.domain.member.MemberRepository;
-import sopt.jeolloga.domain.templestay.core.Category;
-import sopt.jeolloga.domain.templestay.core.CategoryRepository;
-import sopt.jeolloga.domain.templestay.core.Templestay;
-import sopt.jeolloga.domain.templestay.core.TemplestayRepository;
+import sopt.jeolloga.domain.templestay.core.*;
+import sopt.jeolloga.domain.wishlist.api.dto.PageWishlistRes;
 import sopt.jeolloga.domain.wishlist.api.dto.WishlistTemplestayRes;
 import sopt.jeolloga.domain.wishlist.core.Wishlist;
 import sopt.jeolloga.domain.wishlist.core.WishlistRepository;
 import sopt.jeolloga.domain.wishlist.core.exception.WishlistCoreException;
+import sopt.jeolloga.domain.wishlist.core.exception.WishlistNotFoundException;
 import sopt.jeolloga.exception.ErrorCode;
 
 import java.util.List;
@@ -26,6 +28,7 @@ public class WishlistService {
     private final MemberRepository memberRepository;
     private final TemplestayRepository templestayRepository;
     private final CategoryRepository categoryRepository;
+    private final UrlRepository urlRepository;
 
     @Transactional
     public void addWishlist(Long userId, Long templestayId) {
@@ -58,15 +61,19 @@ public class WishlistService {
     }
 
     @Transactional
-    public List<WishlistTemplestayRes> getWishlist(Long userId) {
+    public PageWishlistRes<WishlistTemplestayRes> getWishlist(Long userId, int page, int pageSize) {
+
         Member member = memberRepository.findById(userId)
                 .orElseThrow(() -> new WishlistCoreException(ErrorCode.NOT_FOUND_TARGET));
 
-        List<Wishlist> wishlist = wishlistRepository.findAllByMember(member);
+        Pageable pageable = PageRequest.of(page, pageSize);
 
-        return wishlist.stream()
+        Page<Wishlist> wishlistPage = wishlistRepository.findAllByMember(member, pageable);
+
+        List<WishlistTemplestayRes> wishlistResList = wishlistPage.stream()
                 .map(w-> {
                     Templestay templestay=w.getTemplestay();
+
                     Category category = categoryRepository.findByTemplestayId(templestay.getId())
                             .orElseThrow(() -> new WishlistCoreException(ErrorCode.NOT_FOUND_TARGET));
 
@@ -76,14 +83,27 @@ public class WishlistService {
                     String region = CategoryUtils.getRegionName(category.getRegion());
                     String type = CategoryUtils.getTypeName(category.getType());
 
+                    String imgUrl = urlRepository.findImgUrlByTemplestayId(templestay.getId())
+                            .orElseThrow(() -> new WishlistNotFoundException());
+
+                    boolean liked = wishlistRepository.existsByMemberIdAndTemplestayId(userId, templestay.getId());
+
                     return new WishlistTemplestayRes(
                             templestay.getId(),
                             templestay.getTempleName(),
                             templestay.getOrganizedName(),
                             tag,
                             region,
-                            type
+                            type,
+                            imgUrl,
+                            liked
                     );
-                }) .collect(Collectors.toList());
+                }).toList();
+        return new PageWishlistRes<>(
+                page,
+                pageSize,
+                wishlistPage.getTotalPages(),
+                wishlistResList
+        );
     }
 }

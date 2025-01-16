@@ -1,8 +1,10 @@
 package sopt.jeolloga.domain.wishlist.api;
 
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import sopt.jeolloga.common.ResponseDto;
@@ -20,7 +22,7 @@ public class WishlistGlobalExceptionHandler {
     }
 
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
-    public ResponseEntity<ResponseDto<Void>> handleMethodNotAllowedException(HttpRequestMethodNotSupportedException ex) {
+    public ResponseEntity<ResponseDto<Void>> handleMethodNotAllowedException(HttpRequestMethodNotSupportedException e) {
         ErrorCode errorCode = ErrorCode.METHOD_NOT_ALLOWED;
         ResponseDto<Void> response = new ResponseDto<>(null, errorCode.getMsg());
         return ResponseEntity.status(errorCode.getHttpStatus()).body(response);
@@ -39,6 +41,13 @@ public class WishlistGlobalExceptionHandler {
         return ResponseEntity.status(errorCode.getHttpStatus()).body(response);
     }
 
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public ResponseEntity<ResponseDto<Void>> handleMissingServletRequestParameterException(
+            MissingServletRequestParameterException e) {
+        String message = String.format("필수 요청 파라미터가 누락되었습니다: %s", e.getParameterName());
+        ResponseDto<Void> response = ResponseDto.fail(message);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ResponseDto<Void>> handlerGeneralException(Exception e) {
         e.printStackTrace();

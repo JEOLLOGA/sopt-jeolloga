@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import sopt.jeolloga.common.ResponseDto;
+import sopt.jeolloga.domain.wishlist.api.dto.PageWishlistRes;
 import sopt.jeolloga.domain.wishlist.api.dto.WishlistTemplestayListRes;
 import sopt.jeolloga.domain.wishlist.api.dto.WishlistTemplestayRes;
 import sopt.jeolloga.domain.wishlist.api.service.WishlistService;
@@ -32,9 +33,10 @@ public class WishlistController {
     }
 
     @GetMapping("/user/wishlist")
-    public ResponseEntity<WishlistTemplestayListRes> getWishlist(
-            @RequestHeader("userId") Long userId) {
-        List<WishlistTemplestayRes> wishlist = wishlistService.getWishlist(userId);
-        return ResponseEntity.ok(WishlistTemplestayListRes.of(wishlist));
+    public PageWishlistRes<WishlistTemplestayRes> getWishlist(
+            @RequestHeader("userId") Long userId,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "pageSize", defaultValue = "6") int pageSize) {
+        return wishlistService.getWishlist(userId, page, pageSize);
     }
 }

@@ -8,6 +8,8 @@ public record WishlistTemplestayRes(
         String templestayName,
         String tag,
         String region,
-        String type
+        String type,
+        String imgUrl,
+        boolean liked
 ) {
 }
