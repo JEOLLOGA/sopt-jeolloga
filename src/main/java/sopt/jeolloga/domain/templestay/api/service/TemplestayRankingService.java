@@ -46,7 +46,6 @@ public class TemplestayRankingService {
                             rankingIds.indexOf(id) + 1,
                             templestay.getId(),
                             templestay.getTempleName(),
-                            templestay.getOrganizedName(),
                             tag,
                             region,
                             liked,
