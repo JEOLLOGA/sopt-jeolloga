@@ -63,7 +63,6 @@ public class CoordinatesService {
             System.err.println("Error while fetching coordinates: " + e.getMessage());
             throw new RuntimeException("Failed to fetch coordinates", e);
         }
-
         return coordinates;
     }
 

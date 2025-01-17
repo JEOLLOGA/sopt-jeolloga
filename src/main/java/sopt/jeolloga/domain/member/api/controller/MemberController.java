@@ -17,24 +17,24 @@ public class MemberController {
     }
 
     @PostMapping("/user/register")
-    public ResponseEntity<String> saveInfo(@RequestHeader Long id, @RequestBody MemberReq memberReq) {
+    public ResponseEntity<String> saveInfo(@RequestHeader String accessToken, Long id, @RequestBody MemberReq memberReq) {
 
         MemberReq memberNameReq = new MemberReq(id, memberReq.ageRange(), memberReq.gender(), memberReq.religion(), memberReq.hasExperience());
-        memberService.saveInfo(memberNameReq);
+        memberService.saveInfo(accessToken, memberNameReq);
 
         return ResponseEntity.ok("Member information update sucess");
     }
 
     @GetMapping("/user/register/success")
-    public ResponseEntity<MemberNameRes> getUserName(@RequestHeader Long id) {
+    public ResponseEntity<MemberNameRes> getUserName(@RequestHeader String accessToken, Long id) {
 
-        MemberNameRes memberNameRes = memberService.getMemberName(id);
+        MemberNameRes memberNameRes = memberService.getMemberName(accessToken, id);
         return ResponseEntity.ok(memberNameRes);
     }
 
     @GetMapping("/user/mypage")
-    public ResponseEntity<MemberRes> getMemeberById(@RequestHeader Long id) {
-        MemberRes memberRes = memberService.getMember(id);
+    public ResponseEntity<MemberRes> getMemeberById(@RequestHeader String accessToken, Long id) {
+        MemberRes memberRes = memberService.getMember(accessToken, id);
         return ResponseEntity.ok(memberRes);
     }
 

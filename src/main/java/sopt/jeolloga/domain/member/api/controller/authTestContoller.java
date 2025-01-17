@@ -38,7 +38,6 @@ public class authTestContoller {
         result.put("principal", authentication.getPrincipal());
         result.put("isAuthenticated", authentication.isAuthenticated());
 
-
         return ResponseEntity.ok(result);
     }
 
@@ -78,7 +77,4 @@ public class authTestContoller {
     public String getKakaoId(@RequestParam String accessToken) {
         return String.format("kakao ID %s", jwtTokenProvider.getMemberIdFromToken(accessToken));
     }
-
-
-
 }

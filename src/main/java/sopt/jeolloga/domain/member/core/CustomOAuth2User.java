@@ -1,4 +1,4 @@
-package sopt.jeolloga.domain.member.api.service;
+package sopt.jeolloga.domain.member.core;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
@@ -21,7 +21,6 @@ public class CustomOAuth2User extends DefaultOAuth2User {
         this.refreshToken = refreshToken;
     }
 
-    // 커스텀 메서드 추가
     public String getEmail() {
         return (String) getAttributes().get("email");
     }

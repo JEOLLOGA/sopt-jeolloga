@@ -24,7 +24,7 @@ public class AuthService {
     }
 
     public boolean isTokenInDatabase(String refreshToken){
-        // DB에 존재하는지 조회
+        // DB에 존재하는지 조회 + refreshToken
         return true;
     }
 

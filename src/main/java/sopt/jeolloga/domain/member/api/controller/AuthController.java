@@ -10,11 +10,9 @@ import sopt.jeolloga.domain.member.api.service.AuthService;
 public class AuthController {
 
     private final AuthService authService;
-    private final JwtTokenProvider jwtTokenProvider;
 
-    public AuthController(AuthService authService, JwtTokenProvider jwtTokenProvider) {
+    public AuthController(AuthService authService) {
         this.authService = authService;
-        this.jwtTokenProvider = jwtTokenProvider;
     }
 
     // refresh 토큰 기반 access 토큰 재발급
@@ -26,19 +24,4 @@ public class AuthController {
 
         return ResponseEntity.ok().headers(headers).body(null);
     }
-
-    // 최초 로그인?
-    @GetMapping("/auth/login")
-    public ResponseEntity<?> login(@RequestParam String userId) {
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.add("Authorization", "Bearer " + authService.createAccessToken(userId));
-        headers.add("Refresh-Token", authService.createRefreshToken(userId));
-
-        return ResponseEntity.ok().headers(headers).body(null);
-    }
-
-    //
-
-
 }
