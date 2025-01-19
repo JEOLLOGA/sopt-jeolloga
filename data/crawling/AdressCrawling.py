@@ -20,11 +20,13 @@ def load_db_config(file_path):
 
 def insert_or_skip_address(cursor, templestay_name, address):
     try:
+        # 중복 확인 쿼리
         check_query = "SELECT id, address FROM templestay WHERE templestay_name = %s"
         cursor.execute(check_query, (templestay_name,))
         result = cursor.fetchone()
 
         if result:
+            # 템플스테이 이름이 존재하는 경우
             templestay_id, existing_address = result
             if existing_address is None:
                 update_query = "UPDATE templestay SET address = %s WHERE id = %s"
@@ -33,7 +35,9 @@ def insert_or_skip_address(cursor, templestay_name, address):
             else:
                 print(f"주소가 이미 존재합니다. 업데이트를 건너뜁니다: 사찰명='{templestay_name}', 기존 주소='{existing_address}'")
         else:
-            print(f"템플스테이 '{templestay_name}'이 존재하지 않아 address 업데이트를 건너뜁니다.")
+            insert_query = "INSERT INTO templestay (templestay_name, address) VALUES (%s, %s)"
+            cursor.execute(insert_query, (templestay_name, address))
+            print(f"새 템플스테이 추가: 사찰명='{templestay_name}', 주소='{address}'")
     except mysql.connector.Error as e:
         print(f"데이터베이스 처리 오류: {e}")
 
