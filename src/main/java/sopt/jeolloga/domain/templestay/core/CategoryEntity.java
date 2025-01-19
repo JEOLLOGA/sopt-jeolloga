@@ -22,25 +22,24 @@ public class CategoryEntity {
     private Long templestayId;
 
     @Column(name = "region")
-    private Integer region; // 지역
-
+    private Integer region;
+    
     @Column(name = "type")
-    private Integer type; // 유형
+    private Integer type;
 
     @Column(name = "purpose")
-    private Integer purpose; // 목적
+    private Integer purpose;
 
     @Column(name = "activity")
-    private Integer activity; // 체험
+    private Integer activity;
 
     @Column(name = "price")
-    private Integer price; // 가격
+    private Integer price;
 
     @Column(name = "etc")
-    private Integer etc; // 기타
+    private Integer etc;
 
-    public CategoryEntity(Long templestayId, int region, int type, int purpose, int activity, int price, int etc) {
-        this.templestayId = templestayId;
+    public CategoryEntity(int region, int type, int purpose, int activity, int price, int etc) {
         this.region = region;
         this.type = type;
         this.purpose = purpose;
