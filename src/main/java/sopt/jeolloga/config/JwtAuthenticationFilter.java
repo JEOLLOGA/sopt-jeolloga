@@ -1,5 +1,6 @@
 package sopt.jeolloga.config;
 
+import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -11,6 +12,11 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import sopt.jeolloga.domain.member.api.utils.JwtTokenProvider;
 import sopt.jeolloga.domain.member.core.exception.CustomAuthenticationCoreException;
 import sopt.jeolloga.exception.ErrorCode;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
+import org.springframework.stereotype.Component;
+import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
@@ -48,7 +54,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
         }
 
-        // 토큰이 없으면 SecurityContext에 인증 정보를 설정하지 않고 다음 필터/비즈니스 로직으로 전달
         chain.doFilter(request, response);
     }
 }

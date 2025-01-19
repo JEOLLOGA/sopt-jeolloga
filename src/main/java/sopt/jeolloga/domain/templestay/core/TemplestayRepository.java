@@ -5,6 +5,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -26,6 +27,5 @@ public interface TemplestayRepository extends JpaRepository<Templestay, Long> {
 
     @Query("SELECT DISTINCT t.templeName FROM Templestay t")
     List<String> findDistinctTempleNames();
-
 }
 

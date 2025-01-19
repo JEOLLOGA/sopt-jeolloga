@@ -33,12 +33,12 @@ public class AuthService {
 
     public boolean isRefreshTokenInRedis(String refreshToken){
 
-        Long kakaoUserId = Long.parseLong(jwtTokenProvider.getMemberIdFromToken(refreshToken));
-        String storedRefreshToken = jwtTokenProvider.getRefreshToken(kakaoUserId);
-
-        if(storedRefreshToken == null || !refreshToken.equals(storedRefreshToken)){
-            return false;
-        }
+//        Long kakaoUserId = Long.parseLong(jwtTokenProvider.getMemberIdFromToken(refreshToken));
+//        String storedRefreshToken = jwtTokenProvider.getRefreshToken(kakaoUserId);
+//
+//        if(storedRefreshToken == null || !refreshToken.equals(storedRefreshToken)){
+//            return false;
+//        }
         return true;
     }
 

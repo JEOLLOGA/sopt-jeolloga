@@ -48,7 +48,7 @@ public class FilterController {
 
     // 필터링 된 템플스테이 목록 반환
     @GetMapping("/filter/list")
-    public ResponseEntity<PageTemplesayRes> getFilteredTemplestay(
+    public ResponseEntity<PageTemplestayRes> getFilteredTemplestay(
             @RequestBody Map<String, Object> filter,
             @RequestParam (value = "page") int page,
             @RequestParam (value="pageSize", defaultValue = "10") int pageSize,
@@ -57,7 +57,7 @@ public class FilterController {
         String accessToken = request.getHeader("Authorization");
 
         List<Long> filteredId;
-        PageTemplesayRes templestayWithPage;
+        PageTemplestayRes templestayWithPage;
         Long userId;
 
         filteredId = filterService.getFiteredTemplestayCategory(filter);

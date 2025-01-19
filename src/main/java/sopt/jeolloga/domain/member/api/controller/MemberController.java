@@ -1,11 +1,15 @@
 package sopt.jeolloga.domain.member.api.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import sopt.jeolloga.domain.member.api.dto.MemberNameRes;
 import sopt.jeolloga.domain.member.api.dto.MemberReq;
 import sopt.jeolloga.domain.member.api.dto.MemberRes;
 import sopt.jeolloga.domain.member.api.service.MemberService;
+import sopt.jeolloga.domain.templestay.api.dto.PageTemplestayRes;
+
+import java.util.List;
 
 @RestController
 public class MemberController {
@@ -17,7 +21,9 @@ public class MemberController {
     }
 
     @PostMapping("/user/register")
-    public ResponseEntity<String> saveInfo(@RequestHeader String accessToken, Long id, @RequestBody MemberReq memberReq) {
+    public ResponseEntity<String> saveInfo(@RequestHeader Long id, @RequestBody MemberReq memberReq, HttpServletRequest request) {
+
+        String accessToken = request.getHeader("Authorization");
 
         MemberReq memberNameReq = new MemberReq(id, memberReq.ageRange(), memberReq.gender(), memberReq.religion(), memberReq.hasExperience());
         memberService.saveInfo(accessToken, memberNameReq);
@@ -26,14 +32,18 @@ public class MemberController {
     }
 
     @GetMapping("/user/register/success")
-    public ResponseEntity<MemberNameRes> getUserName(@RequestHeader String accessToken, Long id) {
+    public ResponseEntity<MemberNameRes> getUserName(@RequestHeader Long id, HttpServletRequest request) {
+
+        String accessToken = request.getHeader("Authorization");
 
         MemberNameRes memberNameRes = memberService.getMemberName(accessToken, id);
         return ResponseEntity.ok(memberNameRes);
     }
 
     @GetMapping("/user/mypage")
-    public ResponseEntity<MemberRes> getMemeberById(@RequestHeader String accessToken, Long id) {
+    public ResponseEntity<MemberRes> getMemeberById(@RequestHeader Long id, HttpServletRequest request) {
+
+        String accessToken = request.getHeader("Authorization");
         MemberRes memberRes = memberService.getMember(accessToken, id);
         return ResponseEntity.ok(memberRes);
     }
