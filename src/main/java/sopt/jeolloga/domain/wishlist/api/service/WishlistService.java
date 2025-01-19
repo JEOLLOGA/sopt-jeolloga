@@ -7,8 +7,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import sopt.jeolloga.common.CategoryUtils;
-import sopt.jeolloga.domain.member.Member;
-import sopt.jeolloga.domain.member.MemberRepository;
+import sopt.jeolloga.domain.member.core.Member;
+import sopt.jeolloga.domain.member.core.MemberRepository;
 import sopt.jeolloga.domain.templestay.core.*;
 import sopt.jeolloga.domain.wishlist.api.dto.PageWishlistRes;
 import sopt.jeolloga.domain.wishlist.api.dto.WishlistTemplestayRes;
@@ -19,7 +19,6 @@ import sopt.jeolloga.domain.wishlist.core.exception.WishlistNotFoundException;
 import sopt.jeolloga.exception.ErrorCode;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Component

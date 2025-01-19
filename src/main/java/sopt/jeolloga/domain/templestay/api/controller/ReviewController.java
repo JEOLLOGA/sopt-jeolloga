@@ -17,8 +17,8 @@ public class ReviewController {
     @GetMapping("/public/templestay/{templestayId}/reviews")
     public PageReviewRes<ReviewRes> getPagedReviewsByTemplestayId(
             @PathVariable Long templestayId,
-            @RequestParam("page") int page) {
-        final int pageSize = 10;
+            @RequestParam("page") int page,
+            @RequestParam(value = "pageSize", defaultValue = "10") int pageSize) {
         return reviewService.getPagedReviewsByTemplestayId(templestayId, page, pageSize);
     }
 }

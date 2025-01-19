@@ -11,4 +11,6 @@ import java.util.Optional;
 public interface UrlRepository extends JpaRepository<Url, Long> {
     @Query("SELECT u.templestayUrl FROM Url u WHERE u.templestayId = :templestayId")
     Optional<String> findImgUrlByTemplestayId(@Param("templestayId") Long templestayId);
+    Optional<Url> findByTemplestayId(Long templestayId);
+
 }

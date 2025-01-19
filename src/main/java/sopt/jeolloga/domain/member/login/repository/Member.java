@@ -1,4 +1,4 @@
-package sopt.jeolloga.domain.member;
+package sopt.jeolloga.domain.member.login.repository;
 
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -35,13 +35,10 @@ public class Member {
     @Column(name = "has_experience")
     private Boolean hasExperience;
 
-    public Member(Long kakaoUserId, String nickname, String email, String ageRange, String gender, String religion, Boolean hasExperience) {
+    public Member(Long kakaoUserId, String email, String nickname){
         this.kakaoUserId = kakaoUserId;
-        this.nickname = nickname;
         this.email = email;
-        this.ageRange = ageRange;
-        this.gender = gender;
-        this.religion = religion;
-        this.hasExperience = hasExperience;
+        this.nickname = nickname;
     }
+
 }
