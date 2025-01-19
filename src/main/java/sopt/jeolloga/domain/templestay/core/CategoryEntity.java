@@ -39,7 +39,26 @@ public class CategoryEntity {
     @Column(name = "etc")
     private Integer etc;
 
-    public CategoryEntity(int region, int type, int purpose, int activity, int price, int etc) {
+
+    private Integer region; // 지역
+
+    @Column(name = "type")
+    private Integer type; // 유형
+
+    @Column(name = "purpose")
+    private Integer purpose; // 목적
+
+    @Column(name = "activity")
+    private Integer activity; // 체험
+
+    @Column(name = "price")
+    private Integer price; // 가격
+
+    @Column(name = "etc")
+    private Integer etc; // 기타
+
+    public CategoryEntity(Long templestayId, int region, int type, int purpose, int activity, int price, int etc) {
+        this.templestayId = templestayId;
         this.region = region;
         this.type = type;
         this.purpose = purpose;
