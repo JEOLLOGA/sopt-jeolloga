@@ -12,7 +12,7 @@ import lombok.ToString;
 @Setter
 @NoArgsConstructor
 @ToString
-public class ImageUrlEntity {
+public class TemplestayImage {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,8 +24,8 @@ public class ImageUrlEntity {
     @Column(name = "img_url")
     private String imgUrl;
 
-    public ImageUrlEntity(Long templestayId, String imgUrl) {
+    public TemplestayImage(Long templestayId, String imgUrl) {
         this.templestayId = templestayId;
         this.imgUrl = imgUrl;
     }
-    }
+}
