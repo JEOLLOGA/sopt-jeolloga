@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import sopt.jeolloga.common.Filters;
 import sopt.jeolloga.domain.templestay.api.dto.*;
 import sopt.jeolloga.domain.templestay.core.*;
+import sopt.jeolloga.domain.wishlist.core.WishlistRepository;
 
 import java.util.List;
 import java.util.Map;
@@ -19,12 +20,14 @@ public class FilterService {
     private Filters filters;
     private final CategoryRepository categoryRepository;
     private final TemplestayRepository templestayRepository;
+    private final WishlistRepository wishlistRepository;
 
 
-    public FilterService(Filters filters, CategoryRepository categoryRepository, TemplestayRepository templestaryRepository, ImageUrlRepository imageUrlRepository) {
+    public FilterService(Filters filters, CategoryRepository categoryRepository, TemplestayRepository templestaryRepository, WishlistRepository wishlistRepository) {
         this.filters = filters;
         this.categoryRepository = categoryRepository;
         this.templestayRepository = templestaryRepository;
+        this.wishlistRepository = wishlistRepository;
     }
 
 
@@ -51,19 +54,18 @@ public class FilterService {
     }
 
 
-    public PageTemplesayRes getFilteredTemplestay(List<Long> ids, int page, int size) {
-
+    public PageTemplestayRes getFilteredTemplestay(List<Long> ids, int page, int size, Long userId) {
 
         Pageable pageable = PageRequest.of(page - 1, size);
-    public PagingRes getFilteredTemplestay(List<Long> ids, int page, int size) {
 
-
-        Pageable pageable = PageRequest.of(page, size);
         Page<Object[]> resultsPage = templestayRepository.findTemplestayWithDetails(ids, pageable);
 
         Page<TemplestayRes> templestayResListPage = resultsPage.map(result -> {
 
             Long id = (Long) result[0];
+            System.out.println("id");
+            System.out.println(id);
+
             String templeName = Optional.ofNullable(result[1]).map(Object::toString).orElse("null");
             String organizedName = Optional.ofNullable(result[2]).map(Object::toString).orElse("null");
             String tags = Optional.ofNullable(result[3]).map(Object::toString).orElse("null");
@@ -76,12 +78,17 @@ public class FilterService {
             String type = (binaryTypeFilter == 0) ? "null" : filters.getFilterKey(binaryTypeFilter, filters.getTypeFilter());
             String imgUrl = Optional.ofNullable(result[6]).map(Object::toString).orElse("null");
 
-            return new TemplestayRes(id, templeName, organizedName, tag, region, type, imgUrl);
+            boolean liked = false;
+            if(userId != null){
+                liked = wishlistRepository.existsByMemberIdAndTemplestayId(userId, id);
+                System.out.println(liked);
+            }
+
+            return new TemplestayRes(id, templeName, organizedName, tag, region, type, imgUrl, liked);
 
         });
 
-        return new PageTemplesayRes(templestayResListPage.getNumber() + 1, templestayResListPage.getSize(), templestayResListPage.getTotalPages(), templestayResListPage.getContent());
-        return new PagingRes(templestayResListPage.getNumber() + 1, templestayResListPage.getSize(), templestayResListPage.getTotalPages(), templestayResListPage.getContent());
+        return new PageTemplestayRes(templestayResListPage.getNumber() + 1, templestayResListPage.getSize(), templestayResListPage.getTotalPages(), templestayResListPage.getContent());
     }
 
 

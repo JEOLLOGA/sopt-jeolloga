@@ -16,7 +16,7 @@ public class Member {
     @GeneratedValue(strategy = GenerationType.IDENTITY) // AUTO_INCREMENT
     private Long id;
 
-    @Column(name = "kakao_user_id", nullable = false)
+    @Column(name = "kakao_user_id")
     private Long kakaoUserId;
 
     @Column(nullable = false, length = 45)

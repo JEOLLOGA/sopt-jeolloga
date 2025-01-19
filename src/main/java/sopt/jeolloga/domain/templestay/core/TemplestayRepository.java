@@ -22,14 +22,16 @@ public interface TemplestayRepository extends JpaRepository<Templestay, Long> {
             "    GROUP BY templestay_id " +
             ") min_img ON t.id = min_img.templestay_id " +
             "LEFT JOIN templestay_image i ON min_img.min_id = i.id " +
-            "WHERE t.id IN :ids", nativeQuery = true)
+            "WHERE t.id IN :ids AND t.tag IS NOT NULL", nativeQuery = true)
     Page<Object[]> findTemplestayWithDetails(@Param("ids") List<Long> ids, Pageable pageable);
 
     @Query("SELECT DISTINCT t.templeName FROM Templestay t")
     List<String> findDistinctTempleNames();
 
-
-    List<Templestay> findAllById(Iterable<Long> id);
-
+    @Query(value = "SELECT t.id, t.temple_name, t.organized_name, t.tag " +
+            "FROM templestay t " +
+            "WHERE t.temple_name LIKE %:query%",
+            countQuery = "SELECT COUNT(*) FROM templestay t WHERE t.temple_name LIKE %:query%",
+            nativeQuery = true)
+    Page<Object[]> searchByTempleNameWithPagination(String query, Pageable pageable);
 }
-
