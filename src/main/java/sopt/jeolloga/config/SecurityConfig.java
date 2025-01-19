@@ -8,6 +8,11 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import sopt.jeolloga.domain.member.login.service.CustomOAuth2UserService;
 import org.springframework.security.oauth2.client.web.HttpSessionOAuth2AuthorizationRequestRepository;
 
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 public class SecurityConfig {
@@ -45,3 +50,17 @@ public class SecurityConfig {
         return http.build();
     }
 }
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http
+                .csrf(csrf -> csrf.disable()) // CSRF 보호 비활성화
+                .authorizeHttpRequests(auth -> auth
+                        .anyRequest().permitAll() // 모든 요청 허용
+                );
+
+        return http.build();
+    }
+}
+
+
+

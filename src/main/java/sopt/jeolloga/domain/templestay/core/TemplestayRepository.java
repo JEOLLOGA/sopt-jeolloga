@@ -5,14 +5,17 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
 @Repository
-public interface TemplestayRepository extends JpaRepository<TemplestayEntity, Long> {
-
-    @Query(value = "SELECT t.id AS templestay_id, t.temple_name, t.organized_name, t.tag, CAST(c.region AS SIGNED) AS region, CAST(c.type AS SIGNED) AS type, i.img_url " +
+public interface TemplestayRepository extends JpaRepository<Templestay, Long> {
+    @Query("SELECT DISTINCT t.templeName FROM Templestay t")
+    List<String> findDistinctTempleNames();
+    
+        @Query(value = "SELECT t.id AS templestay_id, t.temple_name, t.organized_name, t.tag, CAST(c.region AS SIGNED) AS region, CAST(c.type AS SIGNED) AS type, i.img_url " +
             "FROM templestay t " +
             "LEFT JOIN category c ON t.id = c.templestay_id " +
             "LEFT JOIN ( " +
@@ -24,8 +27,4 @@ public interface TemplestayRepository extends JpaRepository<TemplestayEntity, Lo
             "WHERE t.id IN :ids", nativeQuery = true)
     Page<Object[]> findTemplestayWithDetails(@Param("ids") List<Long> ids, Pageable pageable);
 //    List<Object[]> findTemplestayWithDetails(@Param("ids") List<Long> ids);
-
 }
-
-
-
