@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import sopt.jeolloga.domain.member.Member;
+import sopt.jeolloga.domain.member.core.Member;
 import sopt.jeolloga.domain.templestay.core.Templestay;
 
 @Entity

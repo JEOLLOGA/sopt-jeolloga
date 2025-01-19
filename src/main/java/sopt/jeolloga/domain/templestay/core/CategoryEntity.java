@@ -22,6 +22,24 @@ public class CategoryEntity {
     private Long templestayId;
 
     @Column(name = "region")
+    private Integer region;
+    
+    @Column(name = "type")
+    private Integer type;
+
+    @Column(name = "purpose")
+    private Integer purpose;
+
+    @Column(name = "activity")
+    private Integer activity;
+
+    @Column(name = "price")
+    private Integer price;
+
+    @Column(name = "etc")
+    private Integer etc;
+
+
     private Integer region; // 지역
 
     @Column(name = "type")

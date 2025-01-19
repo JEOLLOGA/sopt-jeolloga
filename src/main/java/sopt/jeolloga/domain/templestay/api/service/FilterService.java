@@ -37,7 +37,7 @@ public class FilterService {
     public List<Long> getFiteredTemplestayCategory(Map<String, Object> filter) {
 
         this.filters = new Filters(filter);
-        List<CategoryEntity> categoryEntityList = categoryRepository.findAll();
+        List<Category> categoryEntityList = categoryRepository.findAll();
         List<Long> filteredId = filters.getFilteredCategory(categoryEntityList);
 
         return filteredId;
@@ -51,6 +51,10 @@ public class FilterService {
     }
 
 
+    public PageTemplesayRes getFilteredTemplestay(List<Long> ids, int page, int size) {
+
+
+        Pageable pageable = PageRequest.of(page - 1, size);
     public PagingRes getFilteredTemplestay(List<Long> ids, int page, int size) {
 
 
@@ -76,6 +80,7 @@ public class FilterService {
 
         });
 
+        return new PageTemplesayRes(templestayResListPage.getNumber() + 1, templestayResListPage.getSize(), templestayResListPage.getTotalPages(), templestayResListPage.getContent());
         return new PagingRes(templestayResListPage.getNumber() + 1, templestayResListPage.getSize(), templestayResListPage.getTotalPages(), templestayResListPage.getContent());
     }
 
