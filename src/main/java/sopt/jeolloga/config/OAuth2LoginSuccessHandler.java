@@ -16,10 +16,12 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication)
             throws IOException {
 
+        System.out.println("OAuth2LoginSuccessHandler invoked");
+
         CustomOAuth2User user = (CustomOAuth2User) authentication.getPrincipal();
 
         response.setHeader("Authorization", "Bearer " + user.getAccessToken());
-        response.setHeader("Refresh-Token", user.getRefreshToken());
+        response.setHeader("refreshToken", user.getRefreshToken());
         response.setStatus(HttpServletResponse.SC_OK);
 
 //        response.setContentType("application/json");

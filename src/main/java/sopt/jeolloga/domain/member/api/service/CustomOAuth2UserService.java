@@ -8,6 +8,8 @@ import sopt.jeolloga.domain.member.core.CustomOAuth2User;
 import sopt.jeolloga.domain.member.api.utils.JwtTokenProvider;
 import sopt.jeolloga.domain.member.core.Member;
 import sopt.jeolloga.domain.member.core.MemberRepository;
+import org.springframework.data.redis.core.RedisTemplate;
+
 
 import java.util.Map;
 
@@ -16,10 +18,12 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
     private final MemberRepository memberRepository;
     private final JwtTokenProvider jwtTokenProvider;
+    private final RedisTemplate<String, String> redisTemplate;
 
-    public CustomOAuth2UserService(MemberRepository memberRepository, JwtTokenProvider jwtTokenProvider){
+    public CustomOAuth2UserService(MemberRepository memberRepository, JwtTokenProvider jwtTokenProvider, RedisTemplate redisTemplate){
         this.memberRepository = memberRepository;
         this.jwtTokenProvider = jwtTokenProvider;
+        this.redisTemplate = redisTemplate;
     }
 
     @Override
@@ -39,6 +43,10 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
         String accessToken = jwtTokenProvider.createAccessToken(kakaoUserId);
         String refreshToken = jwtTokenProvider.createRefreshToken(kakaoUserId);
+
+        // redis에 refreshToken 업데이트
+        jwtTokenProvider.deleteRefreshToken((Long) attributes.get("id"));
+        jwtTokenProvider.saveRefreshToken((Long) attributes.get("id"), refreshToken);
 
         return new CustomOAuth2User(oAuth2User.getAuthorities(), attributes, "id", email, accessToken, refreshToken);
     }

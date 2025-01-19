@@ -23,10 +23,6 @@ public class MemberService {
 
     public void saveInfo(String accessToken, MemberReq memberReq){
 
-        if (!isEqualId(accessToken, memberReq.id())) {
-            throw new SecurityException("Token ID does not match request ID.");
-        }
-        
         Member member = memberRepository.findById(memberReq.id())
                 .orElseThrow(() -> new IllegalArgumentException("Member not found for id: " + memberReq.id()));
 
@@ -45,10 +41,6 @@ public class MemberService {
         Member member = memberRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Member not found for id: " + id));
 
-        if (!isEqualId(accessToken, id)) {
-            throw new SecurityException("Token ID does not match request ID.");
-        }
-
         MemberRes memberRes = new MemberRes(member.getId(), member.getNickname(), member.getEmail(), member.getAgeRange(), member.getGender() , member.getReligion(), member.getHasExperience());
         return memberRes;
     }
@@ -59,18 +51,13 @@ public class MemberService {
         Member member = memberRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Nickname not found for id: " + id));
 
-        if (!isEqualId(accessToken, id)) {
-            throw new SecurityException("Token ID does not match request ID.");
-        }
-
         MemberNameRes memberNameRes = new MemberNameRes(member.getNickname());
         return memberNameRes;
     }
 
-    // Access Token에서 추출한 ID와 요청 ID가 동일한지 검증
+    // Access Token에서 추출한 ID와 요청 ID가 동일한지 검증 -> 재논의 필요
     private boolean isEqualId(String accessToken, Long id){
         String tokenId = jwtTokenProvider.getMemberIdFromToken(accessToken);
         return String.valueOf(id).equals(tokenId);
     }
-
 }

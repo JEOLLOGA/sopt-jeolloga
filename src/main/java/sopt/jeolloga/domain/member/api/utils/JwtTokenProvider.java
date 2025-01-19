@@ -6,6 +6,7 @@ import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SignatureException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -13,11 +14,13 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
 import sopt.jeolloga.domain.member.core.exception.CustomAuthenticationCoreException;
 import sopt.jeolloga.exception.ErrorCode;
+import org.springframework.data.redis.core.RedisTemplate;
 
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 
 @Component
@@ -26,9 +29,11 @@ public class JwtTokenProvider { // Jwt Token 생성
     private final Key secretKey;
     private final long accessTokenValidity = 1 * 60 * 60 * 1000; // 1시간
     private final long refreshTokenValidity = 14 * 24 * 60 * 60 * 1000; // 14일
+    private final RedisTemplate<String, String> redisTemplate;
 
-    public JwtTokenProvider(@Value("${jwt.secret}") String secretKey) {
+    public JwtTokenProvider(@Value("${jwt.secret}") String secretKey, RedisTemplate<String, String> redisTemplate) {
         this.secretKey = Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
+        this.redisTemplate = redisTemplate;
     }
 
     // Access Token 발급
@@ -42,6 +47,9 @@ public class JwtTokenProvider { // Jwt Token 생성
         String refreshToken = createToken(memberId, this.refreshTokenValidity);
 
         // Redis에 저장하는 로직 필요
+
+
+
 
         return refreshToken;
     }
@@ -120,4 +128,21 @@ public class JwtTokenProvider { // Jwt Token 생성
         }
         return null;
     }
+
+    public void saveRefreshToken(Long userId, String refreshToken) {
+        String key = "refreshToken:" + userId;
+        redisTemplate.opsForValue().set(key, refreshToken, refreshTokenValidity, TimeUnit.MILLISECONDS);
+    }
+
+    public String getRefreshToken(Long userId) {
+        String key = "refreshToken:" + userId;
+        return redisTemplate.opsForValue().get(key);
+    }
+
+    public void deleteRefreshToken(Long userId) {
+        String key = "refreshToken:" + userId;
+        redisTemplate.delete(key);
+    }
+
+
 }
