@@ -132,14 +132,13 @@ def save_data_to_db(connection, data, templestay_id):
                 VALUES (%s, %s, %s, %s, %s)
             """
             cursor.execute(category_query, (next_id, type_code, region_code, price_code, templestay_id))
-            connection.commit()
-
             print(f"카테고리 테이블에 데이터 저장 완료: ID={next_id}, 템플스테이 ID={templestay_id}, 유형={type_value}({type_code:b}), 지역={region_value}({region_code:b}), 가격={templestay_price}")
+
+        connection.commit()
 
         cursor.close()
     except mysql.connector.Error as err:
         print(f"DB 저장 오류: {err}")
-
 
 db_config_path = "C:\\jeolloga\\data\\db_config.yaml"
 

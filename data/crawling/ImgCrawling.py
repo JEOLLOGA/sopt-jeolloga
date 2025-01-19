@@ -46,20 +46,23 @@ def save_images_to_db(connection, templestay_id, img_urls):
 
         cursor.execute("SELECT MAX(id) FROM templestay_image")
         max_id_result = cursor.fetchone()
-        next_id = (max_id_result[0] + 1) if max_id_result[0] else 1 
+        next_id = (max_id_result[0] + 1) if max_id_result[0] else 1
+
         for img_url in img_urls:
             insert_query = """
                 INSERT INTO templestay_image (id, templestay_id, img_url) 
                 VALUES (%s, %s, %s)
             """
             cursor.execute(insert_query, (next_id, templestay_id, img_url))
-            next_id += 1 
+            next_id += 1
 
         connection.commit()
         print(f"이미지 저장 완료: 템플스테이 ID={templestay_id}, 이미지 개수={len(img_urls)}")
-        cursor.close()
     except mysql.connector.Error as err:
         print(f"이미지 저장 오류: {err}")
+    finally:
+        if cursor:
+            cursor.close()
 
 def crawl_images(url):
     try:
