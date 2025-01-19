@@ -1,12 +1,14 @@
-package sopt.jeolloga.domain.member;
+package sopt.jeolloga.domain.member.core;
 
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(name = "member")
 @Getter
+@Setter
 @NoArgsConstructor
 public class Member {
 
@@ -44,4 +46,11 @@ public class Member {
         this.religion = religion;
         this.hasExperience = hasExperience;
     }
+
+    public Member(Long kakaoUserId, String email, String nickname){
+        this.kakaoUserId = kakaoUserId;
+        this.email = email;
+        this.nickname = nickname;
+    }
+
 }
