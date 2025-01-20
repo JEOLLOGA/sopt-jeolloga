@@ -17,11 +17,10 @@ public class TemplestaySearchController {
 
     @PostMapping("/search")
     public ResponseEntity<PageTemplestaySearchRes<TemplestaySearchRes>> search(
-            @RequestHeader(value = "userId", required = false) Long userId,
             @RequestBody TemplestaySearchReq templestaySearchReq,
-            @RequestParam(value = "page") int page,
-            @RequestParam(value = "pageSize", defaultValue = "10") int pageSize
-    ) {
+            @RequestParam(value = "page", defaultValue = "1") int page,
+            @RequestParam(value = "pageSize", defaultValue = "10") int pageSize) {
+        Long userId = templestaySearchReq.userId();
         String query = templestaySearchReq.content();
         PageTemplestaySearchRes<TemplestaySearchRes> results = templestaySearchService.searchTemplestay(userId, query, page, pageSize);
         return ResponseEntity.ok(results);

@@ -14,9 +14,9 @@ import sopt.jeolloga.domain.templestay.api.service.ReviewService;
 public class ReviewController {
     private final ReviewService reviewService;
 
-    @GetMapping("/public/templestay/{templestayId}/reviews")
+    @GetMapping("/public/templestay/reviews")
     public PageReviewRes<ReviewRes> getPagedReviewsByTemplestayId(
-            @PathVariable Long templestayId,
+            @RequestParam Long templestayId,
             @RequestParam("page") int page,
             @RequestParam(value = "pageSize", defaultValue = "10") int pageSize) {
         return reviewService.getPagedReviewsByTemplestayId(templestayId, page, pageSize);

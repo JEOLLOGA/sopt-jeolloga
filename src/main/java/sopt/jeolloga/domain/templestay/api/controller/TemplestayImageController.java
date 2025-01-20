@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import sopt.jeolloga.domain.templestay.api.dto.TemplestayImgRes;
 import sopt.jeolloga.domain.templestay.api.service.TemplestayImageService;
@@ -13,9 +14,9 @@ import sopt.jeolloga.domain.templestay.api.service.TemplestayImageService;
 public class TemplestayImageController {
     private final TemplestayImageService templestayImageService;
 
-    @GetMapping("/public/templestay/{templestayId}/img")
+    @GetMapping("/public/templestay/img")
     public ResponseEntity<TemplestayImgRes> getTemplestayImages(
-            @PathVariable Long templestayId) {
+            @RequestParam Long templestayId) {
         TemplestayImgRes templestayImgRes = templestayImageService.getTemplestayImages(templestayId);
         return ResponseEntity.ok(templestayImgRes);
     }

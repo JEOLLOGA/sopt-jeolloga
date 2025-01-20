@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import sopt.jeolloga.common.ResponseDto;
 import sopt.jeolloga.domain.member.api.dto.DeleteSearchReq;
+import sopt.jeolloga.domain.member.api.dto.MemberIdReq;
 import sopt.jeolloga.domain.member.api.dto.SearchListRes;
 import sopt.jeolloga.domain.member.api.service.SearchService;
 
@@ -15,7 +16,7 @@ public class UserSearchController {
 
     @GetMapping("/user/search/record")
     public ResponseEntity<SearchListRes> getSearchHistory(
-            @RequestHeader(value = "userId") Long userId
+            @RequestParam(value = "userId") Long userId
     ) {
         SearchListRes searchHistory = searchService.getSearchHistory(userId);
         return ResponseEntity.ok(searchHistory);
@@ -23,17 +24,16 @@ public class UserSearchController {
 
     @DeleteMapping("/user/search/record/delete")
     public ResponseEntity<ResponseDto<Void>> deleteSearchRecord(
-            @RequestHeader(value = "userId") Long userId,
             @RequestBody DeleteSearchReq req
     ) {
-        searchService.deleteSearchRecord(userId, req.searchId());
+        searchService.deleteSearchRecord(req.userId(), req.searchId());
         return ResponseEntity.ok(ResponseDto.success(null));
     }
 
     @DeleteMapping("/user/search/record/deleteAll")
     public ResponseEntity<ResponseDto<Void>> deleteAllSearchRecords(
-            @RequestHeader(value = "userId") Long userId) {
-        searchService.deleteAllSearchRecords(userId);
+            @RequestBody MemberIdReq memberIdReq) {
+        searchService.deleteAllSearchRecords(memberIdReq.userId());
         return ResponseEntity.ok(ResponseDto.success(null));
     }
 }

@@ -1,7 +1,7 @@
 package sopt.jeolloga.domain.templestay.api.dto;
 
 public record TemplestaySearchRes(
-        Long id,
+        Long templestayId,
         String templeName,
         String templstayName,
         String tag,

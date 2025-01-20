@@ -17,7 +17,6 @@ import sopt.jeolloga.domain.templestay.core.CategoryRepository;
 import sopt.jeolloga.domain.templestay.core.TemplestayRepository;
 import sopt.jeolloga.domain.templestay.core.UrlRepository;
 import sopt.jeolloga.domain.templestay.core.exception.TemplestayCoreException;
-import sopt.jeolloga.domain.wishlist.api.dto.PageWishlistRes;
 import sopt.jeolloga.domain.wishlist.core.WishlistRepository;
 import sopt.jeolloga.exception.ErrorCode;
 
@@ -39,9 +38,7 @@ public class TemplestaySearchService {
     public PageTemplestaySearchRes<TemplestaySearchRes> searchTemplestay(Long userId, String query, int page, int pageSize) {
         String sanitizedQuery = query.replaceAll("\\s+", "");
 
-        if (userId != null) {
-            saveSearchContent(userId, query);
-        }
+        saveSearchContent(userId, query);
 
         Pageable pageable = PageRequest.of(page - 1, pageSize);
         Page<Object[]> results = templestayRepository.searchByTempleNameWithPagination(sanitizedQuery, pageable);
@@ -86,24 +83,23 @@ public class TemplestaySearchService {
                 })
                 .collect(Collectors.toList());
 
-        return new PageTemplestaySearchRes<>(
-                page,
-                pageSize,
-                results.getTotalPages(),
-                templestaySearchResults
-        );
+        return new PageTemplestaySearchRes<>(page, pageSize, results.getTotalPages(), templestaySearchResults);
     }
 
     @Transactional
     private void saveSearchContent(Long userId, String content) {
-        if (userId == null || content == null || content.isBlank()) {
+        if (content == null || content.isBlank()) {
             return;
         }
 
-        Member member = memberRepository.findById(userId)
-                .orElseThrow(() -> new TemplestayCoreException(ErrorCode.NOT_FOUND_USER));
+        Member member = null;
+        if (userId != null) {
+            member = memberRepository.findById(userId)
+                    .orElseThrow(() -> new TemplestayCoreException(ErrorCode.NOT_FOUND_USER));
+        }
 
         Search search = new Search(member, content);
         searchRepository.save(search);
     }
+
 }
