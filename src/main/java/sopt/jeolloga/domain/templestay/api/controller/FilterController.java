@@ -50,6 +50,7 @@ public class FilterController {
     @GetMapping("/filter/list")
     public ResponseEntity<PageTemplestayRes> getFilteredTemplestay(
             @RequestBody Map<String, Object> filter,
+            @RequestParam (value = "userId", required = false) Long userId,
             @RequestParam (value = "page") int page,
             @RequestParam (value="pageSize", defaultValue = "10") int pageSize,
             HttpServletRequest request){
@@ -58,12 +59,10 @@ public class FilterController {
 
         List<Long> filteredId;
         PageTemplestayRes templestayWithPage;
-        Long userId;
 
         filteredId = filterService.getFiteredTemplestayCategory(filter);
 
         if (accessToken != null && !accessToken.isEmpty()) {
-            userId = Long.valueOf(request.getHeader("id"));
             templestayWithPage = filterService.getFilteredTemplestay(filteredId, page, pageSize, userId);
         } else {
             userId = null;

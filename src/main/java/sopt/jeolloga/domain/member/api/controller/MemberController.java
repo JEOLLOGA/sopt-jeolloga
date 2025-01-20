@@ -22,30 +22,28 @@ public class MemberController {
     }
 
     @PostMapping("/user/register")
-    public ResponseEntity<String> saveInfo(@RequestBody Long id, @RequestBody MemberReq memberReq, HttpServletRequest request) {
+    public ResponseEntity<String> saveInfo(@RequestBody MemberReq memberReq, HttpServletRequest request) {
 
         String accessToken = request.getHeader("Authorization");
-
-        MemberReq memberNameReq = new MemberReq(id, memberReq.ageRange(), memberReq.gender(), memberReq.religion(), memberReq.hasExperience());
-        memberService.saveInfo(accessToken, memberNameReq);
+        memberService.saveInfo(accessToken, memberReq);
 
         return ResponseEntity.ok("Member information update sucess");
     }
 
     @GetMapping("/user/register/success")
-    public ResponseEntity<MemberNameRes> getUserName(@RequestHeader Long id, HttpServletRequest request) {
+    public ResponseEntity<MemberNameRes> getUserName(@RequestParam (value = "userId") Long userId, HttpServletRequest request) {
 
         String accessToken = request.getHeader("Authorization");
 
-        MemberNameRes memberNameRes = memberService.getMemberName(accessToken, id);
+        MemberNameRes memberNameRes = memberService.getMemberName(accessToken, userId);
         return ResponseEntity.ok(memberNameRes);
     }
 
     @GetMapping("/user/mypage")
-    public ResponseEntity<MemberDetailRes> getMemeberById(@RequestHeader Long id, HttpServletRequest request) {
+    public ResponseEntity<MemberDetailRes> getMemeberById(@RequestParam (value = "userId") Long userId, HttpServletRequest request) {
 
         String accessToken = request.getHeader("Authorization");
-        MemberDetailRes memberDetailRes = memberService.getMember(accessToken, id);
+        MemberDetailRes memberDetailRes = memberService.getMember(accessToken, userId);
         return ResponseEntity.ok(memberDetailRes);
     }
 
