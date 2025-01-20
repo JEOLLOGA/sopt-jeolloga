@@ -39,13 +39,18 @@ public class Filters {
         this.etcFilter = (Map<String, Object>) filter.get("etc");
     }
 
-
     private Map<String, Object> initializeFilter(List<String> options) {
-        return options.stream().collect(Collectors.toMap(option -> option, option -> 1));
+        return options.stream()
+                .collect(Collectors.toMap(
+                        option -> option,
+                        option -> 1,
+                        (existing, replacement) -> existing,
+                        LinkedHashMap::new
+                ));
     }
 
     private Map<String, Object> initializePriceFilter(int minPrice, int maxPrice) {
-        Map<String, Object> priceFilter = new HashMap<>();
+        Map<String, Object> priceFilter = new LinkedHashMap<>();
         priceFilter.put("minPrice", minPrice);
         priceFilter.put("maxPrice", maxPrice);
         return priceFilter;
@@ -64,7 +69,7 @@ public class Filters {
 
         Map<String, Object> resetPriceFilter = initializePriceFilter(DEFAULT_MIN_PRICE, 300000);
 
-        Map<String, Object> resetFilter = new HashMap<>();
+        LinkedHashMap<String, Object> resetFilter = new LinkedHashMap<>();
         resetFilter.put("region", regionFilter);
         resetFilter.put("type", typeFilter);
         resetFilter.put("purpose", purposeFilter);
@@ -75,7 +80,7 @@ public class Filters {
         return resetFilter;
     }
 
-    // filter 전달 순서와 상관없도록 수정 필요!
+
     public List<Long> getFilteredCategory(List<Category> categoryEntities) {
         Integer binaryRegionFilter = convertToBinaryFilter(regionFilter);
         Integer binaryTypeFilter = convertToBinaryFilter(typeFilter);
@@ -130,7 +135,6 @@ public class Filters {
         return filterKey;
     }
 
-
     private Map<String, Object> convertToResponse(Category category) {
 
         Map<String, Object> response = new HashMap<>();
@@ -142,7 +146,7 @@ public class Filters {
 
     public Map<String, List<String>> getFilterKey() {
 
-        Map<String, Map<String, Object>> filters = new HashMap<>();
+        Map<String, Map<String, Object>> filters = new LinkedHashMap<>();
         filters.put("region", this.regionFilter);
         filters.put("type", this.typeFilter);
         filters.put("purpose", this.purposeFilter);
