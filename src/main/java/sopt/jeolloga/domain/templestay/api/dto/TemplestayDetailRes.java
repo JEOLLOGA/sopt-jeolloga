@@ -3,7 +3,7 @@ package sopt.jeolloga.domain.templestay.api.dto;
 import java.math.BigDecimal;
 
 public record TemplestayDetailRes(
-        Long id,
+        Long templestayId,
         String templeName,
         String templestayName,
         String address,

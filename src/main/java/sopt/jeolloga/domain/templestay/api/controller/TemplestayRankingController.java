@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import sopt.jeolloga.common.ResponseDto;
 import sopt.jeolloga.domain.templestay.api.dto.TemplestayRankingListRes;
@@ -19,7 +20,7 @@ public class TemplestayRankingController {
 
     @GetMapping("/ranking")
     public ResponseEntity<TemplestayRankingListRes> getTopRanking(
-            @RequestHeader(value = "userId", required = false) Long userId
+            @RequestParam(value = "userId", required = false) Long userId
     ) {
         TemplestayRankingListRes rankingList = templestayRankingService.getTopRankingList(userId);
         return ResponseEntity.ok(rankingList);

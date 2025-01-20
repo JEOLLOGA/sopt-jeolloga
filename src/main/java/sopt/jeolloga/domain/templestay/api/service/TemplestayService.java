@@ -17,7 +17,7 @@ public class TemplestayService {
     private final WishlistRepository wishlistRepository;
     private final UrlRepository urlRepository;
     private final CategoryRepository categoryRepository;
-    @Transactional(readOnly = true)
+    @Transactional
     public TemplestayDetailRes getTemplestayDetails(Long userId, Long templestayId) {
         Templestay templestay = templestayRepository.findById(templestayId)
                 .orElseThrow(() -> new TemplestayCoreException(ErrorCode.NOT_FOUND_TARGET));

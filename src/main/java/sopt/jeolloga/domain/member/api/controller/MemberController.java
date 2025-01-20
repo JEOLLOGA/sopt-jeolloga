@@ -22,7 +22,7 @@ public class MemberController {
     }
 
     @PostMapping("/user/register")
-    public ResponseEntity<String> saveInfo(@RequestHeader Long id, @RequestBody MemberReq memberReq, HttpServletRequest request) {
+    public ResponseEntity<String> saveInfo(@RequestBody Long id, @RequestBody MemberReq memberReq, HttpServletRequest request) {
 
         String accessToken = request.getHeader("Authorization");
 
