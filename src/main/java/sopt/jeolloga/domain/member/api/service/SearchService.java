@@ -1,10 +1,14 @@
-package sopt.jeolloga.domain.member;
+package sopt.jeolloga.domain.member.api.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import sopt.jeolloga.domain.member.api.dto.SearchListRes;
+import sopt.jeolloga.domain.member.api.dto.SearchRes;
 import sopt.jeolloga.domain.member.core.Member;
 import sopt.jeolloga.domain.member.core.MemberRepository;
+import sopt.jeolloga.domain.member.core.Search;
+import sopt.jeolloga.domain.member.core.SearchRepository;
 import sopt.jeolloga.domain.templestay.core.exception.TemplestayCoreException;
 import sopt.jeolloga.exception.ErrorCode;
 

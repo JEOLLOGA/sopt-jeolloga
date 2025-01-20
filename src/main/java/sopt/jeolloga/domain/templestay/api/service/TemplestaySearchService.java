@@ -6,10 +6,11 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import sopt.jeolloga.common.CategoryUtils;
-import sopt.jeolloga.domain.member.Search;
-import sopt.jeolloga.domain.member.SearchRepository;
 import sopt.jeolloga.domain.member.core.Member;
 import sopt.jeolloga.domain.member.core.MemberRepository;
+import sopt.jeolloga.domain.member.core.Search;
+import sopt.jeolloga.domain.member.core.SearchRepository;
+import sopt.jeolloga.domain.templestay.api.dto.PageTemplestaySearchRes;
 import sopt.jeolloga.domain.templestay.api.dto.TemplestaySearchRes;
 import sopt.jeolloga.domain.templestay.core.Category;
 import sopt.jeolloga.domain.templestay.core.CategoryRepository;
@@ -35,7 +36,7 @@ public class TemplestaySearchService {
     private final WishlistRepository wishlistRepository;
 
     @Transactional
-    public PageWishlistRes<TemplestaySearchRes> searchTemplestay(Long userId, String query, int page, int pageSize) {
+    public PageTemplestaySearchRes<TemplestaySearchRes> searchTemplestay(Long userId, String query, int page, int pageSize) {
         String sanitizedQuery = query.replaceAll("\\s+", "");
 
         if (userId != null) {
@@ -46,7 +47,7 @@ public class TemplestaySearchService {
         Page<Object[]> results = templestayRepository.searchByTempleNameWithPagination(sanitizedQuery, pageable);
 
         if (results.isEmpty()) {
-            return new PageWishlistRes<>(page, pageSize, 0, List.of());
+            return new PageTemplestaySearchRes<>(page, pageSize, 0, List.of());
         }
 
         List<TemplestaySearchRes> templestaySearchResults = results.stream()
@@ -85,7 +86,7 @@ public class TemplestaySearchService {
                 })
                 .collect(Collectors.toList());
 
-        return new PageWishlistRes<>(
+        return new PageTemplestaySearchRes<>(
                 page,
                 pageSize,
                 results.getTotalPages(),
