@@ -36,10 +36,14 @@ public class TemplestayService {
                 .map(DataUtils::convertPriceToString)
                 .orElse(null);
 
+        String fullAddress = templestay.getAddress();
+        String address = DataUtils.extractFirstTwoWords(fullAddress);
+
         return new TemplestayDetailRes(
                 templestay.getId(),
                 templestay.getTempleName(),
                 templestay.getOrganizedName(),
+                address,
                 templestay.getPhoneNumber(),
                 templestay.getTag(),
                 price,
