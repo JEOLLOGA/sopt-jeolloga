@@ -22,4 +22,11 @@ public class DataUtils {
             throw new TemplestayCoreException(ErrorCode.INVALID_DATE_FORMAT);
         }
     }
+
+    public static String convertPriceToString(Integer priceCode) {
+        if (priceCode == null || priceCode <= 0) {
+            return null;
+        }
+        return String.format("%,d원", priceCode);
+    }
 }

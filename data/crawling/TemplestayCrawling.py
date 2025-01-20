@@ -6,77 +6,54 @@ import re
 import json
 
 def load_db_config(file_path):
-    try:
-        with open(file_path, "r", encoding="utf-8") as file:
-            config = yaml.safe_load(file)
-            if not config or "database" not in config:
-                raise ValueError("YAML 파일에 'database' 키가 없습니다.")
-            return config.get("database")
-    except Exception as e:
-        print(f"YAML 파일 로드 오류: {e}")
-        return None
+    with open(file_path, "r", encoding="utf-8") as file:
+        config = yaml.safe_load(file)
+        return config.get("database")
 
 def connect_to_db(config):
     try:
-        connection = mysql.connector.connect(
+        return mysql.connector.connect(
             host=config["host"],
             user=config["user"],
             password=config["password"],
             database=config["name"]
         )
-        print("DB 연결 성공")
-        return connection
-    except mysql.connector.Error as err:
-        print(f"DB 연결 오류: {err}")
+    except mysql.connector.Error as e:
+        print(f"DB 연결 오류: {e}")
         return None
 
-def fetch_urls(connection):
+def clean_text(text):
+    return re.sub(r"\\r|\\n|\\t|\s+", " ", text).strip()
+
+def fetch_last_id(connection):
     try:
         cursor = connection.cursor()
-        query = "SELECT templestay_url FROM url ORDER BY id ASC"
+        query = "SELECT MAX(id) FROM templestay"
         cursor.execute(query)
-        urls = [row[0] for row in cursor.fetchall()]
+        result = cursor.fetchone()
+        last_id = result[0] if result and result[0] else 0
+        cursor.close()
+        return last_id
+    except mysql.connector.Error as err:
+        print(f"마지막 ID 가져오기 오류: {err}")
+        return 0
+
+def fetch_urls_with_ids(connection):
+    try:
+        cursor = connection.cursor()
+        query = "SELECT id, templestay_url FROM url ORDER BY id ASC"
+        cursor.execute(query)
+        urls = [(row[0], row[1]) for row in cursor.fetchall()]
         cursor.close()
         return urls
     except mysql.connector.Error as err:
         print(f"URL 데이터 가져오기 오류: {err}")
         return []
 
-def clean_text(text):
-    return re.sub(r"\\r|\\n|\\t|\s+", " ", text).strip()
-
-def crawl_introduction(url):
+def crawl_data(url, url_id):
     try:
         response = requests.get(url)
         response.raise_for_status()
-
-        soup = BeautifulSoup(response.text, "html.parser")
-
-        h4_element = soup.select_one(".page-title + h4")
-        h4_text = h4_element.text if h4_element else ""
-        h4_text = clean_text(h4_text)
-
-        introduction_element = soup.select_one(".page-content p")
-        introduction = introduction_element.text if introduction_element else ""
-        introduction = clean_text(introduction)
-
-        return {
-            "url": url,
-            "data": json.dumps([h4_text, introduction], ensure_ascii=False)
-        }
-
-    except requests.exceptions.RequestException as e:
-        print(f"요청 오류: {e}")
-        return None
-    except Exception as e:
-        print(f"크롤링 오류: {e}")
-        return None
-
-def crawl_data(url):
-    try:
-        response = requests.get(url)
-        response.raise_for_status()
-
         soup = BeautifulSoup(response.text, "html.parser")
 
         templestay_name = soup.select_one(".page-name h1").text
@@ -88,24 +65,41 @@ def crawl_data(url):
         temple_name = soup.select_one(".page-name h1").text
         temple_name = re.search(r"\[(.+?)\]", temple_name).group(1)
 
-        introduction_data = crawl_introduction(url)
+        introduction = extract_introduction(soup)
 
         schedule = crawl_schedule_data(soup)
 
         return {
             "templestay_name": templestay_name,
             "phone_number": phone_number,
-            "introduction": introduction_data["data"] if introduction_data else None,
+            "introduction": introduction,
             "temple_name": temple_name,
-            "schedule": schedule
+            "schedule": schedule,
+            "url_id": url_id
         }
 
-    except requests.exceptions.RequestException as e:
-        print(f"요청 오류: {e}")
-        return None
     except Exception as e:
-        print(f"크롤링 오류: {e}")
+        print(f"크롤링 실패 (URL: {url}): {e}")
         return None
+
+
+def extract_introduction(soup):
+    try:
+        introduction_data = {}
+
+        title_element = soup.select_one("h4")
+        title = clean_text(title_element.text) if title_element else "null"
+
+        description_element = title_element.find_next("p") if title_element else None
+        description = clean_text(description_element.text) if description_element else "null"
+
+        introduction_data[title] = description
+
+        return json.dumps(introduction_data, ensure_ascii=False)
+
+    except Exception as e:
+        print(f"소개 정보 크롤링 실패: {e}")
+        return json.dumps({"error": "데이터를 가져오지 못했습니다."}, ensure_ascii=False)
 
 def crawl_schedule_data(soup):
     try:
@@ -114,7 +108,6 @@ def crawl_schedule_data(soup):
 
         for day_title_element in day_sections:
             day_title = day_title_element.text.strip() if day_title_element else "null"
-
             table_element = day_title_element.find_next("table") if day_title_element else None
             if not table_element:
                 continue
@@ -133,37 +126,70 @@ def crawl_schedule_data(soup):
         return json.dumps(schedule, ensure_ascii=False)
 
     except Exception as e:
-        print(f"Schedule 크롤링 오류: {e}")
+        print(f"일정 크롤링 실패: {e}")
         return "{}"
 
-db_config_path = "C:\\jeolloga\\data\\db_config.yaml"
+def save_crawled_data_to_db(connection, data):
+    cursor = None
+    try:
+        cursor = connection.cursor()
 
+        check_query = "SELECT COUNT(*) FROM templestay WHERE templestay_name = %s"
+        cursor.execute(check_query, (data["templestay_name"],))
+        result = cursor.fetchone()
+        if result[0] > 0:
+            print(f"중복된 templestay_name: {data['templestay_name']} - 저장하지 않음")
+            return
+
+        last_id = fetch_last_id(connection)
+        new_id = last_id + 1
+
+        templestay_query = """
+            INSERT INTO templestay (id, templestay_name, phone_number, introduction, temple_name, schedule)
+            VALUES (%s, %s, %s, %s, %s, %s)
+        """
+        cursor.execute(templestay_query, (
+            new_id,
+            data["templestay_name"],
+            data["phone_number"],
+            data["introduction"],
+            data["temple_name"],
+            data["schedule"]
+        ))
+        connection.commit()
+
+        update_url_query = "UPDATE url SET templestay_id = %s WHERE id = %s"
+        cursor.execute(update_url_query, (new_id, data["url_id"]))
+        connection.commit()
+
+        print(f"데이터 저장 및 URL 업데이트 성공: Templestay ID {new_id}, URL ID {data['url_id']}")
+
+    except mysql.connector.Error as err:
+        print(f"데이터 저장 오류: {err}")
+    finally:
+        if cursor:
+            cursor.close()
+
+def sequential_crawling_and_saving(urls_with_ids, connection):
+    for url_id, url in urls_with_ids:
+        print(f"크롤링 중: {url} (URL ID: {url_id})")
+        data = crawl_data(url, url_id)
+        if data:
+            save_crawled_data_to_db(connection, data)
+
+db_config_path = "C:\\jeolloga\\data\\db_config.yaml"
 db_config = load_db_config(db_config_path)
 
-if not db_config:
-    print("DB 설정 로드 실패. 프로그램 종료")
-    exit()
-
 connection = connect_to_db(db_config)
-
 if not connection:
-    print("DB 연결 실패. 프로그램 종료")
+    print("DB 연결 실패. 프로그램을 종료합니다.")
     exit()
 
-urls = fetch_urls(connection)
-
-if not urls:
-    print("URL 데이터 없음. 프로그램 종료")
+urls_with_ids = fetch_urls_with_ids(connection)
+if not urls_with_ids:
+    print("크롤링할 URL 데이터가 없습니다.")
     connection.close()
     exit()
 
-print("크롤링 결과 (최대 10개):")
-for index, url in enumerate(urls[:10]):
-    print(f"크롤링 중: {url}")
-    crawled_data = crawl_data(url)
-    if crawled_data:
-        print(crawled_data)
-    else:
-        print(f"크롤링 실패: {url}")
-
+sequential_crawling_and_saving(urls_with_ids, connection)
 connection.close()
