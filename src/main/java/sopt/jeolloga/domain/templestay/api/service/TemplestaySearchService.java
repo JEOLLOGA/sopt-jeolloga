@@ -88,7 +88,7 @@ public class TemplestaySearchService {
 
     @Transactional
     private void saveSearchContent(Long userId, String content) {
-        if (content == null || content.isBlank()) {
+        if (userId == null || content == null || content.isBlank()) {
             return;
         }
 
