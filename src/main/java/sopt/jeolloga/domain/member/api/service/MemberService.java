@@ -24,8 +24,8 @@ public class MemberService {
 
     public void saveInfo(String accessToken, MemberReq memberReq){
 
-        Member member = memberRepository.findById(memberReq.id())
-                .orElseThrow(() -> new IllegalArgumentException("Member not found for id: " + memberReq.id()));
+        Member member = memberRepository.findById(memberReq.userId())
+                .orElseThrow(() -> new IllegalArgumentException("Member not found for id: " + memberReq.userId()));
 
         member.setNickname(member.getNickname());
         member.setEmail(member.getEmail());
@@ -37,20 +37,20 @@ public class MemberService {
         memberRepository.save(member);
     }
 
-    public MemberDetailRes getMember(String accessToken, Long id) {
+    public MemberDetailRes getMember(String accessToken, Long userId) {
 
-        Member member = memberRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Member not found for id: " + id));
+        Member member = memberRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("Member not found for id: " + userId));
 
         MemberDetailRes memberDetailRes = new MemberDetailRes(member.getId(), member.getNickname(), member.getEmail(), member.getAgeRange(), member.getGender() , member.getReligion(), member.getHasExperience());
         return memberDetailRes;
     }
 
     // 특정 유저 조회
-    public MemberNameRes getMemberName(String accessToken, Long id) {
+    public MemberNameRes getMemberName(String accessToken, Long userId) {
 
-        Member member = memberRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Nickname not found for id: " + id));
+        Member member = memberRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("Nickname not found for id: " + userId));
 
         MemberNameRes memberNameRes = new MemberNameRes(member.getNickname());
         return memberNameRes;
