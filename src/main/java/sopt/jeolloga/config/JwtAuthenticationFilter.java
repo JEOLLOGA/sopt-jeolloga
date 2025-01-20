@@ -53,7 +53,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 throw new CustomAuthenticationCoreException(ErrorCode.UNAUTHORIZED);
             }
         }
-
         chain.doFilter(request, response);
     }
 }

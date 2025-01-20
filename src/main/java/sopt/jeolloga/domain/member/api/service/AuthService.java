@@ -1,5 +1,7 @@
 package sopt.jeolloga.domain.member.api.service;
 
+import org.apache.coyote.BadRequestException;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import sopt.jeolloga.domain.member.api.utils.JwtTokenProvider;
 import sopt.jeolloga.domain.member.core.MemberRepository;
@@ -15,6 +17,12 @@ public class AuthService {
         this.memberRepository = memberRepository;
     }
 
+//    public void logout(String accessToken){
+//
+//        String kakaoUserId = jwtTokenProvider.getMemberIdFromToken(accessToken);
+//        jwtTokenProvider.deleteRefreshToken(Long.parseLong(kakaoUserId));
+//    }
+
     public String createAccessToken(String kakaoUserID){
         return jwtTokenProvider.createAccessToken(kakaoUserID);
     }
@@ -23,8 +31,14 @@ public class AuthService {
         return jwtTokenProvider.createRefreshToken(kakaoUserID);
     }
 
-    public boolean isTokenInDatabase(String refreshToken){
-        // DB에 존재하는지 조회
+    public boolean isRefreshTokenInRedis(String refreshToken){
+
+//        Long kakaoUserId = Long.parseLong(jwtTokenProvider.getMemberIdFromToken(refreshToken));
+//        String storedRefreshToken = jwtTokenProvider.getRefreshToken(kakaoUserId);
+//
+//        if(storedRefreshToken == null || !refreshToken.equals(storedRefreshToken)){
+//            return false;
+//        }
         return true;
     }
 
@@ -46,13 +60,13 @@ public class AuthService {
 
 
         // DB에 사용자의 refreshToken과 입력된 refresh Token 일치하는지 확인할 필요 있음
-        if (!isTokenInDatabase(refreshToken)) {
-            throw new IllegalArgumentException("Refresh Token is contaminated"); // refresh Token 만료 -> 재로그인 필요
+        if (!isRefreshTokenInRedis(refreshToken)) {
+            // refresh Token 만료 or 다른 refreshToken이 들어온 상황 -> Error 방출
+            throw new IllegalArgumentException("Refresh Token is contaminated");
         }
 
         // 새로운 Access Token 발급
         return jwtTokenProvider.createAccessToken(kakaoUserId);
-
     }
 
     public void saveRefreshToken(Long userId, String refreshToken) {
@@ -62,7 +76,7 @@ public class AuthService {
 
     // 로그아웃 관련
     public void deleteRefreshToken(Long userId) {
-        // DB에서 Refresh Token 제거
-        // refreshTokenRepository.deleteByUserId(userId);
+//        // DB에서 Refresh Token 제거
+//         refreshTokenRepository.deleteByUserId(userId);
     }
 }

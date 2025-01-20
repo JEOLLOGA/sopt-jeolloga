@@ -36,10 +36,11 @@ dependencies {
 	testImplementation 'org.springframework.security:spring-security-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
-	// login
+	// Login
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 	testImplementation 'io.projectreactor:reactor-test'
 	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
+	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
 
 	// JWT
 	implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
@@ -48,6 +49,12 @@ dependencies {
 	implementation 'org.json:json:20210307'
 	implementation 'org.jsoup:jsoup:1.16.1'
 	implementation 'org.springframework.boot:spring-boot-starter-batch'
+
+	// Redis
+	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+
+	// GeoCoding
+	implementation 'org.springframework.boot:spring-boot-starter-webflux'
 }
 
 tasks.named('test') {

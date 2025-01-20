@@ -15,6 +15,7 @@ import java.util.Optional;
 public interface WishlistRepository extends JpaRepository<Wishlist, Long> {
     Optional<Wishlist> findByMemberAndTemplestay(Member member, Templestay templestay);
     Page<Wishlist> findAllByMember(Member member, Pageable pageable);
+
     @Query("SELECT COUNT(w) > 0 FROM Wishlist w WHERE w.member.id = :memberId AND w.templestay.id = :templestayId")
     boolean existsByMemberIdAndTemplestayId(@Param("memberId") Long memberId, @Param("templestayId") Long templestayId);
 

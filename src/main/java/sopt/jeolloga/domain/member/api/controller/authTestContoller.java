@@ -1,10 +1,16 @@
 package sopt.jeolloga.domain.member.api.controller;
 
+import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import sopt.jeolloga.domain.member.api.service.TokenService;
 import sopt.jeolloga.domain.member.api.utils.JwtTokenProvider;
+import sopt.jeolloga.domain.member.core.Token;
+import sopt.jeolloga.domain.member.core.TokenRepository;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -13,10 +19,35 @@ import java.util.Map;
 public class authTestContoller {
 
     private final JwtTokenProvider jwtTokenProvider;
+    private final TokenService tokenService;
 
-    public authTestContoller(JwtTokenProvider jwtTokenProvider) {
+    public authTestContoller(JwtTokenProvider jwtTokenProvider, TokenService tokenService) {
         this.jwtTokenProvider = jwtTokenProvider;
+        this.tokenService = tokenService;
     }
+
+    @PostMapping("/test/redis/save")
+    public String saveToken() {
+
+        String id = "2";
+        String refreshToken = "test token2";
+        tokenService.saveToken(id, refreshToken);
+        return "Token saved!";
+    }
+
+    @GetMapping("/test/redis/get")
+    public Token getToken() {
+        String id = "1";
+        return tokenService.getTokenById(id);
+    }
+
+    @DeleteMapping("/test/redis/delete")
+    public String deleteToken() {
+        tokenService.deleteToken("1");
+        return "Token deleted!";
+    }
+
+
 
     @PostMapping("/test/authentication")
     public ResponseEntity<Map<String, Object>> publicTest() {
@@ -37,7 +68,6 @@ public class authTestContoller {
         result.put("detail", authentication.getDetails());
         result.put("principal", authentication.getPrincipal());
         result.put("isAuthenticated", authentication.isAuthenticated());
-
 
         return ResponseEntity.ok(result);
     }
@@ -78,7 +108,4 @@ public class authTestContoller {
     public String getKakaoId(@RequestParam String accessToken) {
         return String.format("kakao ID %s", jwtTokenProvider.getMemberIdFromToken(accessToken));
     }
-
-
-
 }

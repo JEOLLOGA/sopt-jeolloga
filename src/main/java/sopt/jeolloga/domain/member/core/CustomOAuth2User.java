@@ -1,4 +1,4 @@
-package sopt.jeolloga.domain.member.api.service;
+package sopt.jeolloga.domain.member.core;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
@@ -11,19 +11,24 @@ public class CustomOAuth2User extends DefaultOAuth2User {
     private final String accessToken;
     private final String refreshToken;
     private final String email;
+    private final Long userId;
 
     public CustomOAuth2User(Collection<? extends GrantedAuthority> authorities,
                             Map<String, Object> attributes,
-                            String nameAttributeKey, String email, String accessToken, String refreshToken) {
+                            String nameAttributeKey, String email, String accessToken, String refreshToken, Long userId) {
         super(authorities, attributes, nameAttributeKey);
         this.email = email;
         this.accessToken = accessToken;
         this.refreshToken = refreshToken;
+        this.userId = userId;
     }
 
-    // 커스텀 메서드 추가
     public String getEmail() {
         return (String) getAttributes().get("email");
+    }
+
+    public Long getUserId() {
+        return userId;
     }
 
     public String getAccessToken() {

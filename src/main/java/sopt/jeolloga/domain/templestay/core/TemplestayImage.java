@@ -4,12 +4,14 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 @Entity
 @Table(name = "templestay_image")
 @Getter
 @Setter
 @NoArgsConstructor
+@ToString
 public class TemplestayImage {
 
     @Id
@@ -19,6 +21,11 @@ public class TemplestayImage {
     @Column(name = "templestay_id")
     private Long templestayId;
 
-    @Column(name = "img_url", length = 255)
+    @Column(name = "img_url")
     private String imgUrl;
+
+    public TemplestayImage(Long templestayId, String imgUrl) {
+        this.templestayId = templestayId;
+        this.imgUrl = imgUrl;
+    }
 }

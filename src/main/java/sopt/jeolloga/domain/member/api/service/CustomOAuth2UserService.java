@@ -4,23 +4,26 @@ import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserServ
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
+import sopt.jeolloga.domain.member.api.dto.MemberRes;
+import sopt.jeolloga.domain.member.core.*;
 import sopt.jeolloga.domain.member.api.utils.JwtTokenProvider;
-import sopt.jeolloga.domain.member.core.Member;
-import sopt.jeolloga.domain.member.core.MemberRepository;
-
+import org.springframework.data.redis.core.RedisTemplate;
 
 
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
     private final MemberRepository memberRepository;
     private final JwtTokenProvider jwtTokenProvider;
+    private final TokenRepository tokenRepository;
 
-    public CustomOAuth2UserService(MemberRepository memberRepository, JwtTokenProvider jwtTokenProvider){
+    public CustomOAuth2UserService(MemberRepository memberRepository, JwtTokenProvider jwtTokenProvider, TokenRepository tokenRepository){
         this.memberRepository = memberRepository;
         this.jwtTokenProvider = jwtTokenProvider;
+        this.tokenRepository = tokenRepository;
     }
 
     @Override
@@ -36,26 +39,61 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         String email = (String) kakaoAccount.get("email");
         String nickname = (String) properties.get("nickname");
 
-        Member member = findOrCreateUser(Long.parseLong(kakaoUserId), email, nickname);
+        // 유저 생성 or 조회
+        Long userId = findOrCreateUser(Long.parseLong(kakaoUserId), email, nickname);
 
+        // access, refresh token 발급
         String accessToken = jwtTokenProvider.createAccessToken(kakaoUserId);
         String refreshToken = jwtTokenProvider.createRefreshToken(kakaoUserId);
 
-        /*// redis에 refreshToken 업데이트
-        jwtTokenProvider.deleteRefreshToken((Long) attributes.get("id"));
-        jwtTokenProvider.saveRefreshToken((Long) attributes.get("id"), refreshToken)*/;
+        // 기존 token 삭제
+        if(getRefreshTokenById(kakaoUserId) != null){
+            deleteRefreshToken(kakaoUserId);
+        }
 
-        return new CustomOAuth2User(oAuth2User.getAuthorities(), attributes, "id", email, accessToken, refreshToken);
+        // Redis에 Refresh Token 저장
+        saveRefreshToken(kakaoUserId, refreshToken);
+
+        return new CustomOAuth2User(oAuth2User.getAuthorities(), attributes, "id", email, accessToken, refreshToken, userId);
     }
 
-    private Member findOrCreateUser(Long kakaoUserId, String email, String nickname) {
-
+    private Long findOrCreateUser(Long kakaoUserId, String email, String nickname) {
         return memberRepository.findByKakaoUserId(kakaoUserId)
+                .map(Member::getId)
                 .orElseGet(() -> {
                     Member newMember = new Member(kakaoUserId, email, nickname);
                     memberRepository.save(newMember);
                     System.out.println("New User Created");
-                    return newMember;
+                    return newMember.getId();
                 });
     }
+
+    public void saveRefreshToken(String id, String refreshToken) {
+        Token token = new Token(id, refreshToken);
+        tokenRepository.save(token);
+    }
+
+    public Token getRefreshTokenById(String id) {
+        return tokenRepository.findById(id).orElse(null);
+    }
+
+    public void deleteRefreshToken(String id) {
+        tokenRepository.deleteById(id);
+    }
+
+
+//    public String reissueAccessToken(String refreshToken) {
+//
+//        String kakaoUserId = jwtTokenProvider.getMemberIdFromToken(refreshToken);
+//        String storedRefreshToken = getTokenById(kakaoUserId).getRefreshToken();
+//
+//        if (storedRefreshToken == null || !storedRefreshToken.equals(refreshToken)) {
+//            throw new IllegalArgumentException("유효하지 않은 Refresh Token입니다.");
+//        }
+//
+//        return jwtTokenProvider.createAccessToken(kakaoUserId);
+//    }
+
 }
+
+

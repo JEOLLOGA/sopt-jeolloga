@@ -1,44 +1,47 @@
 package sopt.jeolloga.domain.member.api.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import sopt.jeolloga.domain.member.api.utils.JwtTokenProvider;
+import sopt.jeolloga.domain.member.api.service.CustomOAuth2UserService;
 import sopt.jeolloga.domain.member.api.service.AuthService;
 
 @RestController
 public class AuthController {
 
     private final AuthService authService;
-    private final JwtTokenProvider jwtTokenProvider;
+    private final CustomOAuth2UserService customOAuth2UserService;
 
-    public AuthController(AuthService authService, JwtTokenProvider jwtTokenProvider) {
+    public AuthController(AuthService authService, CustomOAuth2UserService customOAuth2UserService) {
         this.authService = authService;
-        this.jwtTokenProvider = jwtTokenProvider;
+        this.customOAuth2UserService = customOAuth2UserService;
     }
 
     // refresh 토큰 기반 access 토큰 재발급
-    @GetMapping("/auth/refresh")
+    @PostMapping("/auth/reissue")
     public ResponseEntity<?> refreshAccessToken(@RequestHeader String refreshToken) {
 
+
+
         HttpHeaders headers = new HttpHeaders();
-        headers.add("Authorization", "Bearer " + authService.refreshAccessToken(refreshToken));
+//        headers.add("Authorization", "Bearer " + customOAuth2UserService.reissueAccessToken(refreshToken));
 
         return ResponseEntity.ok().headers(headers).body(null);
     }
 
-    // 최초 로그인?
-    @GetMapping("/auth/login")
-    public ResponseEntity<?> login(@RequestParam String userId) {
+    @PostMapping("/auth/logout")
+    public ResponseEntity<?> logout(HttpServletRequest request){
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.add("Authorization", "Bearer " + authService.createAccessToken(userId));
-        headers.add("Refresh-Token", authService.createRefreshToken(userId));
+        String authorizationHeader = request.getHeader("Authorization");
+        String accessToken = null;
 
-        return ResponseEntity.ok().headers(headers).body(null);
+        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+             authorizationHeader.substring(7);
+        }
+
+//        authService.logout(accessToken);
+
+        return ResponseEntity.ok("logout");
     }
-
-    //
-
-
 }

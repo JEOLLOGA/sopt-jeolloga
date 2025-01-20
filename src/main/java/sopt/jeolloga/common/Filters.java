@@ -75,6 +75,7 @@ public class Filters {
         return resetFilter;
     }
 
+    // filter 전달 순서와 상관없도록 수정 필요!
     public List<Long> getFilteredCategory(List<Category> categoryEntities) {
         Integer binaryRegionFilter = convertToBinaryFilter(regionFilter);
         Integer binaryTypeFilter = convertToBinaryFilter(typeFilter);
@@ -131,6 +132,7 @@ public class Filters {
 
 
     private Map<String, Object> convertToResponse(Category category) {
+
         Map<String, Object> response = new HashMap<>();
         response.put("id", category.getId());
         response.put("type", category.getType());

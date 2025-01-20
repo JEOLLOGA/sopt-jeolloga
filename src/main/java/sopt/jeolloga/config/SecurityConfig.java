@@ -7,6 +7,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import sopt.jeolloga.domain.member.api.service.CustomOAuth2UserService;
 import sopt.jeolloga.domain.member.api.utils.CustomAuthenticationEntryPoint;
+import sopt.jeolloga.domain.member.core.CustomOAuth2User;
 
 @Configuration
 public class SecurityConfig {
@@ -40,7 +41,8 @@ public class SecurityConfig {
                         .requestMatchers("/public/**").permitAll()
                         .requestMatchers("/oauth2/**").permitAll()
                         .requestMatchers("/auth/**").permitAll()
-                        .requestMatchers("/login/").permitAll()
+                        .requestMatchers("/login/**").permitAll()
+                        .requestMatchers("/test/**").permitAll()
                         .anyRequest().permitAll()
                 )
                 .oauth2Login(oauth2 -> oauth2
@@ -56,3 +58,7 @@ public class SecurityConfig {
         return http.build();
     }
 }
+
+
+
+

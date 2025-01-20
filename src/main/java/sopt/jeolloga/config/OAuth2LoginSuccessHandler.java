@@ -5,7 +5,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
-import sopt.jeolloga.domain.member.api.service.CustomOAuth2User;
+import sopt.jeolloga.domain.member.core.CustomOAuth2User;
 
 import java.io.IOException;
 
@@ -19,10 +19,8 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 
         response.setHeader("Authorization", "Bearer " + user.getAccessToken());
         response.setHeader("refreshToken", user.getRefreshToken());
+        response.setHeader("id", String.valueOf(user.getUserId()));
         response.setStatus(HttpServletResponse.SC_OK);
 
-//        response.setContentType("application/json");
-//        response.setCharacterEncoding("UTF-8");
-//        response.getWriter().write("{\"message\": \"Login successful!\"}");
     }
 }
