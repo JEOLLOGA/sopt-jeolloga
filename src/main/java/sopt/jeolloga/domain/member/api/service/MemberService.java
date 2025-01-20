@@ -1,6 +1,7 @@
 package sopt.jeolloga.domain.member.api.service;
 
 import org.springframework.stereotype.Service;
+import sopt.jeolloga.domain.member.api.dto.MemberDetailRes;
 import sopt.jeolloga.domain.member.api.dto.MemberNameRes;
 import sopt.jeolloga.domain.member.api.dto.MemberReq;
 import sopt.jeolloga.domain.member.api.dto.MemberRes;
@@ -36,13 +37,13 @@ public class MemberService {
         memberRepository.save(member);
     }
 
-    public MemberRes getMember(String accessToken, Long id) {
+    public MemberDetailRes getMember(String accessToken, Long id) {
 
         Member member = memberRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Member not found for id: " + id));
 
-        MemberRes memberRes = new MemberRes(member.getId(), member.getNickname(), member.getEmail(), member.getAgeRange(), member.getGender() , member.getReligion(), member.getHasExperience());
-        return memberRes;
+        MemberDetailRes memberDetailRes = new MemberDetailRes(member.getId(), member.getNickname(), member.getEmail(), member.getAgeRange(), member.getGender() , member.getReligion(), member.getHasExperience());
+        return memberDetailRes;
     }
 
     // 특정 유저 조회

@@ -128,21 +128,4 @@ public class JwtTokenProvider { // Jwt Token 생성
         }
         return null;
     }
-
-    public void saveRefreshToken(Long userId, String refreshToken) {
-        String key = "refreshToken:" + userId;
-        redisTemplate.opsForValue().set(key, refreshToken, refreshTokenValidity, TimeUnit.MILLISECONDS);
-    }
-
-    public String getRefreshToken(Long userId) {
-        String key = "refreshToken:" + userId;
-        return redisTemplate.opsForValue().get(key);
-    }
-
-    public void deleteRefreshToken(Long userId) {
-        String key = "refreshToken:" + userId;
-        redisTemplate.delete(key);
-    }
-
-
 }

@@ -17,11 +17,11 @@ public class AuthService {
         this.memberRepository = memberRepository;
     }
 
-    public void logout(String accessToken){
-
-        String kakaoUserId = jwtTokenProvider.getMemberIdFromToken(accessToken);
-        jwtTokenProvider.deleteRefreshToken(Long.parseLong(kakaoUserId));
-    }
+//    public void logout(String accessToken){
+//
+//        String kakaoUserId = jwtTokenProvider.getMemberIdFromToken(accessToken);
+//        jwtTokenProvider.deleteRefreshToken(Long.parseLong(kakaoUserId));
+//    }
 
     public String createAccessToken(String kakaoUserID){
         return jwtTokenProvider.createAccessToken(kakaoUserID);

@@ -1,11 +1,16 @@
 package sopt.jeolloga.domain.member.api.controller;
 
+import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import sopt.jeolloga.domain.member.api.service.TokenService;
 import sopt.jeolloga.domain.member.api.utils.JwtTokenProvider;
+import sopt.jeolloga.domain.member.core.Token;
+import sopt.jeolloga.domain.member.core.TokenRepository;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -14,35 +19,35 @@ import java.util.Map;
 public class authTestContoller {
 
     private final JwtTokenProvider jwtTokenProvider;
-    private final RedisTemplate<String, String> redisTemplate;
+    private final TokenService tokenService;
 
-    public authTestContoller(JwtTokenProvider jwtTokenProvider, RedisTemplate redisTemplate) {
+    public authTestContoller(JwtTokenProvider jwtTokenProvider, TokenService tokenService) {
         this.jwtTokenProvider = jwtTokenProvider;
-        this.redisTemplate = redisTemplate;
+        this.tokenService = tokenService;
     }
 
-    @PostMapping("/test/redis")
-    public ResponseEntity<?> checkRedis(){
-        checkConnection();
-        return ResponseEntity.ok("redis test");
+    @PostMapping("/test/redis/save")
+    public String saveToken() {
+
+        String id = "2";
+        String refreshToken = "test token2";
+        tokenService.saveToken(id, refreshToken);
+        return "Token saved!";
+    }
+
+    @GetMapping("/test/redis/get")
+    public Token getToken() {
+        String id = "1";
+        return tokenService.getTokenById(id);
+    }
+
+    @DeleteMapping("/test/redis/delete")
+    public String deleteToken() {
+        tokenService.deleteToken("1");
+        return "Token deleted!";
     }
 
 
-    public void checkConnection() {
-        try {
-            // 테스트 키 저장
-            redisTemplate.opsForValue().set("testKey", "testValue");
-            String value = redisTemplate.opsForValue().get("testKey");
-
-            if ("testValue".equals(value)) {
-                System.out.println("Redis is connected and working!");
-            } else {
-                System.out.println("Redis connection failed or misconfigured.");
-            }
-        } catch (Exception e) {
-            System.err.println("Redis connection test failed: " + e.getMessage());
-        }
-    }
 
     @PostMapping("/test/authentication")
     public ResponseEntity<Map<String, Object>> publicTest() {

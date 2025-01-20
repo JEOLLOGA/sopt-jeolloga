@@ -75,6 +75,7 @@ public class Filters {
         return resetFilter;
     }
 
+    // filter 전달 순서와 상관없도록 수정 필요!
     public List<Long> getFilteredCategory(List<Category> categoryEntities) {
         Integer binaryRegionFilter = convertToBinaryFilter(regionFilter);
         Integer binaryTypeFilter = convertToBinaryFilter(typeFilter);

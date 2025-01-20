@@ -19,10 +19,8 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 
         response.setHeader("Authorization", "Bearer " + user.getAccessToken());
         response.setHeader("refreshToken", user.getRefreshToken());
+        response.setHeader("id", String.valueOf(user.getUserId()));
         response.setStatus(HttpServletResponse.SC_OK);
 
-//        response.setContentType("application/json");
-//        response.setCharacterEncoding("UTF-8");
-//        response.getWriter().write("{\"message\": \"Login successful!\"}");
     }
 }

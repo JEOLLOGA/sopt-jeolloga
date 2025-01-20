@@ -40,7 +40,8 @@ public class SecurityConfig {
                         .requestMatchers("/public/**").permitAll()
                         .requestMatchers("/oauth2/**").permitAll()
                         .requestMatchers("/auth/**").permitAll()
-                        .requestMatchers("/login/").permitAll()
+                        .requestMatchers("/login/**").permitAll()
+                        .requestMatchers("/test/**").permitAll()
                         .anyRequest().permitAll()
                 )
                 .oauth2Login(oauth2 -> oauth2

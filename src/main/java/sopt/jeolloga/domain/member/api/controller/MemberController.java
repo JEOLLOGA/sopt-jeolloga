@@ -3,6 +3,7 @@ package sopt.jeolloga.domain.member.api.controller;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import sopt.jeolloga.domain.member.api.dto.MemberDetailRes;
 import sopt.jeolloga.domain.member.api.dto.MemberNameRes;
 import sopt.jeolloga.domain.member.api.dto.MemberReq;
 import sopt.jeolloga.domain.member.api.dto.MemberRes;
@@ -41,11 +42,11 @@ public class MemberController {
     }
 
     @GetMapping("/user/mypage")
-    public ResponseEntity<MemberRes> getMemeberById(@RequestHeader Long id, HttpServletRequest request) {
+    public ResponseEntity<MemberDetailRes> getMemeberById(@RequestHeader Long id, HttpServletRequest request) {
 
         String accessToken = request.getHeader("Authorization");
-        MemberRes memberRes = memberService.getMember(accessToken, id);
-        return ResponseEntity.ok(memberRes);
+        MemberDetailRes memberDetailRes = memberService.getMember(accessToken, id);
+        return ResponseEntity.ok(memberDetailRes);
     }
 
 }
