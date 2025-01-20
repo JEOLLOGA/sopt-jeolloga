@@ -1,4 +1,4 @@
-package sopt.jeolloga.domain.member;
+package sopt.jeolloga.domain.member.core;
 
 import jakarta.persistence.*;
 import lombok.Getter;

@@ -1,4 +1,4 @@
-package sopt.jeolloga.domain.member;
+package sopt.jeolloga.domain.member.api.dto;
 
 public record DeleteSearchReq(
         Long searchId
