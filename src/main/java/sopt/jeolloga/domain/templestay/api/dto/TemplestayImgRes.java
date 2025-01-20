@@ -7,7 +7,7 @@ public record TemplestayImgRes(
         List<TemplestayImg> templestayImgs
 ) {
     public static record TemplestayImg(
-            Long id,
+            Long imageUrlId,
             String imgUrl
     ) {
     }

@@ -2,7 +2,7 @@ package sopt.jeolloga.domain.templestay.api.dto;
 
 public record TemplestayRankingRes(
         int ranking,
-        Long id,
+        Long templestayId,
         String templeName,
         String tag,
         String region,

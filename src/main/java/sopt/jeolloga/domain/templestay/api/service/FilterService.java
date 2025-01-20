@@ -93,7 +93,7 @@ public class FilterService {
 
 
     public ResetFilterRes getFilterReset() {
-        ResetFilterRes resetFilterRes = new ResetFilterRes(this.filters.getResetFilter(), this.templestayRepository.count());
+        ResetFilterRes resetFilterRes = new ResetFilterRes(this.templestayRepository.count(), this.filters.getResetFilter());
         return resetFilterRes;
     }
 

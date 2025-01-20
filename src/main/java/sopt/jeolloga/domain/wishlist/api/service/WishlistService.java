@@ -47,13 +47,8 @@ public class WishlistService {
 
     @Transactional
     public void deleteWishlist(Long userId, Long templestayId) {
-        Member member = memberRepository.findById(userId)
-                .orElseThrow(() -> new WishlistCoreException(ErrorCode.NOT_FOUND_TARGET));
 
-        Templestay templestay = templestayRepository.findById(templestayId)
-                .orElseThrow(() -> new WishlistCoreException(ErrorCode.NOT_FOUND_TARGET));
-
-        Wishlist wishlist = wishlistRepository.findByMemberAndTemplestay(member, templestay)
+        Wishlist wishlist = (Wishlist) wishlistRepository.findByMemberIdAndTemplestayId(userId, templestayId)
                 .orElseThrow(() -> new WishlistCoreException(ErrorCode.NOT_FOUND_TEMPLESTAY));
 
         wishlistRepository.delete(wishlist);
