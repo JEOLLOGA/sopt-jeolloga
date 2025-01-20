@@ -81,19 +81,6 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         tokenRepository.deleteById(id);
     }
 
-
-//    public String reissueAccessToken(String refreshToken) {
-//
-//        String kakaoUserId = jwtTokenProvider.getMemberIdFromToken(refreshToken);
-//        String storedRefreshToken = getTokenById(kakaoUserId).getRefreshToken();
-//
-//        if (storedRefreshToken == null || !storedRefreshToken.equals(refreshToken)) {
-//            throw new IllegalArgumentException("유효하지 않은 Refresh Token입니다.");
-//        }
-//
-//        return jwtTokenProvider.createAccessToken(kakaoUserId);
-//    }
-
 }
 
 

@@ -1,5 +1,4 @@
 package sopt.jeolloga.domain.member.api.dto;
 
-public record MemberRes(Long id, String nickname, String email) {
-
+public record MemberRes(Long userId, String nickname, String email) {
 }
