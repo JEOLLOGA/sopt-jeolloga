@@ -35,13 +35,34 @@ public class TemplestaySearchService {
     private final WishlistRepository wishlistRepository;
 
     @Transactional
-    public PageTemplestaySearchRes<TemplestaySearchRes> searchTemplestay(Long userId, String query, int page, int pageSize) {
+    public PageTemplestaySearchRes<TemplestaySearchRes> filterTemplestay(
+            Long userId,
+            String query,
+            int page,
+            int pageSize,
+            Integer regionFilter,
+            Integer typeFilter,
+            Integer purposeFilter,
+            Integer experienceFilter,
+            Integer etcFilter,
+            Integer priceMin,
+            Integer priceMax) {
+
         String sanitizedQuery = query.replaceAll("\\s+", "");
 
         saveSearchContent(userId, query);
 
         Pageable pageable = PageRequest.of(page - 1, pageSize);
-        Page<Object[]> results = templestayRepository.searchByTempleNameWithPagination(sanitizedQuery, pageable);
+        Page<Object[]> results = templestayRepository.searchWithFilters(
+                sanitizedQuery,
+                regionFilter,
+                typeFilter,
+                purposeFilter,
+                experienceFilter,
+                etcFilter,
+                priceMin,
+                priceMax,
+                pageable);
 
         if (results.isEmpty()) {
             return new PageTemplestaySearchRes<>(page, pageSize, 0, List.of());
@@ -86,6 +107,7 @@ public class TemplestaySearchService {
         return new PageTemplestaySearchRes<>(page, pageSize, results.getTotalPages(), templestaySearchResults);
     }
 
+
     @Transactional
     private void saveSearchContent(Long userId, String content) {
         if (userId == null || content == null || content.isBlank()) {
@@ -101,5 +123,4 @@ public class TemplestaySearchService {
         Search search = new Search(member, content);
         searchRepository.save(search);
     }
-
 }

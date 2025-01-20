@@ -34,4 +34,29 @@ public interface TemplestayRepository extends JpaRepository<Templestay, Long> {
             countQuery = "SELECT COUNT(*) FROM templestay t WHERE t.temple_name LIKE %:query%",
             nativeQuery = true)
     Page<Object[]> searchByTempleNameWithPagination(String query, Pageable pageable);
+
+    @Query("""
+        SELECT t.id, t.templeName, t.organizedName, t.tag
+        FROM Templestay t
+        JOIN Category c ON t.id = c.templestayId
+        WHERE (:sanitizedQuery IS NULL OR t.templeName LIKE %:sanitizedQuery%)
+          AND (:regionFilter IS NULL OR (c.region & :regionFilter) > 0)
+          AND (:typeFilter IS NULL OR (c.type & :typeFilter) > 0)
+          AND (:purposeFilter IS NULL OR (c.purpose & :purposeFilter) > 0)
+          AND (:experienceFilter IS NULL OR (c.experience & :experienceFilter) > 0)
+          AND (:etcFilter IS NULL OR (c.etc & :etcFilter) > 0)
+          AND (:priceMin IS NULL OR t.price >= :priceMin)
+          AND (:priceMax IS NULL OR t.price <= :priceMax)
+        """)
+    Page<Object[]> searchWithFilters(
+            @Param("sanitizedQuery") String sanitizedQuery,
+            @Param("regionFilter") Integer regionFilter,
+            @Param("typeFilter") Integer typeFilter,
+            @Param("purposeFilter") Integer purposeFilter,
+            @Param("experienceFilter") Integer experienceFilter,
+            @Param("etcFilter") Integer etcFilter,
+            @Param("priceMin") Integer priceMin,
+            @Param("priceMax") Integer priceMax,
+            Pageable pageable);
+
 }
