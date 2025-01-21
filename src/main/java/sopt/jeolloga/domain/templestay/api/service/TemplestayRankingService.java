@@ -19,6 +19,7 @@ public class TemplestayRankingService {
     private final CategoryRepository categoryRepository;
     private final WishlistRepository wishlistRepository;
     private final UrlRepository urlRepository;
+    private final TemplestayImageRepository templestayImageRepository;
 
     @Transactional
     public TemplestayRankingListRes getTopRankingList(Long userId) {
@@ -38,7 +39,7 @@ public class TemplestayRankingService {
 
                     String region = category != null ? CategoryUtils.getRegionName(category.getRegion()) : "알 수 없음";
 
-                    String imgUrl = urlRepository.findImgUrlByTemplestayId(id).orElse("이미지 없음");
+                    String imgUrl = templestayImageRepository.findImgUrlByTemplestayId(id).orElse("이미지 없음");
 
                     boolean liked = userId != null && wishlistRepository.existsByMemberIdAndTemplestayId(userId, id);
 
