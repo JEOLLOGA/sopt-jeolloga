@@ -30,7 +30,6 @@ public class FilterService {
         this.wishlistRepository = wishlistRepository;
     }
 
-
     public FilterRes getFilters() {
         FilterRes filterRes = new FilterRes(this.filters.getFilterKey());
         return filterRes;

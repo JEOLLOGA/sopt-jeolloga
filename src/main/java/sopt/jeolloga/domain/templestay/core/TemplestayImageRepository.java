@@ -17,5 +17,4 @@ public interface TemplestayImageRepository extends JpaRepository<TemplestayImage
     List<TemplestayImage> findByIdIn(@Param("ids") List<Long> ids);
 
     List<TemplestayImage> findAllByTemplestayId(Long templestayId);
-
 }
