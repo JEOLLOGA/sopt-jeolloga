@@ -10,6 +10,9 @@ import sopt.jeolloga.domain.templestay.api.dto.TemplestayFilterReq;
 import sopt.jeolloga.domain.templestay.api.dto.TemplestaySearchRes;
 import sopt.jeolloga.domain.templestay.api.service.TemplestaySearchService;
 
+import java.util.Optional;
+import java.util.OptionalLong;
+
 @RequiredArgsConstructor
 @RestController
 public class TemplestaySearchController {
@@ -17,6 +20,7 @@ public class TemplestaySearchController {
 
     @PostMapping("/search")
     public ResponseEntity<PageTemplestaySearchRes<TemplestaySearchRes>> searchWithFilters(
+            @RequestParam(value = "userId", required = false) Long userId, // required = false로 설정
             @RequestBody TemplestayFilterReq templestayFilterReq,
             @RequestParam(value = "page", defaultValue = "1") int page,
             @RequestParam(value = "pageSize", defaultValue = "10") int pageSize) {
@@ -24,7 +28,7 @@ public class TemplestaySearchController {
         Pageable pageable = PageRequest.of(page - 1, pageSize);
 
         PageTemplestaySearchRes<TemplestaySearchRes> results = templestaySearchService.searchTemplestayWithFilters(
-                templestayFilterReq.userId(),
+                userId, // userId가 null일 수도 있음
                 templestayFilterReq.content(),
                 templestayFilterReq.region(),
                 templestayFilterReq.type(),

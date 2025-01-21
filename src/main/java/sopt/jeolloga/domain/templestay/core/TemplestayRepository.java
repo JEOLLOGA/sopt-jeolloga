@@ -52,5 +52,4 @@ public interface TemplestayRepository extends JpaRepository<Templestay, Long> {
             @Param("activity") Integer activity,
             @Param("etc") Integer etc
     );
-
 }

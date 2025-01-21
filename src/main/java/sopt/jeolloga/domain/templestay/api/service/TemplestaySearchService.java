@@ -12,7 +12,9 @@ import sopt.jeolloga.domain.member.core.SearchRepository;
 import sopt.jeolloga.domain.templestay.api.dto.PageTemplestaySearchRes;
 import sopt.jeolloga.domain.templestay.api.dto.TemplestaySearchRes;
 import sopt.jeolloga.domain.templestay.core.TemplestayRepository;
+import sopt.jeolloga.domain.templestay.core.exception.TemplestayCoreException;
 import sopt.jeolloga.domain.wishlist.core.WishlistRepository;
+import sopt.jeolloga.exception.ErrorCode;
 
 import java.util.List;
 import java.util.Map;
@@ -40,28 +42,39 @@ public class TemplestaySearchService {
         saveSearchContent(userId, query);
 
         String sanitizedQuery = query != null ? query.trim() : "";
-        Integer regionFilter = calculateBitValue(region);
-        Integer typeFilter = calculateBitValue(type);
-        Integer purposeFilter = calculateBitValue(purpose);
-        Integer activityFilter = calculateBitValue(activity);
-        Integer etcFilter = calculateBitValue(etc);
+        Integer regionFilter = calculateBitValue(region, "region");
+        Integer typeFilter = calculateBitValue(type, "type");
+        Integer purposeFilter = calculateBitValue(purpose, "purpose");
+        Integer activityFilter = calculateBitValue(activity, "activity");
+        Integer etcFilter = calculateBitValue(etc, "etc");
 
         List<Object[]> searchResults = templestayRepository.searchWithFiltersAndData(
                 sanitizedQuery, regionFilter, typeFilter, purposeFilter, activityFilter, etcFilter);
 
-        List<TemplestaySearchRes> templestaySearchResults = searchResults.stream()
+        int totalPages = (int) Math.ceil((double) searchResults.size() / pageable.getPageSize());
+
+        List<Object[]> paginatedResults = searchResults.stream()
+                .skip((long) pageable.getPageNumber() * pageable.getPageSize())
+                .limit(pageable.getPageSize())
+                .collect(Collectors.toList());
+
+        boolean isUserNull = userId == null;
+        Long sharedUserId = isUserNull ? -1L : userId; // userId가 null이면 공통 값을 사용
+
+        List<TemplestaySearchRes> templestaySearchResults = paginatedResults.stream()
                 .map(result -> {
                     Long id = ((Number) result[0]).longValue();
                     String templeName = result[1] != null ? result[1].toString() : null;
                     String templestayName = result[2] != null ? result[2].toString() : null;
-                    String tag = result[3] != null ? result[3].toString() : null;
+                    String tag = result[3] != null ? result[3].toString().split(",")[0] : null;
                     String regionName = result.length > 4 && result[4] != null
-                            ? CategoryUtils.getRegionName(((Number) result[4]).intValue())
+                            ? CategoryUtils.getRegionName((Integer) result[4])
                             : null;
                     String typeName = result.length > 5 && result[5] != null
-                            ? CategoryUtils.getTypeName(((Number) result[5]).intValue())
+                            ? CategoryUtils.getTypeName((Integer) result[5])
                             : null;
-                    String imgUrl = result.length > 6 ? result[6].toString() : null;
+                    String imgUrl = result.length > 9 && result[9] != null
+                            ? result[9].toString() : null;
                     boolean liked = (userId != null) && wishlistRepository.existsByMemberIdAndTemplestayId(userId, id);
 
                     return new TemplestaySearchRes(
@@ -80,15 +93,23 @@ public class TemplestaySearchService {
         return new PageTemplestaySearchRes<>(
                 pageable.getPageNumber() + 1,
                 pageable.getPageSize(),
-                templestaySearchResults.size(),
+                totalPages,
                 templestaySearchResults
         );
     }
 
-    private Integer calculateBitValue(Map<String, Integer> filter) {
-        if (filter == null || filter.isEmpty()) {
-            return null;
+    private Integer calculateBitValue(Map<String, Integer> filter, String categoryType) {
+        if (filter == null || filter.isEmpty() || filter.values().stream().allMatch(value -> value == 0)) {
+            return switch (categoryType) {
+                case "region" -> 0b111111111111111;
+                case "type" -> 0b111;
+                case "purpose" -> 0b11111111;
+                case "activity" -> 0b1111111111111;
+                case "etc" -> 0b11111111;
+                default -> 0;
+            };
         }
+        // 필터된 비트 계산
         return filter.entrySet().stream()
                 .filter(entry -> entry.getValue() == 1)
                 .map(Map.Entry::getKey)
@@ -96,9 +117,10 @@ public class TemplestaySearchService {
                 .reduce(0, (a, b) -> a | b);
     }
 
+
     @Transactional
     private void saveSearchContent(Long userId, String content) {
-        if (content == null || content.isBlank()) {
+        if (userId == null || content == null || content.isBlank()) {
             content = "";
         }
 

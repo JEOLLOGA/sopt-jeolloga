@@ -63,16 +63,16 @@ public class TemplestayGlobalExceptionHandler {
                 .body(ResponseDto.fail("요청한 리소스를 찾을 수 없습니다."));
     }
 
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ResponseDto<Void>> handleHttpMessageNotReadableException(HttpMessageNotReadableException e) {
+        return ResponseEntity.badRequest().body(ResponseDto.fail("요청 본문이 비어 있거나 잘못되었습니다."));
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ResponseDto<Void>> handleGeneralException(Exception e) {
         e.printStackTrace();
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(ResponseDto.fail("서버 내부 오류입니다."));
-    }
-
-    @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<ResponseDto<Void>> handleHttpMessageNotReadableException(HttpMessageNotReadableException e) {
-        return ResponseEntity.badRequest().body(ResponseDto.fail("요청 본문이 비어 있거나 잘못되었습니다."));
     }
 }

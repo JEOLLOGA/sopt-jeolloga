@@ -3,7 +3,6 @@ package sopt.jeolloga.domain.templestay.api.dto;
 import java.util.Map;
 
 public record TemplestayFilterReq(
-        Long userId,
         String content,
         Map<String, Integer> region,
         Map<String, Integer> type,
