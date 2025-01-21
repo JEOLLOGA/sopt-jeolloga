@@ -18,14 +18,14 @@ public class TemplestayImage {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "templestay_id")
-    private Long templestayId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "templestay_id")
+    private Templestay templestay;
 
     @Column(name = "img_url")
     private String imgUrl;
 
-    public TemplestayImage(Long templestayId, String imgUrl) {
-        this.templestayId = templestayId;
+    public TemplestayImage(String imgUrl) {
         this.imgUrl = imgUrl;
     }
 }
