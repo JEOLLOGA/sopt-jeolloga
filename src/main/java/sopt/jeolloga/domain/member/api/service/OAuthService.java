@@ -35,7 +35,6 @@ public class OAuthService {
 
     public String getKakaoAccessToken(String authorizationCode){
 
-        // WebClient를 이용한 post 요청 (카카오 Access Token 발급)
         KakaoTokenRes kakaoTokenRes = WebClient.create(KAUTH_TOKEN_URL_HOST).post()
                 .uri(uriBuilder -> uriBuilder
                         .scheme("https")
