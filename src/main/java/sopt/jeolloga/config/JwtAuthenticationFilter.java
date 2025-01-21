@@ -1,6 +1,5 @@
 package sopt.jeolloga.config;
 
-import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -10,13 +9,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import sopt.jeolloga.domain.member.api.utils.JwtTokenProvider;
-import sopt.jeolloga.domain.member.core.exception.CustomAuthenticationCoreException;
+import sopt.jeolloga.domain.member.core.exception.MemberCoreException;
 import sopt.jeolloga.exception.ErrorCode;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
-import org.springframework.stereotype.Component;
-import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
@@ -50,7 +44,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             } else {
                 // 유효하지 않은 토큰 -> 401 응답 반환
-                throw new CustomAuthenticationCoreException(ErrorCode.UNAUTHORIZED);
+                throw new MemberCoreException(ErrorCode.UNAUTHORIZED);
             }
         }
         chain.doFilter(request, response);

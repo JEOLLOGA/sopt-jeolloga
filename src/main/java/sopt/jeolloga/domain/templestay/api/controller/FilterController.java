@@ -2,10 +2,7 @@ package sopt.jeolloga.domain.templestay.api.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import sopt.jeolloga.domain.templestay.api.dto.*;
 import sopt.jeolloga.domain.templestay.api.service.FilterService;
 
@@ -38,7 +35,7 @@ public class FilterController {
     }
 
     // 필터링 된 템플스테이 개수 반환
-    @GetMapping("/public/filter/count")
+    @PostMapping("/public/filter/count")
     public ResponseEntity<FilterCountRes> getFilteredTemplestayNum(@RequestBody Map<String, Object> filter) {
 
         List<Long> filteredId = filterService.getFiteredTemplestayCategory(filter);
@@ -47,7 +44,7 @@ public class FilterController {
     }
 
     // 필터링 된 템플스테이 목록 반환
-    @GetMapping("/filter/list")
+    @PostMapping("/filter/list")
     public ResponseEntity<PageTemplestayRes> getFilteredTemplestay(
             @RequestBody Map<String, Object> filter,
             @RequestParam (value = "userId", required = false) Long userId,
