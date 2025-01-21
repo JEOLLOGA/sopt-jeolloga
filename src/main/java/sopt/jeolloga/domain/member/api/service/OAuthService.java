@@ -40,7 +40,7 @@ public class OAuthService {
                 .uri(uriBuilder -> uriBuilder
                         .scheme("https")
                         .path("/oauth/token")
-                        .queryParam("redirect_uri", "http://52.78.131.68/login")
+                        .queryParam("redirect_uri", "http://52.78.131.68/login/")
                         .queryParam("grant_type", "authorization_code")
                         .queryParam("client_id", CLIENT_ID)
                         .queryParam("code", authorizationCode)
