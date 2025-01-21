@@ -12,10 +12,7 @@ import sopt.jeolloga.domain.member.core.Search;
 import sopt.jeolloga.domain.member.core.SearchRepository;
 import sopt.jeolloga.domain.templestay.api.dto.PageTemplestaySearchRes;
 import sopt.jeolloga.domain.templestay.api.dto.TemplestaySearchRes;
-import sopt.jeolloga.domain.templestay.core.Category;
-import sopt.jeolloga.domain.templestay.core.CategoryRepository;
-import sopt.jeolloga.domain.templestay.core.TemplestayRepository;
-import sopt.jeolloga.domain.templestay.core.UrlRepository;
+import sopt.jeolloga.domain.templestay.core.*;
 import sopt.jeolloga.domain.templestay.core.exception.TemplestayCoreException;
 import sopt.jeolloga.domain.wishlist.core.WishlistRepository;
 import sopt.jeolloga.exception.ErrorCode;
@@ -33,6 +30,7 @@ public class TemplestaySearchService {
     private final CategoryRepository categoryRepository;
     private final UrlRepository urlRepository;
     private final WishlistRepository wishlistRepository;
+    private final TemplestayImageRepository templestayImageRepository;
 
     @Transactional
     public PageTemplestaySearchRes<TemplestaySearchRes> searchTemplestay(Long userId, String query, int page, int pageSize) {
@@ -64,7 +62,7 @@ public class TemplestaySearchService {
                                 .orElseThrow(() -> new TemplestayCoreException(ErrorCode.NOT_FOUND_TARGET));
                         region = CategoryUtils.getRegionName(category.getRegion());
                         type = CategoryUtils.getTypeName(category.getType());
-                        imgUrl = urlRepository.findImgUrlByTemplestayId(id).orElse(null);
+                        imgUrl = templestayImageRepository.findImgUrlByTemplestayId(id).orElse(null);
                         if (userId != null) {
                             liked = wishlistRepository.existsByMemberIdAndTemplestayId(userId, id);
                         }

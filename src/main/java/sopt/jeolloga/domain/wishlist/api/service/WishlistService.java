@@ -28,6 +28,7 @@ public class WishlistService {
     private final TemplestayRepository templestayRepository;
     private final CategoryRepository categoryRepository;
     private final UrlRepository urlRepository;
+    private final TemplestayImageRepository templestayImageRepository;
 
     @Transactional
     public void addWishlist(Long userId, Long templestayId) {
@@ -77,7 +78,7 @@ public class WishlistService {
                     String region = CategoryUtils.getRegionName(category.getRegion());
                     String type = CategoryUtils.getTypeName(category.getType());
 
-                    String imgUrl = urlRepository.findImgUrlByTemplestayId(templestay.getId())
+                    String imgUrl = templestayImageRepository.findImgUrlByTemplestayId(templestay.getId())
                             .orElseThrow(() -> new WishlistNotFoundException());
 
                     boolean liked = wishlistRepository.existsByMemberIdAndTemplestayId(userId, templestay.getId());
