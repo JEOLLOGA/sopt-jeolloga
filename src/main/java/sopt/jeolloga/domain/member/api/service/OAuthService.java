@@ -25,6 +25,9 @@ public class OAuthService {
     @Value("${kakao.client.client-id}")
     private String CLIENT_ID;
 
+    @Value("${kakao.client.redirect-uri}")
+    private String REDIRECT_URI;
+
     MemberRepository memberRepository;
     JwtTokenProvider jwtTokenProvider;
 
@@ -39,7 +42,7 @@ public class OAuthService {
                 .uri(uriBuilder -> uriBuilder
                         .scheme("https")
                         .path("/oauth/token")
-                        .queryParam("redirect_uri", "http://127.0.0.1:8080/login")
+                        .queryParam("redirect_uri", REDIRECT_URI)
                         .queryParam("grant_type", "authorization_code")
                         .queryParam("client_id", CLIENT_ID)
                         .queryParam("code", authorizationCode)
