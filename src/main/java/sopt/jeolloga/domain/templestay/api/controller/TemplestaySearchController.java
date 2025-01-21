@@ -20,7 +20,7 @@ public class TemplestaySearchController {
 
     @PostMapping("/search")
     public ResponseEntity<PageTemplestaySearchRes<TemplestaySearchRes>> searchWithFilters(
-            @RequestParam(value = "userId", required = false) Long userId, // required = false로 설정
+            @RequestParam(value = "userId", required = false) Long userId,
             @RequestBody TemplestayFilterReq templestayFilterReq,
             @RequestParam(value = "page", defaultValue = "1") int page,
             @RequestParam(value = "pageSize", defaultValue = "10") int pageSize) {

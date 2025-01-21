@@ -39,9 +39,12 @@ public class TemplestaySearchService {
             Map<String, Integer> etc,
             Pageable pageable
     ) {
-        saveSearchContent(userId, query);
+        if (userId != null) {
+            saveSearchContent(userId, query);
+        }
 
-        String sanitizedQuery = query != null ? query.trim() : "";
+        String sanitizedQuery = (query != null && !"NULL".equalsIgnoreCase(query)) ? query.trim() : "";
+
         Integer regionFilter = calculateBitValue(region, "region");
         Integer typeFilter = calculateBitValue(type, "type");
         Integer purposeFilter = calculateBitValue(purpose, "purpose");
@@ -51,6 +54,16 @@ public class TemplestaySearchService {
         List<Object[]> searchResults = templestayRepository.searchWithFiltersAndData(
                 sanitizedQuery, regionFilter, typeFilter, purposeFilter, activityFilter, etcFilter);
 
+        if (searchResults.isEmpty()) {
+            return new PageTemplestaySearchRes<>(
+                    pageable.getPageNumber() + 1,
+                    pageable.getPageSize(),
+                    0,
+                    sanitizedQuery,
+                    List.of()
+            );
+        }
+
         int totalPages = (int) Math.ceil((double) searchResults.size() / pageable.getPageSize());
 
         List<Object[]> paginatedResults = searchResults.stream()
@@ -58,9 +71,7 @@ public class TemplestaySearchService {
                 .limit(pageable.getPageSize())
                 .collect(Collectors.toList());
 
-        boolean isUserNull = userId == null;
-        Long sharedUserId = isUserNull ? -1L : userId; // userId가 null이면 공통 값을 사용
-
+        // 관심 여부(liked) 기본값 처리
         List<TemplestaySearchRes> templestaySearchResults = paginatedResults.stream()
                 .map(result -> {
                     Long id = ((Number) result[0]).longValue();
@@ -94,6 +105,7 @@ public class TemplestaySearchService {
                 pageable.getPageNumber() + 1,
                 pageable.getPageSize(),
                 totalPages,
+                sanitizedQuery,
                 templestaySearchResults
         );
     }
@@ -109,7 +121,6 @@ public class TemplestaySearchService {
                 default -> 0;
             };
         }
-        // 필터된 비트 계산
         return filter.entrySet().stream()
                 .filter(entry -> entry.getValue() == 1)
                 .map(Map.Entry::getKey)

@@ -6,6 +6,7 @@ public record PageTemplestaySearchRes<T>(
         int page,
         int pageSize,
         int totalPages,
+        String content,
         List<T> templestays
 ) {
 }
