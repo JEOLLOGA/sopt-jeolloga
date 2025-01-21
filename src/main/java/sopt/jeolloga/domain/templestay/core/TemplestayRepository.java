@@ -28,10 +28,29 @@ public interface TemplestayRepository extends JpaRepository<Templestay, Long> {
     @Query("SELECT DISTINCT t.templeName FROM Templestay t")
     List<String> findDistinctTempleNames();
 
-    @Query(value = "SELECT t.id, t.temple_name, t.organized_name, t.tag " +
-            "FROM templestay t " +
-            "WHERE t.temple_name LIKE %:query%",
-            countQuery = "SELECT COUNT(*) FROM templestay t WHERE t.temple_name LIKE %:query%",
-            nativeQuery = true)
-    Page<Object[]> searchByTempleNameWithPagination(String query, Pageable pageable);
+    @Query(value = """
+    SELECT t.id, t.temple_name, t.templestay_name, t.tag,
+           c.region, c.type, c.purpose, c.activity, c.etc,
+           (SELECT ti.img_url
+            FROM templestay_image ti
+            WHERE ti.templestay_id = t.id
+            ORDER BY ti.id ASC LIMIT 1) AS img_url
+    FROM templestay t
+    LEFT JOIN category c ON t.id = c.templestay_id
+    WHERE t.temple_name LIKE %:query%
+      AND (:region IS NULL OR c.region & :region != 0)
+      AND (:type IS NULL OR c.type & :type != 0)
+      AND (:purpose IS NULL OR c.purpose & :purpose != 0)
+      AND (:activity IS NULL OR c.activity & :activity != 0)
+      AND (:etc IS NULL OR c.etc & :etc != 0)
+""", nativeQuery = true)
+    List<Object[]> searchWithFiltersAndData(
+            @Param("query") String query,
+            @Param("region") Integer region,
+            @Param("type") Integer type,
+            @Param("purpose") Integer purpose,
+            @Param("activity") Integer activity,
+            @Param("etc") Integer etc
+    );
+
 }

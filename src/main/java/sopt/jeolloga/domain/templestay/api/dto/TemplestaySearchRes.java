@@ -3,7 +3,7 @@ package sopt.jeolloga.domain.templestay.api.dto;
 public record TemplestaySearchRes(
         Long templestayId,
         String templeName,
-        String templstayName,
+        String templestayName,
         String tag,
         String region,
         String type,
@@ -11,3 +11,4 @@ public record TemplestaySearchRes(
         boolean liked
 ) {
 }
+
