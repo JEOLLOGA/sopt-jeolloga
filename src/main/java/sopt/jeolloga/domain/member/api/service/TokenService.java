@@ -5,6 +5,8 @@ import sopt.jeolloga.domain.member.api.utils.JwtTokenProvider;
 import sopt.jeolloga.domain.member.core.RefreshToken;
 import sopt.jeolloga.domain.member.core.RefreshTokenRepository;
 import org.springframework.data.redis.core.RedisTemplate;
+import sopt.jeolloga.domain.member.core.exception.MemberCoreException;
+import sopt.jeolloga.exception.ErrorCode;
 
 @Service
 public class TokenService {
@@ -42,12 +44,12 @@ public class TokenService {
 
         // 저장된 refreshToken이 없는 경우
         if (oldRefreshToken == null) {
-            throw new IllegalArgumentException("토큰이 만료되어 재로그인이 필요합니다.");
+            throw new MemberCoreException(ErrorCode.EXPIRED_REFRESH_TOKEN);
         }
 
         // 입력된 refreshToken이 저장된 토큰과 일치하지 않는 경우
         if (!oldRefreshToken.equals(refreshToken)) {
-            throw new IllegalArgumentException("잘못된 토큰이 입력되었습니다.");
+            throw new MemberCoreException(ErrorCode.INVALID_TOKEN);
         }
 
         return jwtTokenProvider.createAccessToken(kakaoUserId);
@@ -58,7 +60,6 @@ public class TokenService {
         String kakaoUserId = jwtTokenProvider.getMemberIdFromToken(accessToken);
         deleteRefreshToken(kakaoUserId);
     }
-
 
 
     // refresh Token 관련

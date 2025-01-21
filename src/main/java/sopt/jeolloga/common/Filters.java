@@ -9,8 +9,14 @@ import java.util.stream.Collectors;
 @Component
 public class Filters {
 
-    private static final int MAX_PRICE = Integer.MAX_VALUE;
+    private static final int DEFAULT_MAX_PRICE = Integer.MAX_VALUE;
     private static final int DEFAULT_MIN_PRICE = 0;
+
+    private final List<String> regionOptions = List.of("강원", "경기", "경남", "경북", "광주", "대구", "대전", "부산", "서울", "인천", "전남", "전북", "제주", "충남", "충북");
+    private final List<String> typeOptions = List.of("당일형", "휴식형", "체험형");
+    private final List<String> purposeOptions = List.of("힐링", "전통문화 체험", "심신치유", "자기계발", "여행 일정", "사찰순례", "휴식", "호기심");
+    private final List<String> activityOptions = List.of("발우공양", "108배", "스님과의 차담", "등산", "새벽 예불", "사찰 탐방", "염주 만들기", "연등 만들기", "다도", "명상", "산책", "요가", "기타");
+    private final List<String> etcOptions = List.of("절밥이 맛있는", "TV에 나온", "연예인이 다녀간", "근처 관광지가 많은", "속세와 멀어지고 싶은", "동물 친구들과 함께", "유튜브 운영 중인", "단체 가능");
 
     private Map<String, Object> regionFilter;
     private Map<String, Object> typeFilter;
@@ -20,12 +26,12 @@ public class Filters {
     private Map<String, Object> etcFilter;
 
     public Filters() {
-        this.regionFilter = initializeFilter(Arrays.asList("강원", "경기", "경남", "경북", "광주", "대구", "대전", "부산", "서울", "인천", "전남", "전북", "제주", "충남", "충북"));
-        this.typeFilter = initializeFilter(Arrays.asList("당일형", "휴식형", "체험형"));
-        this.purposeFilter = initializeFilter(Arrays.asList("힐링", "전통문화 체험", "심신치유", "자기계발", "여행 일정", "사찰순례", "휴식", "호기심", "기타"));
-        this.activityFilter = initializeFilter(Arrays.asList("발우공양", "108배", "스님과의 차담", "등산", "새벽 예불", "사찰 탐방", "염주 만들기", "연등 만들기", "다도", "명상", "산책", "요가", "기타"));
-        this.etcFilter = initializeFilter(Arrays.asList("절밥이 맛있는", "TV에 나온", "연예인이 다녀간", "근처 관광지가 많은", "속세와 멀어지고 싶은", "동물 친구들과 함께", "유튜브 운영 중인", "단체 가능"));
-        this.priceFilter = initializePriceFilter(DEFAULT_MIN_PRICE, MAX_PRICE);
+        this.regionFilter = initializeFilter(this.regionOptions);
+        this.typeFilter = initializeFilter(this.typeOptions);
+        this.purposeFilter = initializeFilter(this.purposeOptions);
+        this.activityFilter = initializeFilter(this.activityOptions);
+        this.etcFilter = initializeFilter(this.etcOptions);
+        this.priceFilter = initializePriceFilter(DEFAULT_MIN_PRICE, DEFAULT_MAX_PRICE);
     }
 
     public Filters(Map<String, Object> filter) {
@@ -61,6 +67,7 @@ public class Filters {
     }
 
     public Map<String, Object> getResetFilter() {
+
         setFilterValue(regionFilter, 0);
         setFilterValue(typeFilter, 0);
         setFilterValue(purposeFilter, 0);
@@ -82,13 +89,15 @@ public class Filters {
 
 
     public List<Long> getFilteredCategory(List<Category> categoryEntities) {
-        Integer binaryRegionFilter = convertToBinaryFilter(regionFilter);
-        Integer binaryTypeFilter = convertToBinaryFilter(typeFilter);
-        Integer binaryPurposeFilter = convertToBinaryFilter(purposeFilter);
-        Integer binaryActivityFilter = convertToBinaryFilter(activityFilter);
-        Integer binaryEtcFilter = convertToBinaryFilter(etcFilter);
+        Integer binaryRegionFilter = convertToBinaryFilter(regionFilter, regionOptions);
+        Integer binaryTypeFilter = convertToBinaryFilter(typeFilter, typeOptions);
+        Integer binaryPurposeFilter = convertToBinaryFilter(purposeFilter, purposeOptions);
+        Integer binaryActivityFilter = convertToBinaryFilter(activityFilter, activityOptions);
+        Integer binaryEtcFilter = convertToBinaryFilter(etcFilter, etcOptions);
+
+
         Integer minPrice = (Integer) priceFilter.getOrDefault("minPrice", DEFAULT_MIN_PRICE);
-        Integer maxPrice = (Integer) priceFilter.getOrDefault("maxPrice", MAX_PRICE);
+        Integer maxPrice = (Integer) priceFilter.getOrDefault("maxPrice", DEFAULT_MAX_PRICE);
 
         return categoryEntities.stream()
                 .filter(category -> matchesFilter(category, binaryRegionFilter, binaryTypeFilter, binaryPurposeFilter, binaryActivityFilter, binaryEtcFilter, minPrice, maxPrice))
@@ -106,16 +115,21 @@ public class Filters {
                 category.getPrice() <= maxPrice;
     }
 
-    public Integer convertToBinaryFilter(Map<String, Object> filterMap) {
+    public Integer convertToBinaryFilter(Map<String, Object> filterMap, List<String> options) {
 
         Integer binaryValue = 0;
         int position = 0;
 
-        for(Map.Entry<String, Object> entry : filterMap.entrySet()) {
-            if((Integer) entry.getValue() == 1) {
+        for (String option : options) {
+
+            if((Integer) filterMap.get(option) == 1) {
                 binaryValue |= (1 << position);
             }
             position ++;
+        }
+
+        if(binaryValue == 0){
+            return Integer.MAX_VALUE;
         }
         return binaryValue;
     }
@@ -171,3 +185,5 @@ public class Filters {
     }
 
 }
+
+

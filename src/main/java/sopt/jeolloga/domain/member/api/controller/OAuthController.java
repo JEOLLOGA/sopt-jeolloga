@@ -54,7 +54,7 @@ public class OAuthController {
 
         // kakao에서 받아온 유저정보 바탕으로 멤버 생성 or id 조회
         Long userId = memberService.findOrCreateUser(memberInfo);
-        
+
         // accessToken, refreshToken 생성
         String accessToken = tokenService.createAccessToken(kakaoUserId);
         String refreshToken = tokenService.createRefreshToken(kakaoUserId);
@@ -72,7 +72,6 @@ public class OAuthController {
     @GetMapping("/login/reissue")
     public ResponseEntity<?> reissueAccessToken(@RequestHeader("refreshToken") String refreshToken) {
 
-        System.out.println("접속");
         // AccessToken 재발급
         String accessToken = tokenService.reissueAccessToken(refreshToken);
 

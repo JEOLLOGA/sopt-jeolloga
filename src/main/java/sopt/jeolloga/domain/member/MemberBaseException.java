@@ -5,11 +5,11 @@ import org.springframework.security.core.AuthenticationException;
 import sopt.jeolloga.exception.ErrorCode;
 
 @Getter
-public class CustomAuthenticationBaseException extends AuthenticationException {
+public class MemberBaseException extends AuthenticationException {
 
     private final ErrorCode errorCode;
 
-    public CustomAuthenticationBaseException(ErrorCode errorCode) {
+    public MemberBaseException(ErrorCode errorCode) {
         super(errorCode.getMsg());
         this.errorCode = errorCode;
     }

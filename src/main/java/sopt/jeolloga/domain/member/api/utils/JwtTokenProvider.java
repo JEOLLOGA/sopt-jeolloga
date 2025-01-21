@@ -12,7 +12,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
-import sopt.jeolloga.domain.member.core.exception.CustomAuthenticationCoreException;
+import sopt.jeolloga.domain.member.core.exception.MemberCoreException;
 import sopt.jeolloga.exception.ErrorCode;
 
 import java.nio.charset.StandardCharsets;
@@ -61,21 +61,20 @@ public class JwtTokenProvider { // Jwt Token 생성
     // 공통 토큰 검증 메서드
     public boolean validateToken(String token) {
 
-        // 추후 에러코드 수정 필요
+        boolean isValid = false;
+
         try {
             Jwts.parserBuilder()
                     .setSigningKey(this.secretKey)
                     .build()
                     .parseClaimsJws(token);
-            return true;
+            isValid = true;
         } catch (ExpiredJwtException e) {
-            throw new CustomAuthenticationCoreException(ErrorCode.UNAUTHORIZED);
+            throw new MemberCoreException(ErrorCode.EXPIRED_TOKEN);
         } catch (UnsupportedJwtException | MalformedJwtException | SignatureException e) {
-            throw new CustomAuthenticationCoreException(ErrorCode.UNAUTHORIZED);
-        } catch (IllegalArgumentException e) {
-            System.out.println("JWT claims string is empty");
+            throw new MemberCoreException(ErrorCode.INVALID_TOKEN);
         }
-        return false;
+        return isValid;
     }
 
     public Authentication getAuthentication(String token) {
@@ -94,12 +93,20 @@ public class JwtTokenProvider { // Jwt Token 생성
     // JWT에서 사용자 kakaoUserID 추출
     public String getMemberIdFromToken(String token) {
 
-        String userId =  Jwts.parserBuilder()
-                .setSigningKey(this.secretKey)
-                .build()
-                .parseClaimsJws(token)
-                .getBody()
-                .getSubject();
+        String userId= null;
+
+        try {
+            userId = Jwts.parserBuilder()
+                    .setSigningKey(this.secretKey)
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody()
+                    .getSubject();
+        } catch (ExpiredJwtException e) {
+            throw new MemberCoreException(ErrorCode.EXPIRED_TOKEN);
+        } catch (UnsupportedJwtException | MalformedJwtException | SignatureException e) {
+            throw new MemberCoreException(ErrorCode.INVALID_TOKEN);
+        }
 
         return userId;
     }
