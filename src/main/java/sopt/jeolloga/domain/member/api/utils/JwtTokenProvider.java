@@ -14,14 +14,11 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
 import sopt.jeolloga.domain.member.core.exception.CustomAuthenticationCoreException;
 import sopt.jeolloga.exception.ErrorCode;
-import org.springframework.data.redis.core.RedisTemplate;
 
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
-
 
 @Component
 public class JwtTokenProvider { // Jwt Token 생성
@@ -45,12 +42,6 @@ public class JwtTokenProvider { // Jwt Token 생성
     public String createRefreshToken(String memberId) {
 
         String refreshToken = createToken(memberId, this.refreshTokenValidity);
-
-        // Redis에 저장하는 로직 필요
-
-
-
-
         return refreshToken;
     }
 

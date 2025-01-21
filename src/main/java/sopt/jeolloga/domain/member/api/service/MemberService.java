@@ -22,6 +22,17 @@ public class MemberService {
         this.jwtTokenProvider = jwtTokenProvider;
     }
 
+    public Long findOrCreateUser(MemberRes memberInfo) {
+        return memberRepository.findByKakaoUserId(memberInfo.userId())
+                .map(Member::getId)
+                .orElseGet(() -> {
+                    Member newMember = new Member(memberInfo.userId(), memberInfo.nickname(), memberInfo.email(), null, null, null, null);
+                    memberRepository.save(newMember);
+                    System.out.println("New User Created");
+                    return newMember.getId();
+                });
+    }
+
     public void saveInfo(String accessToken, MemberReq memberReq){
 
         Member member = memberRepository.findById(memberReq.userId())
