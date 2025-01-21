@@ -46,11 +46,4 @@ public class Member {
         this.religion = religion;
         this.hasExperience = hasExperience;
     }
-
-    public Member(Long kakaoUserId, String email, String nickname){
-        this.kakaoUserId = kakaoUserId;
-        this.email = email;
-        this.nickname = nickname;
-    }
-
 }

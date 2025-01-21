@@ -22,15 +22,24 @@ public class RedisConfig {
     @Value("${redis.port}")
     private int port;
 
-//    @Value("${redis.password}")
-//    private String password;
+    @Value("${redis.password}")
+    private String password;
 
     @Bean
     public RedisConnectionFactory redisConnectionFactory(){
         RedisStandaloneConfiguration redisStandaloneConfiguration = new RedisStandaloneConfiguration();
         redisStandaloneConfiguration.setHostName(host);
         redisStandaloneConfiguration.setPort(port);
-//        redisStandaloneConfiguration.setPassword(password);
+        redisStandaloneConfiguration.setPassword(password);
         return new LettuceConnectionFactory(redisStandaloneConfiguration);
+    }
+
+    @Bean
+    public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory redisConnectionFactory) {
+        RedisTemplate<String, Object> template = new RedisTemplate<>();
+        template.setConnectionFactory(redisConnectionFactory);
+        template.setKeySerializer(new StringRedisSerializer()); // 키는 문자열
+        template.setValueSerializer(new StringRedisSerializer()); // 값은 JSON
+        return template;
     }
 }
