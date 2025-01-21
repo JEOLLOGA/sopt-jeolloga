@@ -6,11 +6,8 @@ import org.springframework.web.bind.annotation.*;
 import sopt.jeolloga.domain.member.api.dto.MemberDetailRes;
 import sopt.jeolloga.domain.member.api.dto.MemberNameRes;
 import sopt.jeolloga.domain.member.api.dto.MemberReq;
-import sopt.jeolloga.domain.member.api.dto.MemberRes;
 import sopt.jeolloga.domain.member.api.service.MemberService;
-import sopt.jeolloga.domain.templestay.api.dto.PageTemplestayRes;
 
-import java.util.List;
 
 @RestController
 public class MemberController {
