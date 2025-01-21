@@ -117,22 +117,28 @@ public class TemplestaySearchService {
                 .reduce(0, (a, b) -> a | b);
     }
 
-
     @Transactional
     private void saveSearchContent(Long userId, String content) {
-        if (userId == null || content == null || content.isBlank()) {
-            content = "";
+        if (content == null || content.isBlank()) {
+            throw new TemplestayCoreException(ErrorCode.INVALID_SEARCH_CONTENT);
         }
 
         Member member = null;
         if (userId != null) {
             member = memberRepository.findById(userId)
-                    .orElseThrow(() -> new RuntimeException("User not found"));
+                    .orElseThrow(() -> new TemplestayCoreException(ErrorCode.NOT_FOUND_USER));
+        } else {
+            throw new TemplestayCoreException(ErrorCode.MISSING_USER_ID);
         }
 
-        Search search = new Search(member, content);
-        searchRepository.save(search);
+        try {
+            Search search = new Search(member, content);
+            searchRepository.save(search);
+        } catch (Exception e) {
+            throw new TemplestayCoreException(ErrorCode.INTERNAL_SERVER_ERROR);
+        }
     }
+
 
     private Integer getBinaryValue(String filterKey) {
         return switch (filterKey) {
