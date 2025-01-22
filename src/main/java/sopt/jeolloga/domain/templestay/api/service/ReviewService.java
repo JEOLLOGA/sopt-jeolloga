@@ -37,6 +37,8 @@ public class ReviewService {
             throw new TemplestayCoreException(ErrorCode.REVIEW_NOT_FOUND);
         }
 
+        Long count = reviewRepository.countByTempleName(templeName);
+
         List<ReviewRes> reviewDtos = reviews.getContent().stream()
                 .map(review -> new ReviewRes(
                         review.getId(),
@@ -51,6 +53,7 @@ public class ReviewService {
 
         return new PageReviewRes<>(
                 templestayId,
+                count,
                 page,
                 size,
                 reviews.getTotalPages(),
