@@ -14,7 +14,7 @@ public record TemplestayDetailRes(
         String detailAddress,
         String schedule,
         BigDecimal latitude,
-        BigDecimal longtitude,
+        BigDecimal longitude,
         boolean liked,
         String url
 ){
