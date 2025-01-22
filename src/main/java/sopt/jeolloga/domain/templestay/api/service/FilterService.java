@@ -36,12 +36,16 @@ public class FilterService {
     }
 
 
-    public List<Long> getFiteredTemplestayCategory(Map<String, Object> filter) {
+    public List<Long> getFiteredTemplestayCategory(TemplestayFilterReqTemp filter) {
+
+        // content 기반으로 id 필터링 + category 기반 필터링
 
         this.filters = new Filters(filter);
+
+        List<Long> contentFilteredId = templestayRepository.findIdsByTempleNameContaining(filter.content());
         List<Category> categoryEntityList = categoryRepository.findAll();
         List<Long> filteredId = filters.getFilteredCategory(categoryEntityList);
-
+        filteredId.retainAll(contentFilteredId);
         return filteredId;
     }
 

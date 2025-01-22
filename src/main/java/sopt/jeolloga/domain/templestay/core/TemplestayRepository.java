@@ -52,4 +52,7 @@ public interface TemplestayRepository extends JpaRepository<Templestay, Long> {
             @Param("activity") Integer activity,
             @Param("etc") Integer etc
     );
+
+    @Query("SELECT t.id FROM Templestay t WHERE t.templeName LIKE %:content%")
+    List<Long> findIdsByTempleNameContaining(@Param("content") String content);
 }

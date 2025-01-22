@@ -10,6 +10,7 @@ import sopt.jeolloga.domain.templestay.api.dto.TemplestayFilterReq;
 import sopt.jeolloga.domain.templestay.api.dto.TemplestaySearchRes;
 import sopt.jeolloga.domain.templestay.api.service.TemplestaySearchService;
 
+import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalLong;
 
