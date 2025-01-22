@@ -20,6 +20,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static ch.qos.logback.core.joran.JoranConstants.NULL;
+
 @RequiredArgsConstructor
 @Service
 public class TemplestaySearchService {
@@ -43,7 +45,7 @@ public class TemplestaySearchService {
             saveSearchContent(userId, query);
         }
 
-        String sanitizedQuery = (query != null && !"NULL".equalsIgnoreCase(query)) ? query.trim() : "";
+        String sanitizedQuery = (query == null || query.isBlank()) ? "" : query.trim();
 
         Integer regionFilter = calculateBitValue(region, "region");
         Integer typeFilter = calculateBitValue(type, "type");
@@ -131,7 +133,7 @@ public class TemplestaySearchService {
     @Transactional
     private void saveSearchContent(Long userId, String content) {
         if (content == null || content.isBlank()) {
-            throw new TemplestayCoreException(ErrorCode.INVALID_SEARCH_CONTENT);
+            content = "";
         }
 
         Member member = null;
