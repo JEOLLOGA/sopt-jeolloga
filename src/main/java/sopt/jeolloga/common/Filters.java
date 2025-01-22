@@ -139,11 +139,12 @@ public class Filters {
         int position = 0;
 
         for (String option : options) {
+            Object value = filterMap.get(option);
 
-            if((Integer) filterMap.get(option) == 1) {
+            if (value instanceof Integer && (Integer) value == 1) {
                 binaryValue |= (1 << position);
             }
-            position ++;
+            position++;
         }
 
         if(binaryValue == 0){
