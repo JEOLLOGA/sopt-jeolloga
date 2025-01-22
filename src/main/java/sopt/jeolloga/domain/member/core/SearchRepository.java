@@ -12,8 +12,13 @@ import java.util.List;
 
 @Repository
 public interface SearchRepository extends JpaRepository<Search, Long> {
-    @Query("SELECT s.id, s.content FROM Search s WHERE s.member.id = :userId ORDER BY s.id DESC")
-    List<Object[]> findTop10ByMemberIdOrderByIdDesc(Long userId);
+    @Query(value = "SELECT s.id, s.content " +
+            "FROM search s " +
+            "WHERE s.member_id = :userId " +
+            "AND s.content <> '' " +
+            "ORDER BY s.id DESC " +
+            "LIMIT 10", nativeQuery = true)
+    List<Object[]> findTop10ByMemberIdOrderByIdDesc(@Param("userId") Long userId);
 
     void deleteAllByMemberId(Long memberId);
 }
