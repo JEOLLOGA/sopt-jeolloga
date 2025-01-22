@@ -36,36 +36,37 @@ public class FilterController {
 
     // 필터링 된 템플스테이 개수 반환
     @PostMapping("/public/filter/count")
-    public ResponseEntity<FilterCountRes> getFilteredTemplestayNum(@RequestBody Map<String, Object> filter) {
+    public ResponseEntity<FilterCountRes> getFilteredTemplestayNum(@RequestBody TemplestayFilterReqTemp filter) {
+
 
         List<Long> filteredId = filterService.getFiteredTemplestayCategory(filter);
         FilterCountRes filterCountRes = filterService.getFilteredTemplestayNum(filteredId);
         return ResponseEntity.ok(filterCountRes);
     }
 
-    // 필터링 된 템플스테이 목록 반환
-    @PostMapping("/filter/list")
-    public ResponseEntity<PageTemplestayRes> getFilteredTemplestay(
-            @RequestBody Map<String, Object> filter,
-            @RequestParam (value = "userId", required = false) Long userId,
-            @RequestParam (value = "page") int page,
-            @RequestParam (value="pageSize", defaultValue = "10") int pageSize,
-            HttpServletRequest request){
-
-        String accessToken = request.getHeader("Authorization");
-
-        List<Long> filteredId;
-        PageTemplestayRes templestayWithPage;
-
-        filteredId = filterService.getFiteredTemplestayCategory(filter);
-
-        if (accessToken != null && !accessToken.isEmpty()) {
-            templestayWithPage = filterService.getFilteredTemplestay(filteredId, page, pageSize, userId);
-        } else {
-            userId = null;
-            templestayWithPage = filterService.getFilteredTemplestay(filteredId, page, pageSize, userId);
-        }
-
-        return ResponseEntity.ok(templestayWithPage);
-    }
+//    // 필터링 된 템플스테이 목록 반환
+//    @PostMapping("/filter/list")
+//    public ResponseEntity<PageTemplestayRes> getFilteredTemplestay(
+//            @RequestBody Map<String, Object> filter,
+//            @RequestParam (value = "userId", required = false) Long userId,
+//            @RequestParam (value = "page") int page,
+//            @RequestParam (value="pageSize", defaultValue = "10") int pageSize,
+//            HttpServletRequest request){
+//
+//        String accessToken = request.getHeader("Authorization");
+//
+//        List<Long> filteredId;
+//        PageTemplestayRes templestayWithPage;
+//
+//        filteredId = filterService.getFiteredTemplestayCategory(filter);
+//
+//        if (accessToken != null && !accessToken.isEmpty()) {
+//            templestayWithPage = filterService.getFilteredTemplestay(filteredId, page, pageSize, userId);
+//        } else {
+//            userId = null;
+//            templestayWithPage = filterService.getFilteredTemplestay(filteredId, page, pageSize, userId);
+//        }
+//
+//        return ResponseEntity.ok(templestayWithPage);
+//    }
 }

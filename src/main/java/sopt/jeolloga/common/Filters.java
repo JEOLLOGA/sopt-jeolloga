@@ -1,6 +1,8 @@
 package sopt.jeolloga.common;
 
 import org.springframework.stereotype.Component;
+import sopt.jeolloga.domain.templestay.api.dto.TemplestayFilterReq;
+import sopt.jeolloga.domain.templestay.api.dto.TemplestayFilterReqTemp;
 import sopt.jeolloga.domain.templestay.core.Category;
 
 import java.util.*;
@@ -18,6 +20,7 @@ public class Filters {
     private final List<String> activityOptions = List.of("발우공양", "108배", "스님과의 차담", "등산", "새벽 예불", "사찰 탐방", "염주 만들기", "연등 만들기", "다도", "명상", "산책", "요가", "기타");
     private final List<String> etcOptions = List.of("절밥이 맛있는", "TV에 나온", "연예인이 다녀간", "근처 관광지가 많은", "속세와 멀어지고 싶은", "동물 친구들과 함께", "유튜브 운영 중인", "단체 가능");
 
+    private String content;
     private Map<String, Object> regionFilter;
     private Map<String, Object> typeFilter;
     private Map<String, Object> purposeFilter;
@@ -26,6 +29,7 @@ public class Filters {
     private Map<String, Object> etcFilter;
 
     public Filters() {
+        this.content = "";
         this.regionFilter = initializeFilter(this.regionOptions);
         this.typeFilter = initializeFilter(this.typeOptions);
         this.purposeFilter = initializeFilter(this.purposeOptions);
@@ -35,7 +39,7 @@ public class Filters {
     }
 
     public Filters(Map<String, Object> filter) {
-
+        this.content = "";
         this.regionFilter = (Map<String, Object>) filter.get("region");
         this.typeFilter = (Map<String, Object>) filter.get("type");
         this.purposeFilter = (Map<String, Object>) filter.get("purpose");
@@ -43,6 +47,18 @@ public class Filters {
         this.priceFilter = (Map<String, Object>) filter.get("price");
         priceFilter.put("maxPrice", priceFilter.get("maxPrice").equals(300000) ? Integer.MAX_VALUE : priceFilter.get("maxPrice"));
         this.etcFilter = (Map<String, Object>) filter.get("etc");
+    }
+
+    public Filters(TemplestayFilterReqTemp templestayFilterReq){
+        this.content = templestayFilterReq.content();
+        this.regionFilter = templestayFilterReq.region();
+        this.typeFilter = templestayFilterReq.type();
+        this.purposeFilter = templestayFilterReq.purpose();
+        this.activityFilter = templestayFilterReq.activity();
+        this.priceFilter = new HashMap<>();
+        this.priceFilter.put("minPrice", templestayFilterReq.price().minPrice());
+        this.priceFilter.put("maxPrice", templestayFilterReq.price().maxPrice().equals(300000) ? Integer.MAX_VALUE : templestayFilterReq.price().maxPrice());
+        this.etcFilter = templestayFilterReq.etc();
     }
 
     private Map<String, Object> initializeFilter(List<String> options) {
@@ -89,6 +105,8 @@ public class Filters {
 
 
     public List<Long> getFilteredCategory(List<Category> categoryEntities) {
+
+
         Integer binaryRegionFilter = convertToBinaryFilter(regionFilter, regionOptions);
         Integer binaryTypeFilter = convertToBinaryFilter(typeFilter, typeOptions);
         Integer binaryPurposeFilter = convertToBinaryFilter(purposeFilter, purposeOptions);
