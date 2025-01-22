@@ -43,7 +43,14 @@ public class MemberService {
         member.setAgeRange(memberReq.ageRange());
         member.setGender(memberReq.gender());
         member.setReligion(memberReq.religion());
-        member.setHasExperience(memberReq.hasExperience());
+
+        if("있음".equals(memberReq.hasExperience())){
+            member.setHasExperience(true);
+        } else if("없음".equals(memberReq.hasExperience())) {
+            member.setHasExperience(false);
+        } else {
+            member.setHasExperience(null);
+        }
 
         memberRepository.save(member);
     }
