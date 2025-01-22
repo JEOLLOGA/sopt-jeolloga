@@ -14,25 +14,28 @@ import java.util.List;
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final CorsConfig corsConfig;
 
     public SecurityConfig(
-            JwtAuthenticationFilter jwtAuthenticationFilter) {
+            JwtAuthenticationFilter jwtAuthenticationFilter, CorsConfig corsConfig) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+        this.corsConfig = corsConfig;
     }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(csrf -> csrf.disable()) // CSRF 비활성화
-                .cors(cors -> cors.configurationSource(request -> {
-                    CorsConfiguration config = new CorsConfiguration();
-                    config.setAllowedOrigins(List.of("http://localhost:5173", "https://52.78.131.68", "http://localhost:5173", "https://www.gototemplestay.com"));
-                    config.setAllowedMethods(List.of("GET", "POST", "DELETE"));
-                    config.setAllowedHeaders(List.of("Authorization", "Content-Type"));
-                    config.setExposedHeaders(List.of("Custom-Header"));
-                    config.setAllowCredentials(true);
-                    return config;
-                }))
+                .cors(cors -> cors.configurationSource(corsConfig.corsConfigurationSource())) // CORS 설정 참조
+//                .cors(cors -> cors.configurationSource(request -> {
+//                    CorsConfiguration config = new CorsConfiguration();
+//                    config.setAllowedOrigins(List.of("http://localhost:5173", "https://52.78.131.68", "http://localhost:5173", "https://www.gototemplestay.com"));
+//                    config.setAllowedMethods(List.of("GET", "POST", "DELETE"));
+//                    config.setAllowedHeaders(List.of("Authorization", "Content-Type"));
+//                    config.setExposedHeaders(List.of("Custom-Header"));
+//                    config.setAllowCredentials(true);
+//                    return config;
+//                }))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/user/**").authenticated()
                         .requestMatchers("/public/**").permitAll()

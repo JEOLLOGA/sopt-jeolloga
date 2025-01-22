@@ -21,8 +21,6 @@ public class MemberController {
     @PostMapping("/user/register")
     public ResponseEntity<String> saveInfo(@RequestBody MemberReq memberReq, HttpServletRequest request) {
 
-        System.out.println(memberReq);
-
         String accessToken = request.getHeader("Authorization");
         memberService.saveInfo(accessToken, memberReq);
 
