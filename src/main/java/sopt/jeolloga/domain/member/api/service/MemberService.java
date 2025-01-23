@@ -60,6 +60,11 @@ public class MemberService {
         Member member = memberRepository.findById(userId)
                 .orElseThrow(() -> new MemberCoreException(ErrorCode.NOT_FOUND_USER));
 
+        Boolean hasExperience = member.getHasExperience();
+        if (hasExperience == null) {
+            hasExperience = false;
+        }
+
         MemberDetailRes memberDetailRes = new MemberDetailRes(member.getId(), member.getNickname(), member.getEmail(), member.getAgeRange(), member.getGender() , member.getReligion(), member.getHasExperience());
         return memberDetailRes;
     }
