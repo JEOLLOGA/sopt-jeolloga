@@ -49,7 +49,7 @@ public class MemberService {
         } else if("없음".equals(memberReq.hasExperience())) {
             member.setHasExperience(false);
         } else {
-            member.setHasExperience(null);
+            member.setHasExperience(false);
         }
 
         memberRepository.save(member);
