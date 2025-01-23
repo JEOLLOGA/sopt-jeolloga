@@ -14,6 +14,8 @@ import sopt.jeolloga.domain.templestay.core.exception.TemplestayCoreException;
 import sopt.jeolloga.domain.templestay.core.exception.TemplestayNotFoundException;
 import sopt.jeolloga.exception.ErrorCode;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -47,7 +49,7 @@ public class ReviewService {
                         review.getReviewName(),
                         review.getReviewDescription(),
                         DataUtils.formatReviewDate(review.getReviewDate()),
-                        review.getReviewImgUrl()
+                        "https://52.78.131.68:443/api/image-proxy?imgUrl=" + review.getReviewImgUrl()
                 ))
                 .toList();
 
