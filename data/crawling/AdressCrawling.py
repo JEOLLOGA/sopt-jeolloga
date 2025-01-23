@@ -20,13 +20,11 @@ def load_db_config(file_path):
 
 def insert_or_skip_address(cursor, templestay_name, address):
     try:
-        # 중복 확인 쿼리
         check_query = "SELECT id, address FROM templestay WHERE templestay_name = %s"
         cursor.execute(check_query, (templestay_name,))
         result = cursor.fetchone()
 
         if result:
-            # 템플스테이 이름이 존재하는 경우
             templestay_id, existing_address = result
             if existing_address is None:
                 update_query = "UPDATE templestay SET address = %s WHERE id = %s"
