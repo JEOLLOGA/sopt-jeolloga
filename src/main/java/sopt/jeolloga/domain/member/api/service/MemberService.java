@@ -49,7 +49,7 @@ public class MemberService {
         } else if("없음".equals(memberReq.hasExperience())) {
             member.setHasExperience(false);
         } else {
-            member.setHasExperience(null);
+            member.setHasExperience(false);
         }
         memberRepository.save(member);
     }
@@ -59,7 +59,21 @@ public class MemberService {
         Member member = memberRepository.findById(userId)
                 .orElseThrow(() -> new MemberCoreException(ErrorCode.NOT_FOUND_USER));
 
-        MemberDetailRes memberDetailRes = new MemberDetailRes(member.getId(), member.getNickname(), member.getEmail(), member.getAgeRange(), member.getGender() , member.getReligion(), member.getHasExperience());
+        Boolean hasExperience = member.getHasExperience();
+        if (hasExperience == null) {
+            hasExperience = false;
+        }
+
+        MemberDetailRes memberDetailRes = new MemberDetailRes(
+                member.getId(),
+                member.getNickname(),
+                member.getEmail(),
+                member.getAgeRange(),
+                member.getGender(),
+                member.getReligion(),
+                hasExperience 
+        );
+
         return memberDetailRes;
     }
 

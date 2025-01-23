@@ -23,7 +23,7 @@ public class TemplestayRankingService {
 
     @Transactional
     public TemplestayRankingListRes getTopRankingList(Long userId) {
-        List<Long> rankingIds = List.of(1L, 2L, 3L);
+        List<Long> rankingIds = List.of(244L, 196L, 4L);
 
         List<TemplestayRankingRes> rankings = rankingIds.stream()
                 .map(id -> {
