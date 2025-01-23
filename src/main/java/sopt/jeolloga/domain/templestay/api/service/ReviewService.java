@@ -49,7 +49,7 @@ public class ReviewService {
                         review.getReviewName(),
                         review.getReviewDescription(),
                         DataUtils.formatReviewDate(review.getReviewDate()),
-                        "https://52.78.131.68:443/api/image-proxy?imgUrl=" + review.getReviewImgUrl()
+                        "https://api.gototemplestay.com/api/image-proxy?imgUrl=" + review.getReviewImgUrl()
                 ))
                 .toList();
 
