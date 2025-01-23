@@ -73,12 +73,11 @@ public class TemplestaySearchService {
                 .limit(pageable.getPageSize())
                 .collect(Collectors.toList());
 
-        // 관심 여부(liked) 기본값 처리
         List<TemplestaySearchRes> templestaySearchResults = paginatedResults.stream()
                 .map(result -> {
                     Long id = ((Number) result[0]).longValue();
                     String templeName = result[1] != null ? result[1].toString() : null;
-                    String templestayName = result[2] != null ? result[2].toString() : null;
+                    String organizedName = result[2] != null ? result[2].toString() : null;
                     String tag = result[3] != null ? result[3].toString().split(",")[0] : null;
                     String regionName = result.length > 4 && result[4] != null
                             ? CategoryUtils.getRegionName((Integer) result[4])
@@ -93,7 +92,7 @@ public class TemplestaySearchService {
                     return new TemplestaySearchRes(
                             id,
                             templeName,
-                            templestayName,
+                            organizedName,
                             tag,
                             regionName,
                             typeName,
