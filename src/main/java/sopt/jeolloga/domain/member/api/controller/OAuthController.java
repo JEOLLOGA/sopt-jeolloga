@@ -25,10 +25,11 @@ public class OAuthController {
     private TokenService tokenService;
 
     @Value("${kakao.client.client-id}")
-    private String client_id;
+    private String CLIENT_ID;
 
     @Value("${kakao.client.redirect-uri}")
-    private String redirect_uri;
+    private String REDIRECT_URI;
+
 
     public OAuthController(OAuthService oAuthService, MemberService memberService, TokenService tokenService){
         this.oAuthService = oAuthService;
@@ -38,16 +39,17 @@ public class OAuthController {
 
     @GetMapping("/login/page")
     public String loginPage(Model model) {
-        String location = "https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=" + client_id + "&redirect_uri=" + redirect_uri;
+
+        String location = "https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=" + CLIENT_ID + "&redirect_uri=" + REDIRECT_URI;
         model.addAttribute("location", location);
         return "login";
     }
 
     @GetMapping("/login")
-    public ResponseEntity<LoginRes> login(@RequestParam("code") String code) {
+    public ResponseEntity<LoginRes> login(@RequestParam("code") String code, @RequestParam("redirect_uri") String redirect_uri) {
 
         // accessToken 발급 받아오기
-        String kakaoAccessToken = oAuthService.getKakaoAccessToken(code);
+        String kakaoAccessToken = oAuthService.getKakaoAccessToken(code, redirect_uri);
 
         // accessToken 기반으로 유저 정보 받아오기
         MemberRes memberInfo = oAuthService.getKakaoUserInfo(kakaoAccessToken);

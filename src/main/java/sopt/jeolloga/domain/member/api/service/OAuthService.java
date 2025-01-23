@@ -25,8 +25,6 @@ public class OAuthService {
     @Value("${kakao.client.client-id}")
     private String CLIENT_ID;
 
-    @Value("${kakao.client.redirect-uri}")
-    private String REDIRECT_URI;
 
     MemberRepository memberRepository;
     JwtTokenProvider jwtTokenProvider;
@@ -36,13 +34,13 @@ public class OAuthService {
         this.jwtTokenProvider = jwtTokenProvider;
     }
 
-    public String getKakaoAccessToken(String authorizationCode){
+    public String getKakaoAccessToken(String authorizationCode, String redirect_uri){
 
         KakaoTokenRes kakaoTokenRes = WebClient.create(KAUTH_TOKEN_URL_HOST).post()
                 .uri(uriBuilder -> uriBuilder
                         .scheme("https")
                         .path("/oauth/token")
-                        .queryParam("redirect_uri", REDIRECT_URI)
+                        .queryParam("redirect_uri", redirect_uri)
                         .queryParam("grant_type", "authorization_code")
                         .queryParam("client_id", CLIENT_ID)
                         .queryParam("code", authorizationCode)
