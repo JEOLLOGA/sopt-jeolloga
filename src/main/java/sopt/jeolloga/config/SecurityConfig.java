@@ -28,6 +28,7 @@ public class SecurityConfig {
                         .requestMatchers("/user/**").authenticated()
                         .requestMatchers("/public/**").permitAll()
                         .requestMatchers("/login/**").permitAll()
+                        .requestMatchers("/auth/**").permitAll()
                         .anyRequest().permitAll()
                 )
                 .logout(logout -> logout.disable())

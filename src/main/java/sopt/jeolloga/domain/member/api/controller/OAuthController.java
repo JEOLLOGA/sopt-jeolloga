@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
+import sopt.jeolloga.domain.member.api.dto.LoginRes;
 import sopt.jeolloga.domain.member.api.dto.MemberRes;
 import sopt.jeolloga.domain.member.api.service.MemberService;
 import sopt.jeolloga.domain.member.api.service.OAuthService;
@@ -43,7 +44,7 @@ public class OAuthController {
     }
 
     @GetMapping("/login")
-    public ResponseEntity<?> login(@RequestParam("code") String code) {
+    public ResponseEntity<LoginRes> login(@RequestParam("code") String code) {
 
         // accessToken 발급 받아오기
         String kakaoAccessToken = oAuthService.getKakaoAccessToken(code);
@@ -53,7 +54,7 @@ public class OAuthController {
         String kakaoUserId = String.valueOf(memberInfo.userId());
 
         // kakao에서 받아온 유저정보 바탕으로 멤버 생성 or id 조회
-        Long userId = memberService.findOrCreateUser(memberInfo);
+        LoginRes loginRes = memberService.findOrCreateUser(memberInfo);
 
         // accessToken, refreshToken 생성
         String accessToken = tokenService.createAccessToken(kakaoUserId);
@@ -62,14 +63,13 @@ public class OAuthController {
         // refreshToken 저장
         tokenService.updateRefreshToken(kakaoUserId, refreshToken);
 
-        // HTTP 헤더 및 본문 설정
         return ResponseEntity.ok()
                 .header("Authorization", "Bearer " + accessToken)
                 .header("refreshToken", refreshToken)
-                .body(Map.of("userId", userId));
+                .body(loginRes);
     }
 
-    @GetMapping("/login/reissue")
+    @GetMapping("/auth/refresh")
     public ResponseEntity<?> reissueAccessToken(@RequestHeader("refreshToken") String refreshToken) {
 
         // AccessToken 재발급
