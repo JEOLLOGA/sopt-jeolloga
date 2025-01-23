@@ -40,7 +40,6 @@ public class JwtTokenProvider { // Jwt Token 생성
 
     // Refresh Token 발급
     public String createRefreshToken(String memberId) {
-
         String refreshToken = createToken(memberId, this.refreshTokenValidity);
         return refreshToken;
     }

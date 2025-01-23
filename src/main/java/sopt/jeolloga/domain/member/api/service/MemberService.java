@@ -1,10 +1,7 @@
 package sopt.jeolloga.domain.member.api.service;
 
 import org.springframework.stereotype.Service;
-import sopt.jeolloga.domain.member.api.dto.MemberDetailRes;
-import sopt.jeolloga.domain.member.api.dto.MemberNameRes;
-import sopt.jeolloga.domain.member.api.dto.MemberReq;
-import sopt.jeolloga.domain.member.api.dto.MemberRes;
+import sopt.jeolloga.domain.member.api.dto.*;
 import sopt.jeolloga.domain.member.core.Member;
 import sopt.jeolloga.domain.member.core.MemberRepository;
 import sopt.jeolloga.domain.member.core.exception.MemberCoreException;
@@ -19,18 +16,22 @@ public class MemberService {
         this.memberRepository = memberRepository;
     }
 
-    public Long findOrCreateUser(MemberRes memberInfo) {
-
-        System.out.println(memberInfo);
+    public LoginRes findOrCreateUser(MemberRes memberInfo) {
 
         return memberRepository.findByKakaoUserId(memberInfo.userId())
-                .map(Member::getId)
+                .map(existingMember -> new LoginRes(existingMember.getId(), existingMember.getNickname()))
                 .orElseGet(() -> {
-                    Member newMember = new Member(memberInfo.userId(), memberInfo.nickname(), memberInfo.email(), null, null, null, null);
+                    Member newMember = new Member(
+                            memberInfo.userId(),
+                            memberInfo.nickname(),
+                            memberInfo.email(),
+                            null, null, null, null
+                    );
                     memberRepository.save(newMember);
-                    System.out.println("New User Created");
-                    return newMember.getId();
+                    return new LoginRes(newMember.getId(), null);
                 });
+
+
     }
 
     public void saveInfo(String accessToken, MemberReq memberReq){
@@ -51,7 +52,6 @@ public class MemberService {
         } else {
             member.setHasExperience(false);
         }
-
         memberRepository.save(member);
     }
 

@@ -22,7 +22,7 @@ public enum ErrorCode {
     // 401번대: 권한 오류
     UNAUTHORIZED(40100,HttpStatus.UNAUTHORIZED,"서비스 이용 권한이 없습니다"),
     EXPIRED_ACCESS_TOKEN(40101, HttpStatus.UNAUTHORIZED, "액세스 토큰이 만료되었습니다"),
-    EXPIRED_REFRESH_TOKEN(40102, HttpStatus.UNAUTHORIZED, "리프레쉬 토큰이 만료되었습니다"),
+    EXPIRED_REFRESH_TOKEN(40102, HttpStatus.UNAUTHORIZED, "리프레시 토큰이 없습니다. 가입 또는 재로그인이 필요합니다"),
     EXPIRED_TOKEN(40103, HttpStatus.UNAUTHORIZED, "토큰이 만료되었습니다"),
     INVALID_TOKEN(40104,HttpStatus.UNAUTHORIZED, "유효하지 않은 토큰이 사용되고 있습니다"),
 
