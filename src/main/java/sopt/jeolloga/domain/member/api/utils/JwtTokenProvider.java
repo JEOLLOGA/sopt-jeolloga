@@ -34,22 +34,22 @@ public class JwtTokenProvider { // Jwt Token 생성
     }
 
     // Access Token 발급
-    public String createAccessToken(String memberId) {
-        return createToken(memberId, this.accessTokenValidity);
+    public String createAccessToken(String userId) {
+        return createToken(userId, this.accessTokenValidity);
     }
 
     // Refresh Token 발급
-    public String createRefreshToken(String memberId) {
-        String refreshToken = createToken(memberId, this.refreshTokenValidity);
+    public String createRefreshToken(String userId) {
+        String refreshToken = createToken(userId, this.refreshTokenValidity);
         return refreshToken;
     }
 
-    private String createToken(String memberId, long validity) {
+    private String createToken(String userId, long validity) {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + validity);
 
         return Jwts.builder()
-                .setSubject(String.valueOf(memberId))
+                .setSubject(String.valueOf(userId))
                 .claim("roles", List.of("ROLE_USER"))
                 .setIssuedAt(now)
                 .setExpiration(expiryDate)
@@ -78,7 +78,7 @@ public class JwtTokenProvider { // Jwt Token 생성
 
     public Authentication getAuthentication(String token) {
         Claims claims = getClaims(token);
-        String memberId = claims.getSubject();
+        String userId = claims.getSubject();
 
         // roles 클레임에서 권한 추출
         List<String> roles = claims.get("roles", List.class);
@@ -86,11 +86,11 @@ public class JwtTokenProvider { // Jwt Token 생성
         // 고정된 권한 생성
         List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_USER"));
 
-        return new UsernamePasswordAuthenticationToken(memberId, null, authorities);
+        return new UsernamePasswordAuthenticationToken(userId, null, authorities);
     }
 
-    // JWT에서 사용자 kakaoUserID 추출
-    public String getMemberIdFromToken(String token) {
+    // JWT에서 사용자 UserID 추출
+    public String getUserIdFromToken(String token) {
 
         String userId= null;
 

@@ -18,6 +18,7 @@ public class MemberService {
 
     public LoginRes findOrCreateUser(MemberRes memberInfo) {
 
+        // kakao user id 기반으로 서비스 가입 여부 판단 후 유저 조회 or 생성
         return memberRepository.findByKakaoUserId(memberInfo.userId())
                 .map(existingMember -> new LoginRes(existingMember.getId(), existingMember.getNickname()))
                 .orElseGet(() -> {
@@ -30,8 +31,6 @@ public class MemberService {
                     memberRepository.save(newMember);
                     return new LoginRes(newMember.getId(), null);
                 });
-
-
     }
 
     public void saveInfo(String accessToken, MemberReq memberReq){
