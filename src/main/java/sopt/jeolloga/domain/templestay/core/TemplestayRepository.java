@@ -29,7 +29,7 @@ public interface TemplestayRepository extends JpaRepository<Templestay, Long> {
     List<String> findDistinctTempleNames();
 
     @Query(value = """
-    SELECT t.id, t.temple_name, t.templestay_name, t.tag,
+    SELECT t.id, t.temple_name, t.organized_name, t.tag,
            c.region, c.type, c.purpose, c.activity, c.etc,
            (SELECT ti.img_url
             FROM templestay_image ti
