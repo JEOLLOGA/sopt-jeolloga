@@ -51,7 +51,6 @@ public class MemberService {
         } else {
             member.setHasExperience(null);
         }
-
         memberRepository.save(member);
     }
 

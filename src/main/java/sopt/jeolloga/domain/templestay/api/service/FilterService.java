@@ -64,8 +64,6 @@ public class FilterService {
         Page<TemplestayRes> templestayResListPage = resultsPage.map(result -> {
 
             Long id = (Long) result[0];
-            System.out.println("id");
-            System.out.println(id);
 
             String templeName = Optional.ofNullable(result[1]).map(Object::toString).orElse("null");
             String organizedName = Optional.ofNullable(result[2]).map(Object::toString).orElse("null");
@@ -82,7 +80,6 @@ public class FilterService {
             boolean liked = false;
             if(userId != null){
                 liked = wishlistRepository.existsByMemberIdAndTemplestayId(userId, id);
-                System.out.println(liked);
             }
 
             return new TemplestayRes(id, templeName, organizedName, tag, region, type, imgUrl, liked);

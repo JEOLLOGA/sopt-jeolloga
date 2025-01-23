@@ -1,9 +1,11 @@
 package sopt.jeolloga.domain.member.api;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MissingRequestHeaderException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import sopt.jeolloga.common.ResponseDto;
@@ -29,7 +31,6 @@ public class MemberGlobalExceptionHandler {
     }
 
 
-
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ResponseDto<Void>>handlerHttpMessageNotReadableException(HttpMessageNotReadableException e){
         e.printStackTrace();
@@ -49,6 +50,15 @@ public class MemberGlobalExceptionHandler {
     public ResponseEntity<ResponseDto<Void>>handlerMissingRequestHeaderException(MissingRequestHeaderException e){
         e.printStackTrace();
         ResponseDto<Void> response = new ResponseDto<>(null, "Request Header가 올바르지 않습니다.");
+        return ResponseEntity.status(400).body(response);
+    }
+
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public ResponseEntity<ResponseDto<Void>> handleMissingServletRequestParameterException(
+            MissingServletRequestParameterException e) {
+        e.printStackTrace();
+        ResponseDto<Void> response = new ResponseDto<>(null,"필수 요청 파라미터가 누락되었습니다");
+        String message = String.format("필수 요청 파라미터가 누락되었습니다: %s", e.getParameterName());
         return ResponseEntity.status(400).body(response);
     }
 

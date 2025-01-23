@@ -26,27 +26,33 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getRequestURI();
-        return path.startsWith("/public/") || path.startsWith("/auth/") || path.startsWith("/login/");
+        return path.startsWith("/public/") || path.startsWith("/login/");
     }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws ServletException, IOException {
+        try{
+            // Authorization 헤더에서 JWT 토큰 추출
+            String accessToken = jwtTokenProvider.resolveToken(request);
 
-        // Authorization 헤더에서 JWT 토큰 추출
-        String accessToken = jwtTokenProvider.resolveToken(request);
+            // token 존재
+            if(accessToken != null) {
 
-        // token 존재
-        if(accessToken != null) {
-
-            if(jwtTokenProvider.validateToken(accessToken)) {
-                // 유효한 토큰 -> SecurityContext에 인증 정보 저장
-                Authentication authentication = jwtTokenProvider.getAuthentication(accessToken);
-                SecurityContextHolder.getContext().setAuthentication(authentication);
-            } else {
-                // 유효하지 않은 토큰 -> 401 응답 반환
-                throw new MemberCoreException(ErrorCode.UNAUTHORIZED);
+                if(jwtTokenProvider.validateToken(accessToken)) {
+                    // 유효한 토큰
+                    Authentication authentication = jwtTokenProvider.getAuthentication(accessToken);
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                } else {
+                    // 유효하지 않은 토큰 (만료되거나 조작된 토큰)
+                    throw new MemberCoreException(ErrorCode.UNAUTHORIZED);
+                }
             }
+            chain.doFilter(request, response);
+        } catch (MemberCoreException e) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType("application/json");
+            response.setCharacterEncoding("UTF-8");
+            response.getWriter().write("{\"data\": \"Unauthorized\", \"message\": \"" + e.getErrorCode().getMsg() + "\"}");
         }
-        chain.doFilter(request, response);
     }
 }
