@@ -65,7 +65,16 @@ public class MemberService {
             hasExperience = false;
         }
 
-        MemberDetailRes memberDetailRes = new MemberDetailRes(member.getId(), member.getNickname(), member.getEmail(), member.getAgeRange(), member.getGender() , member.getReligion(), member.getHasExperience());
+        MemberDetailRes memberDetailRes = new MemberDetailRes(
+                member.getId(),
+                member.getNickname(),
+                member.getEmail(),
+                member.getAgeRange(),
+                member.getGender(),
+                member.getReligion(),
+                hasExperience 
+        );
+
         return memberDetailRes;
     }
 
