@@ -7,20 +7,20 @@ import org.springframework.data.redis.core.RedisHash;
 public class RefreshToken {
 
     @Id
-    private String kakaoUserId; // Redis 키
+    private String userId; // Redis 키
     private String refreshToken; // Refresh Token 값
 
-    public RefreshToken(String kakaoUserId, String refreshToken) {
-        this.kakaoUserId = kakaoUserId;
+    public RefreshToken(String userId, String refreshToken) {
+        this.userId = userId;
         this.refreshToken = refreshToken;
     }
 
-    public String getKakaoUserId() {
-        return kakaoUserId;
+    public String getUserId() {
+        return userId;
     }
 
-    public void setKakaoUserId(String kakaoUserId) {
-        this.kakaoUserId = kakaoUserId;
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
     public String getRefreshToken() {

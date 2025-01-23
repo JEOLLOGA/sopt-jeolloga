@@ -30,7 +30,6 @@ public class OAuthController {
     @Value("${kakao.client.redirect-uri}")
     private String REDIRECT_URI;
 
-
     public OAuthController(OAuthService oAuthService, MemberService memberService, TokenService tokenService){
         this.oAuthService = oAuthService;
         this.memberService = memberService;
@@ -46,24 +45,24 @@ public class OAuthController {
     }
 
     @GetMapping("/login")
-    public ResponseEntity<LoginRes> login(@RequestParam("code") String code, @RequestParam("redirect_uri") String redirect_uri) {
+    public ResponseEntity<LoginRes> login(@RequestParam("code") String code) { //@RequestParam("redirect_uri") String redirect_uri
 
         // accessToken 발급 받아오기
-        String kakaoAccessToken = oAuthService.getKakaoAccessToken(code, redirect_uri);
+        String kakaoAccessToken = oAuthService.getKakaoAccessToken(code, REDIRECT_URI);
 
         // accessToken 기반으로 유저 정보 받아오기
         MemberRes memberInfo = oAuthService.getKakaoUserInfo(kakaoAccessToken);
-        String kakaoUserId = String.valueOf(memberInfo.userId());
 
         // kakao에서 받아온 유저정보 바탕으로 멤버 생성 or id 조회
         LoginRes loginRes = memberService.findOrCreateUser(memberInfo);
+        String userId = String.valueOf(loginRes.userId());
 
         // accessToken, refreshToken 생성
-        String accessToken = tokenService.createAccessToken(kakaoUserId);
-        String refreshToken = tokenService.createRefreshToken(kakaoUserId);
+        String accessToken = tokenService.createAccessToken(userId);
+        String refreshToken = tokenService.createRefreshToken(userId);
 
         // refreshToken 저장
-        tokenService.updateRefreshToken(kakaoUserId, refreshToken);
+        tokenService.updateRefreshToken(userId, refreshToken);
 
         return ResponseEntity.ok()
                 .header("Authorization", "Bearer " + accessToken)
