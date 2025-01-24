@@ -31,22 +31,22 @@ def update_templestay_name(connection, file_path):
     try:
         df = pd.read_excel(file_path)
         
-        if "id" not in df.columns or "organized_name" not in df.columns:
-            print("Excel 파일에 'id' 또는 'organized_name' 열이 없습니다.")
+        if "templestay_name" not in df.columns or "organized_name" not in df.columns:
+            print("Excel 파일에 'templestay_name' 또는 'organized_name' 열이 없습니다.")
             return
         
         cursor = connection.cursor()
         
         for _, row in df.iterrows():
-            templestay_id = row["id"]
+            templestay_name = row["templestay_name"]
             organized_name = row["organized_name"]
             
             query = """
                 UPDATE templestay
                 SET organized_name = %s
-                WHERE id = %s;
+                WHERE templestay_name LIKE %s;
             """
-            cursor.execute(query, (organized_name, templestay_id))
+            cursor.execute(query, (organized_name, f"%{templestay_name}%"))
         
         connection.commit()
         print(f"{cursor.rowcount}개의 레코드가 업데이트되었습니다.")
