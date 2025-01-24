@@ -18,6 +18,7 @@ import sopt.jeolloga.exception.ErrorCode;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static ch.qos.logback.core.joran.JoranConstants.NULL;
@@ -141,22 +142,18 @@ public class TemplestaySearchService {
             content = "";
         }
 
-        Member member = null;
-        if (userId != null) {
-            member = memberRepository.findById(userId)
-                    .orElseThrow(() -> new TemplestayCoreException(ErrorCode.NOT_FOUND_USER));
-        } else {
-            throw new TemplestayCoreException(ErrorCode.MISSING_USER_ID);
-        }
+        Member member = memberRepository.findById(userId)
+                .orElseThrow(() -> new TemplestayCoreException(ErrorCode.NOT_FOUND_USER));
 
-        try {
-            Search search = new Search(member, content);
-            searchRepository.save(search);
-        } catch (Exception e) {
-            throw new TemplestayCoreException(ErrorCode.INTERNAL_SERVER_ERROR);
+        Optional<Search> existingSearch = searchRepository.findByMemberAndContent(member, content);
+
+        if (existingSearch.isPresent()) {
+            searchRepository.delete(existingSearch.get());
+            searchRepository.save(new Search(member, content));
+        } else {
+            searchRepository.save(new Search(member, content));
         }
     }
-
 
     private Integer getBinaryValue(String filterKey) {
         return switch (filterKey) {
