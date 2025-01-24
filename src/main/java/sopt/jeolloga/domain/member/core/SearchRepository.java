@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import sopt.jeolloga.domain.member.core.Search;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface SearchRepository extends JpaRepository<Search, Long> {
@@ -19,6 +20,7 @@ public interface SearchRepository extends JpaRepository<Search, Long> {
             "ORDER BY s.id DESC " +
             "LIMIT 10", nativeQuery = true)
     List<Object[]> findTop10ByMemberIdOrderByIdDesc(@Param("userId") Long userId);
-
     void deleteAllByMemberId(Long memberId);
+
+    Optional<Search> findByMemberAndContent(Member member, String content); // 특정 Member와 검색어 내용으로 조회
 }

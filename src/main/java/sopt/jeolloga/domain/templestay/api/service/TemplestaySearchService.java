@@ -18,6 +18,7 @@ import sopt.jeolloga.exception.ErrorCode;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static ch.qos.logback.core.joran.JoranConstants.NULL;
@@ -38,11 +39,17 @@ public class TemplestaySearchService {
             Map<String, Integer> type,
             Map<String, Integer> purpose,
             Map<String, Integer> activity,
+            Integer minPrice,
+            Integer maxPrice,
             Map<String, Integer> etc,
             Pageable pageable
     ) {
         if (userId != null) {
             saveSearchContent(userId, query);
+        }
+
+        if(maxPrice == 300000){
+            maxPrice = Integer.MAX_VALUE;
         }
 
         String sanitizedQuery = (query == null || query.isBlank()) ? "" : query.trim();
@@ -54,7 +61,7 @@ public class TemplestaySearchService {
         Integer etcFilter = calculateBitValue(etc, "etc");
 
         List<Object[]> searchResults = templestayRepository.searchWithFiltersAndData(
-                sanitizedQuery, regionFilter, typeFilter, purposeFilter, activityFilter, etcFilter);
+                sanitizedQuery, regionFilter, typeFilter, purposeFilter, activityFilter, minPrice, maxPrice, etcFilter);
 
         if (searchResults.isEmpty()) {
             return new PageTemplestaySearchRes<>(
@@ -136,22 +143,18 @@ public class TemplestaySearchService {
             content = "";
         }
 
-        Member member = null;
-        if (userId != null) {
-            member = memberRepository.findById(userId)
-                    .orElseThrow(() -> new TemplestayCoreException(ErrorCode.NOT_FOUND_USER));
-        } else {
-            throw new TemplestayCoreException(ErrorCode.MISSING_USER_ID);
-        }
+        Member member = memberRepository.findById(userId)
+                .orElseThrow(() -> new TemplestayCoreException(ErrorCode.NOT_FOUND_USER));
 
-        try {
-            Search search = new Search(member, content);
-            searchRepository.save(search);
-        } catch (Exception e) {
-            throw new TemplestayCoreException(ErrorCode.INTERNAL_SERVER_ERROR);
+        Optional<Search> existingSearch = searchRepository.findByMemberAndContent(member, content);
+
+        if (existingSearch.isPresent()) {
+            searchRepository.delete(existingSearch.get());
+            searchRepository.save(new Search(member, content));
+        } else {
+            searchRepository.save(new Search(member, content));
         }
     }
-
 
     private Integer getBinaryValue(String filterKey) {
         return switch (filterKey) {

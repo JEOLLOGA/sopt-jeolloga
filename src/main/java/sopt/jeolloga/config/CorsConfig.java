@@ -16,11 +16,12 @@ public class CorsConfig {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowedOrigins(List.of(
                 "http://localhost:5173",
-                "https://52.78.131.68",
-                "https://www.gototemplestay.com"
+                "https://3.37.231.47",
+                "https://www.gototemplestay.com",
+                "https://api.gototemplestay.com"
         )); // 허용할 Origin
         config.setAllowedMethods(List.of("GET", "POST", "DELETE")); // 허용할 HTTP Method
-        config.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept")); // 허용할 요청 헤더
+        config.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept", "refreshToken")); // 허용할 요청 헤더
         config.setExposedHeaders(List.of(
                 "Authorization",
                 "Content-Type",

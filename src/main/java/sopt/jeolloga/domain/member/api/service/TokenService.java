@@ -20,27 +20,27 @@ public class TokenService {
         this.redisTemplate = redisTemplate;
     }
 
-    public String createAccessToken(String kakaoUserId){
-        return jwtTokenProvider.createAccessToken(kakaoUserId);
+    public String createAccessToken(String userId){
+        return jwtTokenProvider.createAccessToken(userId);
     }
 
-    public String createRefreshToken(String kakaoUserId){
-        return jwtTokenProvider.createRefreshToken(kakaoUserId);
+    public String createRefreshToken(String userId){
+        return jwtTokenProvider.createRefreshToken(userId);
     }
 
-    public void updateRefreshToken(String kakaoUserId, String refreshToken){
+    public void updateRefreshToken(String userId, String refreshToken){
 
-        if(getRefreshToken(kakaoUserId) != null){
-            deleteRefreshToken(kakaoUserId);
+        if(getRefreshToken(userId) != null){
+            deleteRefreshToken(userId);
         }
-        saveRefreshToken(kakaoUserId, refreshToken);
+        saveRefreshToken(userId, refreshToken);
     }
 
     public String reissueAccessToken(String refreshToken){
 
-        String kakaoUserId = jwtTokenProvider.getMemberIdFromToken(refreshToken);
+        String userId = jwtTokenProvider.getUserIdFromToken(refreshToken);
 
-        String oldRefreshToken = getRefreshToken(kakaoUserId);
+        String oldRefreshToken = getRefreshToken(userId);
 
         // 저장된 refreshToken이 없는 경우
         if (oldRefreshToken == null) {
@@ -52,34 +52,34 @@ public class TokenService {
             throw new MemberCoreException(ErrorCode.INVALID_TOKEN);
         }
 
-        return jwtTokenProvider.createAccessToken(kakaoUserId);
+        return jwtTokenProvider.createAccessToken(userId);
     }
 
     public void logout(String accessToken){
 
-        String kakaoUserId = jwtTokenProvider.getMemberIdFromToken(accessToken);
-        deleteRefreshToken(kakaoUserId);
+        String userId = jwtTokenProvider.getUserIdFromToken(accessToken);
+        deleteRefreshToken(userId);
     }
 
 
     // refresh Token 관련
 
     // Refresh Token 저장
-    public void saveRefreshToken(String kakaoUserId, String token) {
-        RefreshToken refreshToken = new RefreshToken(kakaoUserId, token);
+    public void saveRefreshToken(String userId, String token) {
+        RefreshToken refreshToken = new RefreshToken(userId, token);
         refreshTokenRepository.save(refreshToken);
     }
 
     // Refresh Token 조회
-    public String getRefreshToken(String kakaoUserId) {
-        return refreshTokenRepository.findById(kakaoUserId)
+    public String getRefreshToken(String userId) {
+        return refreshTokenRepository.findById(userId)
                 .map(RefreshToken::getRefreshToken)
                 .orElse(null);
     }
 
     // Refresh Token 삭제
-    public void deleteRefreshToken(String kakaoUserId) {
-        refreshTokenRepository.deleteById(kakaoUserId);
+    public void deleteRefreshToken(String userId) {
+        refreshTokenRepository.deleteById(userId);
     }
 
 }

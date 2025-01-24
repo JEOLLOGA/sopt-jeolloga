@@ -35,6 +35,8 @@ public class TemplestaySearchController {
                 templestayFilterReq.type(),
                 templestayFilterReq.purpose(),
                 templestayFilterReq.activity(),
+                templestayFilterReq.price().minPrice(),
+                templestayFilterReq.price().maxPrice(),
                 templestayFilterReq.etc(),
                 pageable
         );
