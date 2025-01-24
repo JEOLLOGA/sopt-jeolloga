@@ -38,11 +38,17 @@ public class TemplestaySearchService {
             Map<String, Integer> type,
             Map<String, Integer> purpose,
             Map<String, Integer> activity,
+            Integer minPrice,
+            Integer maxPrice,
             Map<String, Integer> etc,
             Pageable pageable
     ) {
         if (userId != null) {
             saveSearchContent(userId, query);
+        }
+
+        if(maxPrice == 300000){
+            maxPrice = Integer.MAX_VALUE;
         }
 
         String sanitizedQuery = (query == null || query.isBlank()) ? "" : query.trim();
@@ -54,7 +60,7 @@ public class TemplestaySearchService {
         Integer etcFilter = calculateBitValue(etc, "etc");
 
         List<Object[]> searchResults = templestayRepository.searchWithFiltersAndData(
-                sanitizedQuery, regionFilter, typeFilter, purposeFilter, activityFilter, etcFilter);
+                sanitizedQuery, regionFilter, typeFilter, purposeFilter, activityFilter, minPrice, maxPrice, etcFilter);
 
         if (searchResults.isEmpty()) {
             return new PageTemplestaySearchRes<>(

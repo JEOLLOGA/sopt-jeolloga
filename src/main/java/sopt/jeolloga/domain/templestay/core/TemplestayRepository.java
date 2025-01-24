@@ -42,6 +42,8 @@ public interface TemplestayRepository extends JpaRepository<Templestay, Long> {
       AND (:type IS NULL OR c.type & :type != 0)
       AND (:purpose IS NULL OR c.purpose & :purpose != 0)
       AND (:activity IS NULL OR c.activity & :activity != 0)
+      AND (:minPrice IS NULL OR c.price >= :minPrice)
+      AND (:maxPrice IS NULL OR c.price <= :maxPrice)
       AND (:etc IS NULL OR c.etc & :etc != 0)
 """, nativeQuery = true)
     List<Object[]> searchWithFiltersAndData(
@@ -50,6 +52,8 @@ public interface TemplestayRepository extends JpaRepository<Templestay, Long> {
             @Param("type") Integer type,
             @Param("purpose") Integer purpose,
             @Param("activity") Integer activity,
+            @Param("minPrice") Integer minPrice,
+            @Param("maxPrice") Integer maxPrice,
             @Param("etc") Integer etc
     );
 
