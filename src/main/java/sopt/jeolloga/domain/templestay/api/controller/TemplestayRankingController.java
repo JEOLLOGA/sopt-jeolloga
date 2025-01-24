@@ -18,6 +18,8 @@ import java.util.List;
 public class TemplestayRankingController {
     private final TemplestayRankingService templestayRankingService;
 
+
+
     @GetMapping("/ranking")
     public ResponseEntity<TemplestayRankingListRes> getTopRanking(
             @RequestParam(value = "userId", required = false) Long userId
