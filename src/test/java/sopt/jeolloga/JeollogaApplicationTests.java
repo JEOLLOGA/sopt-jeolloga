@@ -10,4 +10,9 @@ class JeollogaApplicationTests {
 	void contextLoads() {
 	}
 
+	@Test
+	void 한국말() {
+
+	}
+
 }
