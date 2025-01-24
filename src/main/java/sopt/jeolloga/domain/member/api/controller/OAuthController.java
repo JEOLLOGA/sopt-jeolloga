@@ -50,6 +50,9 @@ public class OAuthController {
         // accessToken 발급 받아오기
         String kakaoAccessToken = oAuthService.getKakaoAccessToken(code, REDIRECT_URI);
 
+        System.out.println("kakao access token");
+        System.out.println(kakaoAccessToken);
+
         // accessToken 기반으로 유저 정보 받아오기
         MemberRes memberInfo = oAuthService.getKakaoUserInfo(kakaoAccessToken);
 

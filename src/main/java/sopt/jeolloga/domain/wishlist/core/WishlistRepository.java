@@ -20,4 +20,7 @@ public interface WishlistRepository extends JpaRepository<Wishlist, Long> {
     boolean existsByMemberIdAndTemplestayId(@Param("memberId") Long memberId, @Param("templestayId") Long templestayId);
 
     Optional<Wishlist> findByMemberIdAndTemplestayId(Long memberId, Long templestayId);
+
+    void deleteAllByMemberId(Long memberId);
 }
+
