@@ -21,7 +21,7 @@ public class CorsConfig {
                 "https://api.gototemplestay.com"
         )); // 허용할 Origin
         config.setAllowedMethods(List.of("GET", "POST", "DELETE")); // 허용할 HTTP Method
-        config.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept")); // 허용할 요청 헤더
+        config.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept", "refreshToken")); // 허용할 요청 헤더
         config.setExposedHeaders(List.of(
                 "Authorization",
                 "Content-Type",
