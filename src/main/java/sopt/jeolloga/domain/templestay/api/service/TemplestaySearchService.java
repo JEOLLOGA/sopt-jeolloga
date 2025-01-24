@@ -18,7 +18,6 @@ import sopt.jeolloga.exception.ErrorCode;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static ch.qos.logback.core.joran.JoranConstants.NULL;
@@ -80,12 +79,11 @@ public class TemplestaySearchService {
                 .limit(pageable.getPageSize())
                 .collect(Collectors.toList());
 
-        // 관심 여부(liked) 기본값 처리
         List<TemplestaySearchRes> templestaySearchResults = paginatedResults.stream()
                 .map(result -> {
                     Long id = ((Number) result[0]).longValue();
                     String templeName = result[1] != null ? result[1].toString() : null;
-                    String templestayName = result[2] != null ? result[2].toString() : null;
+                    String organizedName = result[2] != null ? result[2].toString() : null;
                     String tag = result[3] != null ? result[3].toString().split(",")[0] : null;
                     String regionName = result.length > 4 && result[4] != null
                             ? CategoryUtils.getRegionName((Integer) result[4])
@@ -100,7 +98,7 @@ public class TemplestaySearchService {
                     return new TemplestaySearchRes(
                             id,
                             templeName,
-                            templestayName,
+                            organizedName,
                             tag,
                             regionName,
                             typeName,
@@ -143,18 +141,22 @@ public class TemplestaySearchService {
             content = "";
         }
 
-        Member member = memberRepository.findById(userId)
-                .orElseThrow(() -> new TemplestayCoreException(ErrorCode.NOT_FOUND_USER));
-
-        Optional<Search> existingSearch = searchRepository.findByMemberAndContent(member, content);
-
-        if (existingSearch.isPresent()) {
-            searchRepository.delete(existingSearch.get());
-            searchRepository.save(new Search(member, content));
+        Member member = null;
+        if (userId != null) {
+            member = memberRepository.findById(userId)
+                    .orElseThrow(() -> new TemplestayCoreException(ErrorCode.NOT_FOUND_USER));
         } else {
-            searchRepository.save(new Search(member, content));
+            throw new TemplestayCoreException(ErrorCode.MISSING_USER_ID);
+        }
+
+        try {
+            Search search = new Search(member, content);
+            searchRepository.save(search);
+        } catch (Exception e) {
+            throw new TemplestayCoreException(ErrorCode.INTERNAL_SERVER_ERROR);
         }
     }
+
 
     private Integer getBinaryValue(String filterKey) {
         return switch (filterKey) {
