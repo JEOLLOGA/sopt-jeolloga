@@ -23,7 +23,7 @@ public class TemplestayImageService {
         List<TemplestayImage> images = templestayImageRepository.findAllByTemplestayId(templestayId);
 
         if (images.isEmpty()) {
-            throw new TemplestayCoreException(ErrorCode.NOT_FOUND_TARGET);
+            return null;
         }
 
         List<TemplestayImg> templestayImgs = images.stream()
