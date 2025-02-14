@@ -109,7 +109,5 @@ public class OAuthService {
                 .onStatus(HttpStatusCode::is5xxServerError, clientResponse -> Mono.error(new RuntimeException("Internal Server Error")))
                 .bodyToMono(KakaoUserInfoRes.class)
                 .block();
-
     }
-
 }
