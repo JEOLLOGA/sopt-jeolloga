@@ -46,4 +46,18 @@ public class KakaoClientApi implements OAuthClientApi {
                 .toEntity(KakaoUserInfoRes.class)
                 .getBody();
     }
+
+    @Override
+    public KakaoUnlinkRes unlink(Long userId) {
+
+        return restClient.method(HttpMethod.POST)
+                .uri("https://kapi.kakao.com/v1/user/unlink")
+                .header("Authorization", "KakaoAK " + adminKey)
+                .header("Content-Type", "application/x-www-form-urlencoded;charset=utf-8")
+                .body("target_id_type=user_id" +
+                        "&target_id=" + userId)
+                .retrieve()
+                .toEntity(KakaoUnlinkRes.class)
+                .getBody();
+    }
 }
