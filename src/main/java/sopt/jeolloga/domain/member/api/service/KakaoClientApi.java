@@ -52,14 +52,14 @@ public class KakaoClientApi implements OAuthClientApi {
     }
 
     @Override
-    public KakaoUnlinkRes unlink(Long userId) {
+    public KakaoUnlinkRes unlink(Long kakaoUserId) {
 
         return restClient.method(HttpMethod.POST)
                 .uri("https://kapi.kakao.com/v1/user/unlink")
                 .header("Authorization", "KakaoAK " + ADMIN_KEY)
                 .header("Content-Type", "application/x-www-form-urlencoded;charset=utf-8")
                 .body("target_id_type=user_id" +
-                        "&target_id=" + userId)
+                        "&target_id=" + kakaoUserId)
                 .retrieve()
                 .toEntity(KakaoUnlinkRes.class)
                 .getBody();

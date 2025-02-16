@@ -85,4 +85,17 @@ public class MemberService {
         MemberNameRes memberNameRes = new MemberNameRes(member.getNickname());
         return memberNameRes;
     }
+
+    public Long getUserKakaoId(Long userId){
+        Member member = memberRepository.findById(userId)
+                .orElseThrow(() -> new MemberCoreException(ErrorCode.NOT_FOUND_USER));
+        return member.getKakaoUserId();
+    }
+
+    public void deleteMemberById(Long userId){
+        if (!memberRepository.existsById(userId)) {
+            throw new MemberCoreException(ErrorCode.NOT_FOUND_USER);
+        }
+        memberRepository.deleteById(userId);
+    }
 }

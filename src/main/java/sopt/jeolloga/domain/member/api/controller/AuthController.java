@@ -6,9 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import sopt.jeolloga.domain.member.api.dto.LoginReq;
-import sopt.jeolloga.domain.member.api.dto.LoginRes;
-import sopt.jeolloga.domain.member.api.dto.MemberRes;
+import sopt.jeolloga.domain.member.api.dto.*;
 import sopt.jeolloga.domain.member.api.service.AuthService;
 import sopt.jeolloga.domain.member.api.service.MemberService;
 import sopt.jeolloga.domain.member.api.service.TokenService;
@@ -83,5 +81,11 @@ public class AuthController {
     @GetMapping("login/code")
     public ResponseEntity<?> loginCode(@RequestParam("code") String code){
         return ResponseEntity.ok(code);
+    }
+
+    @PostMapping("login/unlink")
+    public ResponseEntity<KakaoUnlinkRes> loginCode(@RequestBody KakaoUnlinkReq request){
+        KakaoUnlinkRes kakaoUnlinkRes = authService.unlink(request.userId());
+        return ResponseEntity.ok(kakaoUnlinkRes);
     }
 }
