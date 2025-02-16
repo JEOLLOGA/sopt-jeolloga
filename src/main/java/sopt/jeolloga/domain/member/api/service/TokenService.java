@@ -4,7 +4,6 @@ import org.springframework.stereotype.Service;
 import sopt.jeolloga.domain.member.api.utils.JwtTokenProvider;
 import sopt.jeolloga.domain.member.core.RefreshToken;
 import sopt.jeolloga.domain.member.core.RefreshTokenRepository;
-import org.springframework.data.redis.core.RedisTemplate;
 import sopt.jeolloga.domain.member.core.exception.MemberCoreException;
 import sopt.jeolloga.exception.ErrorCode;
 
@@ -12,12 +11,10 @@ import sopt.jeolloga.exception.ErrorCode;
 public class TokenService {
     private final RefreshTokenRepository refreshTokenRepository;
     private final JwtTokenProvider jwtTokenProvider;
-    private final RedisTemplate<String, Object> redisTemplate;
 
-    public TokenService(RefreshTokenRepository refreshTokenRepository, JwtTokenProvider jwtTokenProvider, RedisTemplate<String, Object> redisTemplate) {
+    public TokenService(RefreshTokenRepository refreshTokenRepository, JwtTokenProvider jwtTokenProvider) {
         this.refreshTokenRepository = refreshTokenRepository;
         this.jwtTokenProvider = jwtTokenProvider;
-        this.redisTemplate = redisTemplate;
     }
 
     public String createAccessToken(String userId){
@@ -39,7 +36,6 @@ public class TokenService {
     public String reissueAccessToken(String refreshToken){
 
         String userId = jwtTokenProvider.getUserIdFromToken(refreshToken);
-
         String oldRefreshToken = getRefreshToken(userId);
 
         // 저장된 refreshToken이 없는 경우
@@ -56,13 +52,9 @@ public class TokenService {
     }
 
     public void logout(String accessToken){
-
         String userId = jwtTokenProvider.getUserIdFromToken(accessToken);
         deleteRefreshToken(userId);
     }
-
-
-    // refresh Token 관련
 
     // Refresh Token 저장
     public void saveRefreshToken(String userId, String token) {
@@ -81,5 +73,4 @@ public class TokenService {
     public void deleteRefreshToken(String userId) {
         refreshTokenRepository.deleteById(userId);
     }
-
 }
