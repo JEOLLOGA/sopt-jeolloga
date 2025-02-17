@@ -4,6 +4,7 @@ import requests
 from bs4 import BeautifulSoup
 import re
 import json
+from collections import OrderedDict
 
 def load_db_config(file_path):
     with open(file_path, "r", encoding="utf-8") as file:
@@ -22,9 +23,6 @@ def connect_to_db(config):
         print(f"DB 연결 오류: {e}")
         return None
 
-def clean_text(text):
-    return re.sub(r"\\r|\\n|\\t|\s+", " ", text).strip()
-
 def fetch_last_id(connection):
     try:
         cursor = connection.cursor()
@@ -34,6 +32,7 @@ def fetch_last_id(connection):
         last_id = result[0] if result and result[0] else 0
         cursor.close()
         return last_id
+    
     except mysql.connector.Error as err:
         print(f"마지막 ID 가져오기 오류: {err}")
         return 0
@@ -88,10 +87,10 @@ def extract_introduction(soup):
         introduction_data = {}
 
         title_element = soup.select_one("h4")
-        title = clean_text(title_element.text) if title_element else "null"
+        title = title_element.text.strip() if title_element else "null"
 
         description_element = title_element.find_next("p") if title_element else None
-        description = clean_text(description_element.text) if description_element else "null"
+        description = description_element.text if description_element else "null"
 
         introduction_data[title] = description
 
@@ -101,18 +100,19 @@ def extract_introduction(soup):
         print(f"소개 정보 크롤링 실패: {e}")
         return json.dumps({"error": "데이터를 가져오지 못했습니다."}, ensure_ascii=False)
 
+
 def crawl_schedule_data(soup):
     try:
-        schedule = {}
+        schedule = OrderedDict()
         day_sections = soup.select(".temple-description h4.bullet")
-
+        
         for day_title_element in day_sections:
             day_title = day_title_element.text.strip() if day_title_element else "null"
             table_element = day_title_element.find_next("table") if day_title_element else None
             if not table_element:
                 continue
 
-            day_schedule = {}
+            day_schedule = OrderedDict()
             rows = table_element.select("tbody tr")
             for row in rows:
                 cells = row.select("td")
@@ -129,53 +129,45 @@ def crawl_schedule_data(soup):
         print(f"일정 크롤링 실패: {e}")
         return "{}"
 
-def save_crawled_data_to_db(connection, data):
-    cursor = None
+def update_schedule_and_introduction(connection, data):
     try:
         cursor = connection.cursor()
 
         check_query = "SELECT COUNT(*) FROM templestay WHERE templestay_name = %s"
         cursor.execute(check_query, (data["templestay_name"],))
         result = cursor.fetchone()
+
         if result[0] > 0:
-            print(f"중복된 templestay_name: {data['templestay_name']} - 저장하지 않음")
-            return
-
-        last_id = fetch_last_id(connection)
-        new_id = last_id + 1
-
-        templestay_query = """
-            INSERT INTO templestay (id, templestay_name, phone_number, introduction, temple_name, schedule)
-            VALUES (%s, %s, %s, %s, %s, %s)
-        """
-        cursor.execute(templestay_query, (
-            new_id,
-            data["templestay_name"],
-            data["phone_number"],
-            data["introduction"],
-            data["temple_name"],
-            data["schedule"]
-        ))
-        connection.commit()
-
-        update_url_query = "UPDATE url SET templestay_id = %s WHERE id = %s"
-        cursor.execute(update_url_query, (new_id, data["url_id"]))
-        connection.commit()
-
-        print(f"데이터 저장 및 URL 업데이트 성공: Templestay ID {new_id}, URL ID {data['url_id']}")
+            print(f"중복된 templestay_name ({data['templestay_name']})이 존재하여 업데이트하지 않음.")
+        else:
+            new_id = fetch_last_id(connection) + 1
+            insert_query = """
+                INSERT INTO templestay (id, templestay_name, phone_number, introduction, temple_name, schedule)
+                VALUES (%s, %s, %s, %s, %s, %s)
+            """
+            cursor.execute(insert_query, (
+                new_id,
+                data["templestay_name"],
+                data["phone_number"],
+                data["introduction"],
+                data["temple_name"],
+                data["schedule"]
+            ))
+            connection.commit()
+            print(f"새로운 데이터 삽입 완료 (templestay_name: {data['templestay_name']})")
 
     except mysql.connector.Error as err:
-        print(f"데이터 저장 오류: {err}")
+        print(f"업데이트/삽입 오류 발생: {err}")
+
     finally:
-        if cursor:
-            cursor.close()
+        cursor.close()
 
 def sequential_crawling_and_saving(urls_with_ids, connection):
     for url_id, url in urls_with_ids:
         print(f"크롤링 중: {url} (URL ID: {url_id})")
         data = crawl_data(url, url_id)
         if data:
-            save_crawled_data_to_db(connection, data)
+            update_schedule_and_introduction(connection, data)
 
 db_config_path = "C:\\jeolloga\\data\\db_config.yaml"
 db_config = load_db_config(db_config_path)

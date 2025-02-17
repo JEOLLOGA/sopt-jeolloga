@@ -1,0 +1,5 @@
+database:
+  host: web-jeolloga.cl2mgmwa8yhl.ap-northeast-2.rds.amazonaws.com
+  user: root
+  password: Jeolloga1221
+  name: jeolloga
