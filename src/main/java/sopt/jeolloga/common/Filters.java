@@ -123,7 +123,7 @@ public class Filters {
                 .collect(Collectors.toList());
     }
 
-    private boolean matchesFilter(Category category, int binaryRegionFilter, int binaryTypeFilter, int binaryPurposeFilter, int binaryActivityFilter, int binaryEtcFilter, int minPrice, int maxPrice) {
+    public boolean matchesFilter(Category category, int binaryRegionFilter, int binaryTypeFilter, int binaryPurposeFilter, int binaryActivityFilter, int binaryEtcFilter, int minPrice, int maxPrice) {
         return (category.getRegion() & binaryRegionFilter) != 0 &&
                 (category.getType() & binaryTypeFilter) != 0 &&
                 (category.getPurpose() & binaryPurposeFilter) != 0 &&
