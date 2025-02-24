@@ -76,7 +76,7 @@ public class FilterController {
 
     
     // AccessToken 사용 여부에 따라 분기 필요
-    @PostMapping("public/filter/test")
+    @PostMapping("public/filter/v2")
     public ResponseEntity<PageTemplestayTestRes> filter(
             @RequestBody FilterReq filter,
             @RequestParam (value = "userId", required = false) Long userId,
@@ -88,7 +88,7 @@ public class FilterController {
         return ResponseEntity.ok(result);
     }
 
-    @PostMapping("public/filter/count/test")
+    @PostMapping("public/filter/count/v2")
     public ResponseEntity<FilterCountTestRes> countTest(@RequestBody FilterReq filter){
 
         System.out.println(filter.content());

@@ -5,6 +5,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import sopt.jeolloga.domain.templestay.api.dto.FilterReq;
 import sopt.jeolloga.domain.templestay.api.dto.PageTemplestaySearchRes;
 import sopt.jeolloga.domain.templestay.api.dto.TemplestayFilterReq;
 import sopt.jeolloga.domain.templestay.api.dto.TemplestaySearchRes;
@@ -42,5 +43,16 @@ public class TemplestaySearchController {
         );
 
         return ResponseEntity.ok(results);
+    }
+
+    @PostMapping("public/search/v2")
+    public ResponseEntity<PageTemplestaySearchRes> search(@RequestBody FilterReq filter,
+                                    @RequestParam (value = "userId", required = false) Long userId,
+                                    @RequestParam (value = "page") int page,
+                                    @RequestParam (value="pageSize", defaultValue = "10") int pageSize){
+
+        PageTemplestaySearchRes result = templestaySearchService.searchTemplestayWithFiltersTest(filter, page, pageSize, userId);
+
+        return ResponseEntity.ok(result);
     }
 }

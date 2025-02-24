@@ -1,16 +1,21 @@
 package sopt.jeolloga.domain.templestay.api.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sopt.jeolloga.common.CategoryUtils;
+import sopt.jeolloga.common.FilterUtil;
 import sopt.jeolloga.domain.member.core.Member;
 import sopt.jeolloga.domain.member.core.MemberRepository;
 import sopt.jeolloga.domain.member.core.Search;
 import sopt.jeolloga.domain.member.core.SearchRepository;
+import sopt.jeolloga.domain.templestay.api.dto.FilterReq;
 import sopt.jeolloga.domain.templestay.api.dto.PageTemplestaySearchRes;
 import sopt.jeolloga.domain.templestay.api.dto.TemplestaySearchRes;
+import sopt.jeolloga.domain.templestay.api.dto.TemplestayTestRes;
 import sopt.jeolloga.domain.templestay.core.TemplestayRepository;
 import sopt.jeolloga.domain.templestay.core.exception.TemplestayCoreException;
 import sopt.jeolloga.domain.wishlist.core.WishlistRepository;
@@ -29,6 +34,7 @@ public class TemplestaySearchService {
     private final WishlistRepository wishlistRepository;
     private final MemberRepository memberRepository;
     private final SearchRepository searchRepository;
+
 
     @Transactional
     public PageTemplestaySearchRes<TemplestaySearchRes> searchTemplestayWithFilters(
@@ -210,4 +216,42 @@ public class TemplestaySearchService {
             default -> 0;
         };
     }
+
+    public PageTemplestaySearchRes<TemplestayTestRes> searchTemplestayWithFiltersTest(FilterReq filter, int page, int pageSize, Long userId){
+
+        String content = (filter.content() == null || filter.content().isBlank()) ? "" : filter.content().replaceAll("\\s+", "").trim();
+        Integer binaryRegionFilter = FilterUtil.convertRegion(filter.region());
+        Integer binaryTypeFilter = FilterUtil.convertType(filter.type());
+        Integer binaryPurposeFilter = FilterUtil.convertPurpose(filter.purpose());
+        Integer binaryActivityFilter = FilterUtil.convertActivity(filter.activity());
+        Integer binaryEtcFilter = FilterUtil.convertEtc(filter.etc());
+
+        int minPrice = filter.price().minPrice();
+        int maxPrice = (filter.price().maxPrice() >= 300000) ? Integer.MAX_VALUE : filter.price().maxPrice();
+
+        if (userId != null) {
+            saveSearchContent(userId, content);
+        }
+
+        Pageable pageable = PageRequest.of(page-1, pageSize);
+        Page<Object[]> searchFilteredTemplestayPage = templestayRepository.searchFilteredTemplestay(content, binaryRegionFilter, binaryTypeFilter,
+                binaryPurposeFilter,binaryActivityFilter, minPrice, maxPrice, binaryEtcFilter, userId, pageable);
+
+        List<TemplestayTestRes> templestayList = searchFilteredTemplestayPage.getContent().stream()
+                .map(row -> new TemplestayTestRes(
+                        (Long) row[0],  // templestayId
+                        (String) row[1],  // templeName
+                        (String) row[2],  // templestayName
+                        (String) row[3],  // tag
+                        FilterUtil.convertRegionToString((Integer) row[4]),  // region
+                        FilterUtil.convertTypeToString((Integer) row[5]),  // type
+                        (String) row[6],  // imageUrl
+                        ((Number) row[7]).intValue() == 1  // liked
+                ))
+                .collect(Collectors.toList());
+
+        return new PageTemplestaySearchRes<>(page, pageSize, searchFilteredTemplestayPage.getTotalPages(), content, templestayList
+        );
+    }
+
 }

@@ -59,7 +59,7 @@ public class FilterServiceV2 {
                 .map(row -> new TemplestayTestRes(
                         (Long) row[0],  // templestayId
                         (String) row[1],  // templeName
-                        (String) row[2],  // templestayName
+                        (String) row[2],  // organizedName
                         (String) row[3],  // tag
                         FilterUtil.convertRegionToString((Integer) row[4]),  // region
                         FilterUtil.convertTypeToString((Integer) row[5]),  // type
