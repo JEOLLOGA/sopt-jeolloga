@@ -58,4 +58,122 @@ public interface TemplestayRepository extends JpaRepository<Templestay, Long> {
 
     @Query("SELECT t.id FROM Templestay t WHERE t.templeName LIKE %:content%")
     List<Long> findIdsByTempleNameContaining(@Param("content") String content);
+
+
+
+
+
+
+    @Query(value = "WITH FilteredCategories AS (" +
+            "SELECT templestay_id FROM category " +
+            "WHERE (:region = 0 OR (region & :region) > 0) " +
+            "AND (:type = 0 OR (type & :type) > 0) " +
+            "AND (:purpose = 0 OR (purpose & :purpose) > 0) " +
+            "AND (:activity = 0 OR (activity & :activity) > 0) " +
+            "AND (:etc = 0 OR (etc & :etc) > 0) " +
+            "AND (price BETWEEN :minPrice AND :maxPrice) " +
+            ") " +
+            "SELECT t.id AS templestayId, t.temple_name, t.templestay_name, t.tag, " +
+            "c.region, c.type, img.img_url, " +
+            "EXISTS ( " +
+            "    SELECT 1 FROM wishlist w WHERE w.templestay_id = t.id AND w.member_id = :userId " +
+            ") AS liked " +
+            "FROM templestay t " +
+            "JOIN FilteredCategories fc ON t.id = fc.templestay_id " +
+            "JOIN category c ON t.id = c.templestay_id " +
+            "LEFT JOIN (SELECT templestay_id, img_url FROM templestay_image GROUP BY templestay_id) img " +
+            "ON t.id = img.templestay_id " +
+            "ORDER BY t.id",
+
+            countQuery = "WITH FilteredCategories AS (" +
+                    "SELECT templestay_id FROM category " +
+                    "WHERE (:region = 0 OR (region & :region) > 0) " +
+                    "AND (:type = 0 OR (type & :type) > 0) " +
+                    "AND (:purpose = 0 OR (purpose & :purpose) > 0) " +
+                    "AND (:activity = 0 OR (activity & :activity) > 0) " +
+                    "AND (:etc = 0 OR (etc & :etc) > 0) " +
+                    "AND (price BETWEEN :minPrice AND :maxPrice) " +
+                    ") " +
+                    "SELECT COUNT(*) FROM templestay t " +
+                    "JOIN FilteredCategories fc ON t.id = fc.templestay_id " +
+                    "JOIN category c ON t.id = c.templestay_id",
+            nativeQuery = true)
+    Page<Object[]> findFilteredTemplestay(
+            @Param("region") Integer region,
+            @Param("type") Integer type,
+            @Param("purpose") Integer purpose,
+            @Param("activity") Integer activity,
+            @Param("minPrice") Integer minPrice,
+            @Param("maxPrice") Integer maxPrice,
+            @Param("etc") Integer etc,
+            @Param("userId") Long userId,
+            Pageable pageable
+    );
+
+    @Query(value = "SELECT COUNT(*) FROM category c " +
+                    "WHERE (:region = 0 OR (c.region & :region) > 0) " +
+                    "AND (:type = 0 OR (c.type & :type) > 0) " +
+                    "AND (:purpose = 0 OR (c.purpose & :purpose) > 0) " +
+                    "AND (:activity = 0 OR (c.activity & :activity) > 0) " +
+                    "AND (:etc = 0 OR (c.etc & :etc) > 0) " +
+                    "AND (c.price BETWEEN :minPrice AND :maxPrice)",
+            nativeQuery = true)
+    long findFilteredTemplestayNum(
+            @Param("region") Integer region,
+            @Param("type") Integer type,
+            @Param("purpose") Integer purpose,
+            @Param("activity") Integer activity,
+            @Param("minPrice") Integer minPrice,
+            @Param("maxPrice") Integer maxPrice,
+            @Param("etc") Integer etc
+    );
+
+
+    @Query(value = "WITH FilteredCategories AS (" +
+            "SELECT templestay_id FROM category " +
+            "WHERE (:region = 0 OR (region & :region) > 0) " +
+            "AND (:type = 0 OR (type & :type) > 0) " +
+            "AND (:purpose = 0 OR (purpose & :purpose) > 0) " +
+            "AND (:activity = 0 OR (activity & :activity) > 0) " +
+            "AND (:etc = 0 OR (etc & :etc) > 0) " +
+            "AND (price BETWEEN :minPrice AND :maxPrice) " +
+            ") " +
+            "SELECT t.id AS templestayId, t.temple_name, t.templestay_name, t.tag, " +
+            "c.region, c.type, img.img_url, " +
+            "CASE WHEN w.templestay_id IS NOT NULL THEN TRUE ELSE FALSE END AS liked " +
+            "FROM templestay t " +
+            "JOIN FilteredCategories fc ON t.id = fc.templestay_id " +
+            "JOIN category c ON t.id = c.templestay_id " +
+            "LEFT JOIN (SELECT templestay_id, img_url FROM templestay_image GROUP BY templestay_id) img " +
+            "ON t.id = img.templestay_id " +
+            "LEFT JOIN wishlist w ON t.id = w.templestay_id AND (w.member_id = :userId OR :userId IS NULL) " +
+            "WHERE (:content IS NULL OR t.temple_name LIKE CONCAT('%', :content, '%')) " + // ✅ 검색 키워드 반영
+            "ORDER BY t.id",
+
+            countQuery = "WITH FilteredCategories AS (" +
+                    "SELECT templestay_id FROM category " +
+                    "WHERE (:region = 0 OR (region & :region) > 0) " +
+                    "AND (:type = 0 OR (type & :type) > 0) " +
+                    "AND (:purpose = 0 OR (purpose & :purpose) > 0) " +
+                    "AND (:activity = 0 OR (activity & :activity) > 0) " +
+                    "AND (:etc = 0 OR (etc & :etc) > 0) " +
+                    "AND (price BETWEEN :minPrice AND :maxPrice) " +
+                    ") " +
+                    "SELECT COUNT(*) FROM templestay t " +
+                    "JOIN FilteredCategories fc ON t.id = fc.templestay_id " +
+                    "JOIN category c ON t.id = c.templestay_id " +
+                    "WHERE (:content IS NULL OR t.temple_name LIKE CONCAT('%', :content, '%'))",
+            nativeQuery = true)
+    Page<Object[]> searchFilteredTemplestay(
+            @Param("content") String content,
+            @Param("region") Integer region,
+            @Param("type") Integer type,
+            @Param("purpose") Integer purpose,
+            @Param("activity") Integer activity,
+            @Param("minPrice") Integer minPrice,
+            @Param("maxPrice") Integer maxPrice,
+            @Param("etc") Integer etc,
+            @Param("userId") Long userId,
+            Pageable pageable
+    );
 }
