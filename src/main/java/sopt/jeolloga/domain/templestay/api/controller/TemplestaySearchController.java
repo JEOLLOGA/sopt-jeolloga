@@ -45,8 +45,33 @@ public class TemplestaySearchController {
         return ResponseEntity.ok(results);
     }
 
+    @PostMapping("public/search/v1")
+    public ResponseEntity<PageTemplestaySearchRes<TemplestaySearchRes>> searchOld(
+            @RequestParam(value = "userId", required = false) Long userId,
+            @RequestBody TemplestayFilterReq templestayFilterReq,
+            @RequestParam(value = "page", defaultValue = "1") int page,
+            @RequestParam(value = "pageSize", defaultValue = "10") int pageSize) {
+
+        Pageable pageable = PageRequest.of(page - 1, pageSize);
+
+        PageTemplestaySearchRes<TemplestaySearchRes> results = templestaySearchService.searchTemplestayWithFilters(
+                userId, // userId가 null일 수도 있음
+                templestayFilterReq.content(),
+                templestayFilterReq.region(),
+                templestayFilterReq.type(),
+                templestayFilterReq.purpose(),
+                templestayFilterReq.activity(),
+                templestayFilterReq.price().minPrice(),
+                templestayFilterReq.price().maxPrice(),
+                templestayFilterReq.etc(),
+                pageable
+        );
+
+        return ResponseEntity.ok(results);
+    }
+
     @PostMapping("public/search/v2")
-    public ResponseEntity<PageTemplestaySearchRes> search(@RequestBody FilterReq filter,
+    public ResponseEntity<PageTemplestaySearchRes> searchNew(@RequestBody FilterReq filter,
                                     @RequestParam (value = "userId", required = false) Long userId,
                                     @RequestParam (value = "page") int page,
                                     @RequestParam (value="pageSize", defaultValue = "10") int pageSize){

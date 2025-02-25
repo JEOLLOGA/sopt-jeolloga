@@ -74,10 +74,26 @@ public class FilterController {
         return ResponseEntity.ok(templestayWithPage);
     }
 
+    // 필터링 된 템플스테이 목록 반환
+    @PostMapping("/public/filter/list/v1")
+    public ResponseEntity<PageTemplestayRes> filterListOld(
+            @RequestBody TemplestayFilterReqTemp filter,
+            @RequestParam (value = "userId", required = false) Long userId,
+            @RequestParam (value = "page") int page,
+            @RequestParam (value="pageSize", defaultValue = "10") int pageSize){
+
+        List<Long> filteredId;
+        PageTemplestayRes templestayWithPage;
+
+        filteredId = filterService.getFiteredTemplestayCategory(filter);
+        templestayWithPage = filterService.getFilteredTemplestay(filteredId, page, pageSize, userId);
+
+        return ResponseEntity.ok(templestayWithPage);
+    }
     
     // AccessToken 사용 여부에 따라 분기 필요
-    @PostMapping("public/filter/v2")
-    public ResponseEntity<PageTemplestayTestRes> filter(
+    @PostMapping("public/filter/list/v2")
+    public ResponseEntity<PageTemplestayTestRes> filterListNew(
             @RequestBody FilterReq filter,
             @RequestParam (value = "userId", required = false) Long userId,
             @RequestParam (value = "page") int page,
@@ -88,10 +104,18 @@ public class FilterController {
         return ResponseEntity.ok(result);
     }
 
+    // 필터링 된 템플스테이 개수 반환
+    @PostMapping("/public/filter/count/v1")
+    public ResponseEntity<FilterCountRes> filterOld(@RequestBody TemplestayFilterReqTemp filter) {
+
+        List<Long> filteredId = filterService.getFiteredTemplestayCategory(filter);
+        FilterCountRes filterCountRes = filterService.getFilteredTemplestayNum(filteredId);
+        return ResponseEntity.ok(filterCountRes);
+    }
+
     @PostMapping("public/filter/count/v2")
     public ResponseEntity<FilterCountTestRes> countTest(@RequestBody FilterReq filter){
 
-        System.out.println(filter.content());
         FilterCountTestRes filterCountTestRes = new FilterCountTestRes(filterServiceV2.getFilteredListNum(filter));
 
         return ResponseEntity.ok(filterCountTestRes);

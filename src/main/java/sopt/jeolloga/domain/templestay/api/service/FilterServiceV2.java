@@ -25,6 +25,7 @@ public class FilterServiceV2 {
 
     public long getFilteredListNum(FilterReq filter){
 
+        String content = (filter.content() == null || filter.content().isBlank()) ? "" : filter.content().replaceAll("\\s+", "").trim();
         Integer binaryRegionFilter = FilterUtil.convertRegion(filter.region());
         Integer binaryTypeFilter = FilterUtil.convertType(filter.type());
         Integer binaryPurposeFilter = FilterUtil.convertPurpose(filter.purpose());
@@ -34,7 +35,7 @@ public class FilterServiceV2 {
         int minPrice = filter.price().minPrice();
         int maxPrice = (filter.price().maxPrice() >= 300000) ? Integer.MAX_VALUE : filter.price().maxPrice();
 
-        return templestayRepository.findFilteredTemplestayNum(binaryRegionFilter, binaryTypeFilter,
+        return templestayRepository.findFilteredTemplestayNum(content, binaryRegionFilter, binaryTypeFilter,
                 binaryPurposeFilter,binaryActivityFilter, minPrice, maxPrice, binaryEtcFilter);
     }
 

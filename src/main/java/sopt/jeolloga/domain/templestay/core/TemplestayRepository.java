@@ -107,15 +107,19 @@ public interface TemplestayRepository extends JpaRepository<Templestay, Long> {
             Pageable pageable
     );
 
+
     @Query(value = "SELECT COUNT(*) FROM category c " +
-                    "WHERE (:region = 0 OR (c.region & :region) > 0) " +
-                    "AND (:type = 0 OR (c.type & :type) > 0) " +
-                    "AND (:purpose = 0 OR (c.purpose & :purpose) > 0) " +
-                    "AND (:activity = 0 OR (c.activity & :activity) > 0) " +
-                    "AND (:etc = 0 OR (c.etc & :etc) > 0) " +
-                    "AND (c.price BETWEEN :minPrice AND :maxPrice)",
+            "JOIN templestay t ON c.templestay_id = t.id " +
+            "WHERE (t.temple_name LIKE %:content%)" +
+            "AND (:region = 0 OR (c.region & :region) > 0) " +
+            "AND (:type = 0 OR (c.type & :type) > 0) " +
+            "AND (:purpose = 0 OR (c.purpose & :purpose) > 0) " +
+            "AND (:activity = 0 OR (c.activity & :activity) > 0) " +
+            "AND (:etc = 0 OR (c.etc & :etc) > 0) " +
+            "AND (c.price BETWEEN :minPrice AND :maxPrice)",
             nativeQuery = true)
     long findFilteredTemplestayNum(
+            @Param("content") String content,
             @Param("region") Integer region,
             @Param("type") Integer type,
             @Param("purpose") Integer purpose,
