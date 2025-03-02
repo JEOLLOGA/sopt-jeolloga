@@ -17,7 +17,9 @@ import org.springframework.data.domain.Pageable; // 페이지네이션 요청 �
 import sopt.jeolloga.common.Filters;
 import sopt.jeolloga.domain.templestay.api.dto.PageTemplestayRes;
 import sopt.jeolloga.domain.templestay.api.dto.TemplestayRes;
+import sopt.jeolloga.domain.templestay.api.dto.TemplestaySearchRes;
 import sopt.jeolloga.domain.templestay.api.service.FilterService;
+import sopt.jeolloga.domain.templestay.api.service.FilterServiceV1;
 import sopt.jeolloga.domain.templestay.api.service.TemplestayService;
 import sopt.jeolloga.domain.templestay.core.TemplestayRepository;
 import sopt.jeolloga.domain.wishlist.core.WishlistRepository;
@@ -39,7 +41,7 @@ class TemplestayServiceTest {
     private WishlistRepository wishlistRepository;
 
     @InjectMocks
-    private FilterService filterService;
+    private FilterServiceV1 filterServiceV1;
 
     @Mock
     private Filters filters;
@@ -87,7 +89,7 @@ class TemplestayServiceTest {
         when(filters.getFilterKey(0b010, filters.getTypeFilter())).thenReturn("휴식형");
 
         // When
-        PageTemplestayRes result = filterService.getFilteredTemplestay(ids, page, size, userId);
+        PageTemplestayRes result = filterServiceV1.getFilteredTemplestay(ids, page, size, userId);
 
         // Then
         assertEquals(1, result.Page());
@@ -103,7 +105,7 @@ class TemplestayServiceTest {
         assertEquals("여행 일정으로 딱 좋은", templestay1.tag());
         assertEquals("서울", templestay1.region());
         assertEquals("체험형", templestay1.type());
-        assertEquals("img1", templestay1.imageUrl());
+        assertEquals("img1", templestay1.imgUrl());
         assertTrue(templestay1.liked());
 
         // 두 번째 템플스테이 데이터 검증
@@ -114,7 +116,7 @@ class TemplestayServiceTest {
         assertEquals("마음 챙김 명상", templestay2.tag());
         assertEquals("대구", templestay2.region());
         assertEquals("휴식형", templestay2.type());
-        assertEquals("img2", templestay2.imageUrl());
+        assertEquals("img2", templestay2.imgUrl());
         assertFalse(templestay2.liked());
     }
 

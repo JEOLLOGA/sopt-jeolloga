@@ -5,9 +5,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import sopt.jeolloga.common.FilterUtil;
-import sopt.jeolloga.domain.templestay.api.dto.FilterReq;
-import sopt.jeolloga.domain.templestay.api.dto.PageTemplestayTestRes;
-import sopt.jeolloga.domain.templestay.api.dto.TemplestayTestRes;
+import sopt.jeolloga.domain.templestay.api.dto.*;
 import sopt.jeolloga.domain.templestay.core.TemplestayRepository;
 
 import java.util.List;
@@ -39,7 +37,7 @@ public class FilterServiceV2 {
                 binaryPurposeFilter,binaryActivityFilter, minPrice, maxPrice, binaryEtcFilter);
     }
 
-    public PageTemplestayTestRes getTemplestayList(FilterReq filter, int page, int pageSize, Long userId){
+    public PageTemplestayRes getTemplestayList(FilterReq filter, int page, int pageSize, Long userId){
 
         Pageable pageable = PageRequest.of(page-1, pageSize);
 
@@ -56,8 +54,8 @@ public class FilterServiceV2 {
                         binaryPurposeFilter,binaryActivityFilter, minPrice, maxPrice, binaryEtcFilter, userId, pageable);
 
 
-        List<TemplestayTestRes> content = filteredTemplestayPage.getContent().stream()
-                .map(row -> new TemplestayTestRes(
+        List<TemplestayRes> content = filteredTemplestayPage.getContent().stream()
+                .map(row -> new TemplestayRes(
                         (Long) row[0],  // templestayId
                         (String) row[1],  // templeName
                         (String) row[2],  // organizedName
@@ -69,6 +67,6 @@ public class FilterServiceV2 {
                 ))
                 .collect(Collectors.toList());
 
-        return new PageTemplestayTestRes(page, pageSize, filteredTemplestayPage.getTotalPages(), content);
+        return new PageTemplestayRes(page, pageSize, filteredTemplestayPage.getTotalPages(), content);
     }
 }

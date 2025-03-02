@@ -4,95 +4,69 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import sopt.jeolloga.common.Filters;
+import sopt.jeolloga.common.FilterUtil;
 import sopt.jeolloga.domain.templestay.api.dto.*;
-import sopt.jeolloga.domain.templestay.core.*;
-import sopt.jeolloga.domain.wishlist.core.WishlistRepository;
+import sopt.jeolloga.domain.templestay.core.TemplestayRepository;
 
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.stream.Collectors;
+
 
 @Service
 public class FilterService {
 
+    private TemplestayRepository templestayRepository;
 
-    private Filters filters;
-    private final CategoryRepository categoryRepository;
-    private final TemplestayRepository templestayRepository;
-    private final WishlistRepository wishlistRepository;
-
-
-    public FilterService(Filters filters, CategoryRepository categoryRepository, TemplestayRepository templestaryRepository, WishlistRepository wishlistRepository) {
-        this.filters = filters;
-        this.categoryRepository = categoryRepository;
-        this.templestayRepository = templestaryRepository;
-        this.wishlistRepository = wishlistRepository;
+    public FilterService(TemplestayRepository templestayRepository) {
+        this.templestayRepository = templestayRepository;
     }
 
-    public FilterRes getFilters() {
-        FilterRes filterRes = new FilterRes(this.filters.getFilterKey());
-        return filterRes;
+    public long getFilteredListNum(FilterReq filter){
+
+        String content = (filter.content() == null || filter.content().isBlank()) ? "" : filter.content().replaceAll("\\s+", "").trim();
+        Integer binaryRegionFilter = FilterUtil.convertRegion(filter.region());
+        Integer binaryTypeFilter = FilterUtil.convertType(filter.type());
+        Integer binaryPurposeFilter = FilterUtil.convertPurpose(filter.purpose());
+        Integer binaryActivityFilter = FilterUtil.convertActivity(filter.activity());
+        Integer binaryEtcFilter = FilterUtil.convertEtc(filter.etc());
+
+        int minPrice = filter.price().minPrice();
+        int maxPrice = (filter.price().maxPrice() >= 300000) ? Integer.MAX_VALUE : filter.price().maxPrice();
+
+        return templestayRepository.findFilteredTemplestayNum(content, binaryRegionFilter, binaryTypeFilter,
+                binaryPurposeFilter,binaryActivityFilter, minPrice, maxPrice, binaryEtcFilter);
     }
 
+    public PageTemplestayRes getTemplestayList(FilterReq filter, int page, int pageSize, Long userId){
 
-    public List<Long> getFiteredTemplestayCategory(TemplestayFilterReqTemp filter) {
+        Pageable pageable = PageRequest.of(page-1, pageSize);
 
-        this.filters = new Filters(filter);
+        Integer binaryRegionFilter = FilterUtil.convertRegion(filter.region());
+        Integer binaryTypeFilter = FilterUtil.convertType(filter.type());
+        Integer binaryPurposeFilter = FilterUtil.convertPurpose(filter.purpose());
+        Integer binaryActivityFilter = FilterUtil.convertActivity(filter.activity());
+        Integer binaryEtcFilter = FilterUtil.convertEtc(filter.etc());
 
-        List<Long> contentFilteredId = templestayRepository.findIdsByTempleNameContaining(filter.content());
-        List<Category> categoryEntityList = categoryRepository.findAll();
-        List<Long> filteredId = filters.getFilteredCategory(categoryEntityList);
-        filteredId.retainAll(contentFilteredId);
-        return filteredId;
+        int minPrice = filter.price().minPrice();
+        int maxPrice = (filter.price().maxPrice() >= 300000) ? Integer.MAX_VALUE : filter.price().maxPrice();
+
+        Page<Object[]> filteredTemplestayPage = templestayRepository.findFilteredTemplestay(binaryRegionFilter, binaryTypeFilter,
+                binaryPurposeFilter,binaryActivityFilter, minPrice, maxPrice, binaryEtcFilter, userId, pageable);
+
+
+        List<TemplestayRes> content = filteredTemplestayPage.getContent().stream()
+                .map(row -> new TemplestayRes(
+                        (Long) row[0],  // templestayId
+                        (String) row[1],  // templeName
+                        (String) row[2],  // organizedName
+                        (String) row[3],  // tag
+                        FilterUtil.convertRegionToString((Integer) row[4]),  // region
+                        FilterUtil.convertTypeToString((Integer) row[5]),  // type
+                        (String) row[6],  // imageUrl
+                        ((Number) row[7]).intValue() == 1  // liked
+                ))
+                .collect(Collectors.toList());
+
+        return new PageTemplestayRes(page, pageSize, filteredTemplestayPage.getTotalPages(), content);
     }
-
-
-    public FilterCountRes getFilteredTemplestayNum(List<Long> filteredId){
-
-        FilterCountRes filterCountRes = new FilterCountRes(filteredId.size());
-        return filterCountRes;
-    }
-
-
-    public PageTemplestayRes getFilteredTemplestay(List<Long> ids, int page, int size, Long userId) {
-
-        Pageable pageable = PageRequest.of(page - 1, size);
-
-        Page<Object[]> resultsPage = templestayRepository.findTemplestayWithDetails(ids, pageable);
-
-        Page<TemplestayRes> templestayResListPage = resultsPage.map(result -> {
-
-            Long id = (Long) result[0];
-
-            String templeName = Optional.ofNullable(result[1]).map(Object::toString).orElse("null");
-            String organizedName = Optional.ofNullable(result[2]).map(Object::toString).orElse("null");
-            String tags = Optional.ofNullable(result[3]).map(Object::toString).orElse("null");
-            String tag = tags.split(",")[0];
-
-            Integer binaryRegionFilter = result[4] != null ? ((Long) result[4]).intValue() : 0;
-            Integer binaryTypeFilter = result[5] != null ? ((Long) result[5]).intValue() : 0;
-
-            String region = (binaryRegionFilter == 0) ? "null" : filters.getFilterKey(binaryRegionFilter, filters.getRegionFilter());
-            String type = (binaryTypeFilter == 0) ? "null" : filters.getFilterKey(binaryTypeFilter, filters.getTypeFilter());
-            String imgUrl = Optional.ofNullable(result[6]).map(Object::toString).orElse("null");
-
-            boolean liked = false;
-            if(userId != null){
-                liked = wishlistRepository.existsByMemberIdAndTemplestayId(userId, id);
-            }
-
-            return new TemplestayRes(id, templeName, organizedName, tag, region, type, imgUrl, liked);
-
-        });
-
-        return new PageTemplestayRes(templestayResListPage.getNumber() + 1, templestayResListPage.getSize(), templestayResListPage.getTotalPages(), templestayResListPage.getContent());
-    }
-
-
-    public ResetFilterRes getFilterReset() {
-        ResetFilterRes resetFilterRes = new ResetFilterRes(this.templestayRepository.count(), this.filters.getResetFilter());
-        return resetFilterRes;
-    }
-
 }

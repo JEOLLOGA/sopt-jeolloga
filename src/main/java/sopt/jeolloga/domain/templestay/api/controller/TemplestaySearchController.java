@@ -1,83 +1,39 @@
 package sopt.jeolloga.domain.templestay.api.controller;
 
-import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
-import sopt.jeolloga.domain.templestay.api.dto.FilterReq;
-import sopt.jeolloga.domain.templestay.api.dto.PageTemplestaySearchRes;
-import sopt.jeolloga.domain.templestay.api.dto.TemplestayFilterReq;
-import sopt.jeolloga.domain.templestay.api.dto.TemplestaySearchRes;
+import sopt.jeolloga.domain.member.core.exception.MemberCoreException;
+import sopt.jeolloga.domain.templestay.api.dto.*;
 import sopt.jeolloga.domain.templestay.api.service.TemplestaySearchService;
+import sopt.jeolloga.exception.ErrorCode;
 
-import java.util.Map;
-import java.util.Optional;
-import java.util.OptionalLong;
-
-@RequiredArgsConstructor
 @RestController
 public class TemplestaySearchController {
     private final TemplestaySearchService templestaySearchService;
 
+    public TemplestaySearchController(TemplestaySearchService templestaySearchService){
+        this.templestaySearchService = templestaySearchService;
+    }
+
     @PostMapping("/search")
-    public ResponseEntity<PageTemplestaySearchRes<TemplestaySearchRes>> searchWithFilters(
+    public ResponseEntity<PageTemplestaySearchRes<?>> searchWithFilters(
             @RequestParam(value = "userId", required = false) Long userId,
-            @RequestBody TemplestayFilterReq templestayFilterReq,
+            @RequestBody FilterReq filter,
             @RequestParam(value = "page", defaultValue = "1") int page,
             @RequestParam(value = "pageSize", defaultValue = "10") int pageSize) {
 
-        Pageable pageable = PageRequest.of(page - 1, pageSize);
+        String authenticatedUser = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        PageTemplestaySearchRes<TemplestayRes> templestaySearchRes;
 
-        PageTemplestaySearchRes<TemplestaySearchRes> results = templestaySearchService.searchTemplestayWithFilters(
-                userId, // userId가 null일 수도 있음
-                templestayFilterReq.content(),
-                templestayFilterReq.region(),
-                templestayFilterReq.type(),
-                templestayFilterReq.purpose(),
-                templestayFilterReq.activity(),
-                templestayFilterReq.price().minPrice(),
-                templestayFilterReq.price().maxPrice(),
-                templestayFilterReq.etc(),
-                pageable
-        );
+        if(authenticatedUser == "anonymousUser"){
+            templestaySearchRes = templestaySearchService.searchFilteredTemplestay(filter, page, pageSize, null);
+        } else if (Long.parseLong(authenticatedUser) == userId) {
+            templestaySearchRes = templestaySearchService.searchFilteredTemplestay(filter, page, pageSize, userId);
+        } else {
+            throw new MemberCoreException(ErrorCode.TOKEN_MISMATCH);
+        }
 
-        return ResponseEntity.ok(results);
-    }
-
-    @PostMapping("public/search/v1")
-    public ResponseEntity<PageTemplestaySearchRes<TemplestaySearchRes>> searchOld(
-            @RequestParam(value = "userId", required = false) Long userId,
-            @RequestBody TemplestayFilterReq templestayFilterReq,
-            @RequestParam(value = "page", defaultValue = "1") int page,
-            @RequestParam(value = "pageSize", defaultValue = "10") int pageSize) {
-
-        Pageable pageable = PageRequest.of(page - 1, pageSize);
-
-        PageTemplestaySearchRes<TemplestaySearchRes> results = templestaySearchService.searchTemplestayWithFilters(
-                userId, // userId가 null일 수도 있음
-                templestayFilterReq.content(),
-                templestayFilterReq.region(),
-                templestayFilterReq.type(),
-                templestayFilterReq.purpose(),
-                templestayFilterReq.activity(),
-                templestayFilterReq.price().minPrice(),
-                templestayFilterReq.price().maxPrice(),
-                templestayFilterReq.etc(),
-                pageable
-        );
-
-        return ResponseEntity.ok(results);
-    }
-
-    @PostMapping("public/search/v2")
-    public ResponseEntity<PageTemplestaySearchRes> searchNew(@RequestBody FilterReq filter,
-                                    @RequestParam (value = "userId", required = false) Long userId,
-                                    @RequestParam (value = "page") int page,
-                                    @RequestParam (value="pageSize", defaultValue = "10") int pageSize){
-
-        PageTemplestaySearchRes result = templestaySearchService.searchTemplestayWithFiltersTest(filter, page, pageSize, userId);
-
-        return ResponseEntity.ok(result);
+        return ResponseEntity.ok(templestaySearchRes);
     }
 }
