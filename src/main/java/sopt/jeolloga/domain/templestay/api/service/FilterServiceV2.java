@@ -11,7 +11,6 @@ import sopt.jeolloga.domain.templestay.core.TemplestayRepository;
 import java.util.List;
 import java.util.stream.Collectors;
 
-
 @Service
 public class FilterServiceV2 {
 
@@ -52,7 +51,6 @@ public class FilterServiceV2 {
 
         Page<Object[]> filteredTemplestayPage = templestayRepository.findFilteredTemplestay(binaryRegionFilter, binaryTypeFilter,
                         binaryPurposeFilter,binaryActivityFilter, minPrice, maxPrice, binaryEtcFilter, userId, pageable);
-
 
         List<TemplestayRes> content = filteredTemplestayPage.getContent().stream()
                 .map(row -> new TemplestayRes(
