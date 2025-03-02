@@ -21,13 +21,13 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-public class TemplestaySearchService {
+public class TemplestaySearchServiceV2 {
 
     private final TemplestayRepository templestayRepository;
     private final MemberRepository memberRepository;
     private final SearchRepository searchRepository;
 
-    public TemplestaySearchService(TemplestayRepository templestayRepository, MemberRepository memberRepository,SearchRepository searchRepository){
+    public TemplestaySearchServiceV2(TemplestayRepository templestayRepository, MemberRepository memberRepository, SearchRepository searchRepository){
         this.templestayRepository = templestayRepository;
         this.memberRepository = memberRepository;
         this.searchRepository = searchRepository;
