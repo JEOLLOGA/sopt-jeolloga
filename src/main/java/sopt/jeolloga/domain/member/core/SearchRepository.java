@@ -22,5 +22,7 @@ public interface SearchRepository extends JpaRepository<Search, Long> {
     List<Object[]> findTop10ByMemberIdOrderByIdDesc(@Param("userId") Long userId);
     void deleteAllByMemberId(Long memberId);
 
-    Optional<Search> findByMemberAndContent(Member member, String content); // 특정 Member와 검색어 내용으로 조회
+    @Modifying
+    @Query("DELETE FROM Search s WHERE s.member = :member AND s.content = :content")
+    void deleteByMemberAndContent(@Param("member") Member member, @Param("content") String content);
 }
