@@ -1,4 +1,4 @@
-package sopt.jeolloga.domain.templestay.api.controller;
+package performance.controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -9,8 +9,8 @@ import sopt.jeolloga.domain.templestay.api.dto.FilterCountRes;
 import sopt.jeolloga.domain.templestay.api.dto.FilterReq;
 import sopt.jeolloga.domain.templestay.api.dto.PageTemplestayRes;
 import sopt.jeolloga.domain.templestay.api.dto.TemplestayFilterReqTemp;
-import sopt.jeolloga.domain.templestay.api.service.FilterServiceV1;
-import sopt.jeolloga.domain.templestay.api.service.FilterServiceV2;
+import performance.service.FilterServiceV1;
+import performance.service.FilterServiceV2;
 
 import java.util.List;
 

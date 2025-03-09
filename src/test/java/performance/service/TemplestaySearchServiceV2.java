@@ -1,4 +1,4 @@
-package sopt.jeolloga.domain.templestay.api.service;
+package performance.service;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;

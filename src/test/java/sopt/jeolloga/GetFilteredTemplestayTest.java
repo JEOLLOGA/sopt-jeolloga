@@ -7,27 +7,19 @@ import org.mockito.InjectMocks; // 테스트 클래스에 Mock 객체를 주입
 import org.mockito.Mock; // Mock 객체를 생성
 import org.mockito.junit.jupiter.MockitoExtension; // Mockito 확장
 
-import static org.mockito.Mockito.*; // Mockito 메서드 (when, verify 등)
 import static org.junit.jupiter.api.Assertions.*; // JUnit assertion 메서드 (assertEquals, assertTrue 등)
 
 import org.springframework.data.domain.Page; // 페이지네이션 인터페이스
 import org.springframework.data.domain.PageImpl; // 페이지네이션 구현체
 import org.springframework.data.domain.PageRequest; // 페이지네이션 요청 객체
-import org.springframework.data.domain.Pageable; // 페이지네이션 요청 인터페이스
 import sopt.jeolloga.common.Filters;
 import sopt.jeolloga.domain.templestay.api.dto.PageTemplestayRes;
 import sopt.jeolloga.domain.templestay.api.dto.TemplestayRes;
-import sopt.jeolloga.domain.templestay.api.dto.TemplestaySearchRes;
-import sopt.jeolloga.domain.templestay.api.service.FilterService;
-import sopt.jeolloga.domain.templestay.api.service.FilterServiceV1;
-import sopt.jeolloga.domain.templestay.api.service.TemplestayService;
+import performance.service.FilterServiceV1;
 import sopt.jeolloga.domain.templestay.core.TemplestayRepository;
 import sopt.jeolloga.domain.wishlist.core.WishlistRepository;
 
 import java.util.List; // List 인터페이스
-import java.util.Optional; // Optional 클래스
-
-import java.util.List;
 
 import static org.mockito.Mockito.when;
 

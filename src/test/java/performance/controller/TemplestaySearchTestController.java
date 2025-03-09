@@ -1,4 +1,4 @@
-package sopt.jeolloga.domain.templestay.api.controller;
+package performance.controller;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -8,8 +8,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import sopt.jeolloga.domain.templestay.api.dto.*;
-import sopt.jeolloga.domain.templestay.api.service.TemplestaySearchServiceV1;
-import sopt.jeolloga.domain.templestay.api.service.TemplestaySearchServiceV2;
+import performance.service.TemplestaySearchServiceV1;
+import performance.service.TemplestaySearchServiceV2;
 
 @RestController
 public class TemplestaySearchTestController {

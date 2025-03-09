@@ -1,6 +1,5 @@
-package sopt.jeolloga.domain.templestay.api.service;
+package performance.service;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -11,6 +10,7 @@ import sopt.jeolloga.domain.member.core.Search;
 import sopt.jeolloga.domain.member.core.SearchRepository;
 import sopt.jeolloga.domain.templestay.api.dto.PageTemplestaySearchRes;
 import sopt.jeolloga.domain.templestay.api.dto.TemplestaySearchRes;
+import sopt.jeolloga.domain.templestay.core.Templestay;
 import sopt.jeolloga.domain.templestay.core.TemplestayRepository;
 import sopt.jeolloga.domain.templestay.core.exception.TemplestayCoreException;
 import sopt.jeolloga.domain.wishlist.core.WishlistRepository;
@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-@RequiredArgsConstructor
 @Service
 public class TemplestaySearchServiceV1 {
     private final TemplestayRepository templestayRepository;
@@ -28,6 +27,12 @@ public class TemplestaySearchServiceV1 {
     private final MemberRepository memberRepository;
     private final SearchRepository searchRepository;
 
+    public TemplestaySearchServiceV1(TemplestayRepository templestayRepository, WishlistRepository wishlistRepository, MemberRepository memberRepository, SearchRepository searchRepository){
+        this.templestayRepository = templestayRepository;
+        this.wishlistRepository = wishlistRepository;
+        this.memberRepository = memberRepository;
+        this.searchRepository = searchRepository;
+    }
 
     @Transactional
     public PageTemplestaySearchRes<TemplestaySearchRes> searchTemplestayWithFilters(
