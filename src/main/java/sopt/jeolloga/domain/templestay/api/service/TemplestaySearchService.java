@@ -142,6 +142,7 @@ public class TemplestaySearchService {
         }
 
         Member member = null;
+
         if (userId != null) {
             member = memberRepository.findById(userId)
                     .orElseThrow(() -> new TemplestayCoreException(ErrorCode.NOT_FOUND_USER));
@@ -150,6 +151,8 @@ public class TemplestaySearchService {
         }
 
         try {
+            searchRepository.deleteByMemberAndContent(member, content);
+
             Search search = new Search(member, content);
             searchRepository.save(search);
         } catch (Exception e) {
