@@ -26,7 +26,7 @@ public class TemplestaySearchController {
         String authenticatedUser = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         PageTemplestaySearchRes<TemplestayRes> templestaySearchRes;
 
-        if(authenticatedUser == "anonymousUser"){
+        if("anonymousUser".equals(authenticatedUser)){
             templestaySearchRes = templestaySearchService.searchFilteredTemplestay(filter, page, pageSize, null);
         } else if (Long.parseLong(authenticatedUser) == userId) {
             templestaySearchRes = templestaySearchService.searchFilteredTemplestay(filter, page, pageSize, userId);

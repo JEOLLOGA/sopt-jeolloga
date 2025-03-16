@@ -34,7 +34,7 @@ public class FilterController {
         String authenticatedUser = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         PageTemplestayRes templestayList;
 
-        if(authenticatedUser == "anonymousUser"){
+        if("anonymousUser".equals(authenticatedUser)){
             templestayList = filterService.getTemplestayList(filter, page, pageSize, null);
         } else if (Long.parseLong(authenticatedUser) == userId) {
             templestayList = filterService.getTemplestayList(filter, page, pageSize, userId);
