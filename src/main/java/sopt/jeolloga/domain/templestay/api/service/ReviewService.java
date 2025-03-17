@@ -49,7 +49,9 @@ public class ReviewService {
                         review.getReviewName(),
                         review.getReviewDescription(),
                         DataUtils.formatReviewDate(review.getReviewDate()),
-                        "https://api.gototemplestay.com/api/image-proxy?imgUrl=" + review.getReviewImgUrl()
+                        review.getReviewImgUrl() != null
+                                ? "https://api.gototemplestay.com/api/image-proxy?imgUrl=" + review.getReviewImgUrl()
+                                : null
                 ))
                 .toList();
 
