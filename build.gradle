@@ -62,5 +62,5 @@ tasks.named('test') {
 }
 
 jar {
-	baseName = "jeolloga-${project.version}-${System.env.BRANCH_NAME ?: 'default'}"
+	archiveBaseName.set("jeolloga-${project.version}-${System.env.BRANCH_NAME ?: 'default'}")
 }
