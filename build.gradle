@@ -63,4 +63,5 @@ tasks.named('test') {
 
 bootJar {
 	archiveBaseName.set("jeolloga-${project.version}-${System.env.BRANCH_NAME ?: 'default'}")
+	archiveVersion.set("")
 }
