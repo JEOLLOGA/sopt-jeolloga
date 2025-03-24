@@ -1,4 +1,4 @@
-package sopt.jeolloga.domain.templestay.api.service;
+package performance.service;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -11,13 +11,12 @@ import sopt.jeolloga.domain.templestay.core.TemplestayRepository;
 import java.util.List;
 import java.util.stream.Collectors;
 
-
 @Service
-public class FilterService {
+public class FilterServiceV2 {
 
     private TemplestayRepository templestayRepository;
 
-    public FilterService(TemplestayRepository templestayRepository) {
+    public FilterServiceV2(TemplestayRepository templestayRepository) {
         this.templestayRepository = templestayRepository;
     }
 
@@ -51,8 +50,7 @@ public class FilterService {
         int maxPrice = (filter.price().maxPrice() >= 300000) ? Integer.MAX_VALUE : filter.price().maxPrice();
 
         Page<Object[]> filteredTemplestayPage = templestayRepository.findFilteredTemplestay(binaryRegionFilter, binaryTypeFilter,
-                binaryPurposeFilter,binaryActivityFilter, minPrice, maxPrice, binaryEtcFilter, userId, pageable);
-
+                        binaryPurposeFilter,binaryActivityFilter, minPrice, maxPrice, binaryEtcFilter, userId, pageable);
 
         List<TemplestayRes> content = filteredTemplestayPage.getContent().stream()
                 .map(row -> new TemplestayRes(

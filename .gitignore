@@ -7,6 +7,7 @@ build/
 
 ### STS ###
 application.yml
+docker-compose.yml
 .apt_generated
 .classpath
 .factorypath
