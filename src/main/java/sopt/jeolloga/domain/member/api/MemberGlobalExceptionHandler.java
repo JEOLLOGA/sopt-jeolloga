@@ -8,6 +8,7 @@ import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 import sopt.jeolloga.common.ResponseDto;
 import sopt.jeolloga.domain.member.MemberBaseException;
 import sopt.jeolloga.domain.member.core.exception.MemberCoreException;
@@ -29,7 +30,6 @@ public class MemberGlobalExceptionHandler {
         ResponseDto<Void> response = new ResponseDto<>(null, errorCode.getMsg());
         return ResponseEntity.status(errorCode.getHttpStatus()).body(response);
     }
-
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ResponseDto<Void>>handlerHttpMessageNotReadableException(HttpMessageNotReadableException e){

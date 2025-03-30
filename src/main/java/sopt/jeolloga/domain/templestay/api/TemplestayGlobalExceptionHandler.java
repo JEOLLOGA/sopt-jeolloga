@@ -10,7 +10,9 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 import sopt.jeolloga.common.ResponseDto;
+import sopt.jeolloga.domain.member.core.exception.MemberCoreException;
 import sopt.jeolloga.domain.templestay.TemplestayBaseException;
+import sopt.jeolloga.domain.templestay.core.exception.TemplestayCoreException;
 import sopt.jeolloga.domain.wishlist.core.exception.WishlistCoreException;
 import sopt.jeolloga.exception.ErrorCode;
 
@@ -23,6 +25,13 @@ public class TemplestayGlobalExceptionHandler {
         return ResponseEntity
                 .status(errorCode.getHttpStatus())
                 .body(ResponseDto.fail(errorCode.getMsg()));
+    }
+
+    @ExceptionHandler(TemplestayCoreException.class)
+    public ResponseEntity<ResponseDto<Void>>handlerTemplestayCoreException(TemplestayCoreException e){
+        ErrorCode errorCode = e.getErrorCode();
+        ResponseDto<Void> response = new ResponseDto<>(null, errorCode.getMsg());
+        return ResponseEntity.status(errorCode.getHttpStatus()).body(response);
     }
 
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)

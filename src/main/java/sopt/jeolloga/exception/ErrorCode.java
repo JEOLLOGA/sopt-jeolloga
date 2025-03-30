@@ -15,8 +15,9 @@ public enum ErrorCode {
     JSON_FIELD_ERROR(40005, HttpStatus.BAD_REQUEST, "JSON 오류 혹은 Request Body 필드 오류입니다."),
     INVALID_DATE_FORMAT(40006, HttpStatus.BAD_REQUEST, "날짜 형식이 잘못되었습니다."),
     DUPLICATE_WISHLIST(40007, HttpStatus.BAD_REQUEST, "중복된 Wishlist 값입니다."),
-    MISSING_USER_ID(40008, HttpStatus.BAD_REQUEST, "userId가 없습니다."),
+    MISSING_USER_ID(40008, HttpStatus.BAD_REQUEST, "존재하지 않는 userId입니다."),
     BAD_REQUEST_PARAMETER(40009, HttpStatus.BAD_REQUEST, "필수 요청 파라미터가 누락되었습니다."),
+    MISSING_TEMPLESTAY_ID(40010, HttpStatus.BAD_REQUEST, "템플스테이 Id가 없습니다."),
 
 
     // 401번대: 권한 오류
@@ -25,6 +26,7 @@ public enum ErrorCode {
     EXPIRED_REFRESH_TOKEN(40102, HttpStatus.UNAUTHORIZED, "리프레시 토큰이 없습니다. 가입 또는 재로그인이 필요합니다"),
     EXPIRED_TOKEN(40103, HttpStatus.UNAUTHORIZED, "토큰이 만료되었습니다"),
     INVALID_TOKEN(40104,HttpStatus.UNAUTHORIZED, "유효하지 않은 토큰이 사용되고 있습니다"),
+    TOKEN_MISMATCH(40105,HttpStatus.UNAUTHORIZED, "다른 사용자의 토큰이 사용되고 있습니다"),
 
     // 404번대: 리소스 찾기 오류
     NOT_FOUND_TARGET(40400, HttpStatus.NOT_FOUND, "대상을 찾을 수 없습니다."),
