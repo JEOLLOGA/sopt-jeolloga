@@ -13,7 +13,7 @@ public class TemplestayViewController {
 
     private final TemplestayViewService templestayViewService;
 
-    @PostMapping("/public/view")
+    @PostMapping("/public/templestay/view")
     public ResponseEntity<?> searchWithFilters(TemplestayViewReq request){
         templestayViewService.addView(request);
         return ResponseEntity.ok().build();
