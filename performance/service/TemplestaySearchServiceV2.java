@@ -20,7 +20,7 @@ import sopt.jeolloga.exception.ErrorCode;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Service
+//@Service
 public class TemplestaySearchServiceV2 {
 
     private final TemplestayRepository templestayRepository;

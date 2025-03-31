@@ -11,7 +11,7 @@ import sopt.jeolloga.domain.templestay.core.TemplestayRepository;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Service
+//@Service
 public class FilterServiceV2 {
 
     private TemplestayRepository templestayRepository;

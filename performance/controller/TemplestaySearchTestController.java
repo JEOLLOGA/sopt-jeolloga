@@ -11,7 +11,7 @@ import sopt.jeolloga.domain.templestay.api.dto.*;
 import performance.service.TemplestaySearchServiceV1;
 import performance.service.TemplestaySearchServiceV2;
 
-@RestController
+//@RestController
 public class TemplestaySearchTestController {
 
     private final TemplestaySearchServiceV1 searchServiceV1;

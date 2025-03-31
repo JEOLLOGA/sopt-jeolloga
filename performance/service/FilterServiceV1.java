@@ -12,7 +12,7 @@ import sopt.jeolloga.domain.wishlist.core.WishlistRepository;
 import java.util.List;
 import java.util.Optional;
 
-@Service
+//@Service
 public class FilterServiceV1 {
 
 

@@ -14,7 +14,7 @@ import performance.service.FilterServiceV2;
 
 import java.util.List;
 
-@RestController
+//@RestController
 public class FilterTestController {
 
     private final FilterServiceV1 filterServiceV1;
