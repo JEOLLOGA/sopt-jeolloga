@@ -3,7 +3,6 @@ package sopt.jeolloga;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import sopt.jeolloga.common.Filters;
 import sopt.jeolloga.domain.templestay.core.Category;
 
 

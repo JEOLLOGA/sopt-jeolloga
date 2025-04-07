@@ -12,7 +12,6 @@ import static org.junit.jupiter.api.Assertions.*; // JUnit assertion 메서드 (
 import org.springframework.data.domain.Page; // 페이지네이션 인터페이스
 import org.springframework.data.domain.PageImpl; // 페이지네이션 구현체
 import org.springframework.data.domain.PageRequest; // 페이지네이션 요청 객체
-import sopt.jeolloga.common.Filters;
 import sopt.jeolloga.domain.templestay.api.dto.PageTemplestayRes;
 import sopt.jeolloga.domain.templestay.api.dto.TemplestayRes;
 import performance.service.FilterServiceV1;
