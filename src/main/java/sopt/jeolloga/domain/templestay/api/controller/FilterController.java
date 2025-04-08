@@ -29,7 +29,7 @@ public class FilterController {
             @RequestBody FilterReq filter,
             @RequestParam (value = "userId", required = false) Long userId,
             @RequestParam(value = "sort", defaultValue = "random", required = false) String sort,
-            @RequestParam (value = "page", defaultValue = "1", required = true) int page,
+            @RequestParam (value = "page", defaultValue = "1", required = false) int page,
             @RequestParam (value="pageSize", defaultValue = "10", required = false) int pageSize){
 
         String authenticatedUser = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
