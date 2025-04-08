@@ -60,6 +60,9 @@ public class FilterService {
 
             filteredTemplestayPage = templestayRepository.findFilteredTemplestaySortByLike(binaryRegionFilter, binaryTypeFilter,
                     binaryPurposeFilter,binaryActivityFilter, minPrice, maxPrice, binaryEtcFilter, userId, pageable);
+        } else if(sort.equals("price")){
+            filteredTemplestayPage = templestayRepository.findFilteredTemplestaySortByPrice(binaryRegionFilter, binaryTypeFilter,
+                    binaryPurposeFilter,binaryActivityFilter, minPrice, maxPrice, binaryEtcFilter, userId, pageable);
         }
 
         List<TemplestayRes> content = filteredTemplestayPage.getContent().stream()

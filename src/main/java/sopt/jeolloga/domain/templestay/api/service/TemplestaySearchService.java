@@ -83,6 +83,9 @@ public class TemplestaySearchService {
         } else if(sort.equals("like")){
             searchFilteredTemplestayPage = templestayRepository.searchFilteredTemplestaySortByLike(content, binaryRegionFilter, binaryTypeFilter,
                     binaryPurposeFilter,binaryActivityFilter, minPrice, maxPrice, binaryEtcFilter, userId, pageable);
+        } else if(sort.equals("price")){
+            searchFilteredTemplestayPage = templestayRepository.searchFilteredTemplestaySortByPrice(content, binaryRegionFilter, binaryTypeFilter,
+                    binaryPurposeFilter,binaryActivityFilter, minPrice, maxPrice, binaryEtcFilter, userId, pageable);
         }
 
 

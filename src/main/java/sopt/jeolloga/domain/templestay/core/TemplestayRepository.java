@@ -156,6 +156,53 @@ public interface TemplestayRepository extends JpaRepository<Templestay, Long> {
             Pageable pageable
     );
 
+    @Query(value = "WITH FilteredCategories AS (" +
+            "SELECT templestay_id FROM category " +
+            "WHERE (:region = 0 OR (region & :region) > 0) " +
+            "AND (:type = 0 OR (type & :type) > 0) " +
+            "AND (:purpose = 0 OR (purpose & :purpose) > 0) " +
+            "AND (:activity = 0 OR (activity & :activity) > 0) " +
+            "AND (:etc = 0 OR (etc & :etc) > 0) " +
+            "AND (price BETWEEN :minPrice AND :maxPrice) " +
+            ") " +
+            "SELECT t.id AS templestayId, t.temple_name, t.templestay_name, t.tag, " +
+            "c.region, c.type, img.img_url, " +
+            "EXISTS ( " +
+            "    SELECT 1 FROM wishlist w WHERE w.templestay_id = t.id AND w.member_id = :userId " +
+            ") AS liked, " +
+            "c.price AS price " +
+            "FROM templestay t " +
+            "JOIN FilteredCategories fc ON t.id = fc.templestay_id " +
+            "JOIN category c ON t.id = c.templestay_id " +
+            "LEFT JOIN (SELECT templestay_id, img_url FROM templestay_image GROUP BY templestay_id) img " +
+            "ON t.id = img.templestay_id " +
+            "ORDER BY price, t.id",
+
+            countQuery = "WITH FilteredCategories AS (" +
+                    "SELECT templestay_id FROM category " +
+                    "WHERE (:region = 0 OR (region & :region) > 0) " +
+                    "AND (:type = 0 OR (type & :type) > 0) " +
+                    "AND (:purpose = 0 OR (purpose & :purpose) > 0) " +
+                    "AND (:activity = 0 OR (activity & :activity) > 0) " +
+                    "AND (:etc = 0 OR (etc & :etc) > 0) " +
+                    "AND (price BETWEEN :minPrice AND :maxPrice) " +
+                    ") " +
+                    "SELECT COUNT(*) FROM templestay t " +
+                    "JOIN FilteredCategories fc ON t.id = fc.templestay_id " +
+                    "JOIN category c ON t.id = c.templestay_id",
+            nativeQuery = true)
+    Page<Object[]> findFilteredTemplestaySortByPrice(
+            @Param("region") Integer region,
+            @Param("type") Integer type,
+            @Param("purpose") Integer purpose,
+            @Param("activity") Integer activity,
+            @Param("minPrice") Integer minPrice,
+            @Param("maxPrice") Integer maxPrice,
+            @Param("etc") Integer etc,
+            @Param("userId") Long userId,
+            Pageable pageable
+    );
+
 
 
     @Query(value = "SELECT COUNT(*) FROM category c " +
@@ -280,4 +327,52 @@ public interface TemplestayRepository extends JpaRepository<Templestay, Long> {
             Pageable pageable
     );
 
+    @Query(value = "WITH FilteredCategories AS (" +
+            "SELECT templestay_id FROM category " +
+            "WHERE (:region = 0 OR (region & :region) > 0) " +
+            "AND (:type = 0 OR (type & :type) > 0) " +
+            "AND (:purpose = 0 OR (purpose & :purpose) > 0) " +
+            "AND (:activity = 0 OR (activity & :activity) > 0) " +
+            "AND (:etc = 0 OR (etc & :etc) > 0) " +
+            "AND (price BETWEEN :minPrice AND :maxPrice) " +
+            ") " +
+            "SELECT t.id AS templestayId, t.temple_name, t.templestay_name, t.tag, " +
+            "c.region, c.type, img.img_url, " +
+            "EXISTS ( " +
+            "    SELECT 1 FROM wishlist w WHERE w.templestay_id = t.id AND w.member_id = :userId " +
+            ") AS liked, " +
+            "c.price AS price " +
+            "FROM templestay t " +
+            "JOIN FilteredCategories fc ON t.id = fc.templestay_id " +
+            "JOIN category c ON t.id = c.templestay_id " +
+            "LEFT JOIN (SELECT templestay_id, img_url FROM templestay_image GROUP BY templestay_id) img " +
+            "ON t.id = img.templestay_id " +
+            "WHERE t.temple_name LIKE %:content% " +
+            "ORDER BY price, t.id",
+
+            countQuery = "WITH FilteredCategories AS (" +
+                    "SELECT templestay_id FROM category " +
+                    "WHERE (:region = 0 OR (region & :region) > 0) " +
+                    "AND (:type = 0 OR (type & :type) > 0) " +
+                    "AND (:purpose = 0 OR (purpose & :purpose) > 0) " +
+                    "AND (:activity = 0 OR (activity & :activity) > 0) " +
+                    "AND (:etc = 0 OR (etc & :etc) > 0) " +
+                    "AND (price BETWEEN :minPrice AND :maxPrice) " +
+                    ") " +
+                    "SELECT COUNT(*) FROM templestay t " +
+                    "JOIN FilteredCategories fc ON t.id = fc.templestay_id " +
+                    "JOIN category c ON t.id = c.templestay_id",
+            nativeQuery = true)
+    Page<Object[]> searchFilteredTemplestaySortByPrice(
+            @Param("content") String content,
+            @Param("region") Integer region,
+            @Param("type") Integer type,
+            @Param("purpose") Integer purpose,
+            @Param("activity") Integer activity,
+            @Param("minPrice") Integer minPrice,
+            @Param("maxPrice") Integer maxPrice,
+            @Param("etc") Integer etc,
+            @Param("userId") Long userId,
+            Pageable pageable
+    );
 }
