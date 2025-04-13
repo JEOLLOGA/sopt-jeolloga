@@ -13,7 +13,9 @@ public class WebConfig implements WebMvcConfigurer {
                         "https://52.78.131.68:443",
                         "http://localhost:5173",
                         "https://www.gototemplestay.com",
-                        "https://dev-gototemplestay.vercel.app") // 허용할 도메인 명시
+                        "https://dev-gototemplestay.vercel.app",
+                        "http://localhost:3000"
+                ) // 허용할 도메인 명시
                 .allowedMethods("GET", "POST", "DELETE")
                 .allowedHeaders("Authorization", "Content-Type")
                 .exposedHeaders("Custom-Header")

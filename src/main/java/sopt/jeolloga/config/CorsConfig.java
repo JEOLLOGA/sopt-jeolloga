@@ -19,7 +19,8 @@ public class CorsConfig {
                 "https://3.37.231.47",
                 "https://www.gototemplestay.com",
                 "https://api.gototemplestay.com",
-                "https://dev-gototemplestay.vercel.app"
+                "https://dev-gototemplestay.vercel.app",
+                "http://localhost:3000"
         )); // 허용할 Origin
         config.setAllowedMethods(List.of("GET", "POST", "DELETE")); // 허용할 HTTP Method
         config.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept", "refreshToken")); // 허용할 요청 헤더
