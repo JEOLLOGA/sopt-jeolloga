@@ -12,7 +12,7 @@ public class WebConfig implements WebMvcConfigurer {
                 .allowedOrigins("http://localhost:8080",
                         "https://52.78.131.68:443",
                         "http://localhost:5173",
-                        " http://localhost:3000",
+                        "http://localhost:3000",
                         "https://www.gototemplestay.com",
                         "https://dev-gototemplestay.vercel.app") // 허용할 도메인 명시
                 .allowedMethods("GET", "POST", "DELETE")
