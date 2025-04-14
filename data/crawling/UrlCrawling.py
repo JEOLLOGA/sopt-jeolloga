@@ -9,12 +9,11 @@ import yaml
 import re
 import time
 
-
 def load_db_config(file_path):
     try:
         with open(file_path, "r", encoding="utf-8") as file:
             config = yaml.safe_load(file)
-            return config.get("database") if config else None
+            return config
     except Exception as e:
         print(f"YAML 파일 로드 오류: {e}")
         return None
@@ -32,7 +31,7 @@ def save_templestay_data_to_db(connection, templestay_url):
             get_max_id_query = "SELECT MAX(id) FROM url"
             cursor.execute(get_max_id_query)
             max_id = cursor.fetchone()[0]
-            next_id = (max_id + 1) if max_id else 1 
+            next_id = (max_id + 1) if max_id else 1
 
             insert_query = "INSERT INTO url (id, templestay_url) VALUES (%s, %s)"
             cursor.execute(insert_query, (next_id, templestay_url))
@@ -58,43 +57,42 @@ def extract_templestay_data_with_paging(url, connection):
         driver.get(url)
         driver.implicitly_wait(10)
 
+        visited_pages = set()
         while True:
             html = driver.page_source
             soup = BeautifulSoup(html, "html.parser")
 
-            listings = soup.find("div", {"id": "et-listings"})
+            listings = soup.find("div", class_="myplace_list")
             if listings:
-                items = listings.find_all("li", {"class": "et-active-listing clearfix"})
-                for item in items:
-                    link_tag = item.find("a", {"class": "readmore-link"})
-                    templestay_url = None
-                    if link_tag and link_tag.get("href"):
-                        base_url = "https://www.templestay.com"
-                        templestay_url = base_url + link_tag["href"]
-
-                    if templestay_url:
+                links = listings.find_all("a", href=re.compile(r"javascript:fncReserve\('\d+'"))
+                for link in links:
+                    match = re.search(r"fncReserve\('(\d+)'", link['href'])
+                    if match:
+                        templestay_seq = match.group(1)
+                        templestay_url = f"https://www.templestay.com/fe/MI000000000000000062/reserve/view.do?templestaySeq={templestay_seq}"
                         save_templestay_data_to_db(connection, templestay_url)
-                    else:
-                        print(f"데이터 누락 - URL: {templestay_url}")
 
-            # 다음 페이지로 이동
-            try:
-                next_button = driver.find_element(By.ID, "content_LinkNext")
-                if "aspNetDisabled" in next_button.get_attribute("class"):
-                    print("마지막 페이지에 도달했습니다.")
-                    break
-                else:
-                    next_button.click()
+            paging = soup.select("div.paging ul a[href^=\"javascript:fncSearch('\"]")
+            clicked = False
+            for a in paging:
+                text = a.get_text(strip=True)
+                if text not in visited_pages:
+                    visited_pages.add(text)
+                    print(f"이동: {text} 페이지")
+                    driver.execute_script(a["href"])
                     time.sleep(2)
-            except Exception as e:
-                print(f"다음 페이지 버튼을 찾을 수 없습니다: {e}")
+                    clicked = True
+                    break
+
+            if not clicked:
+                print("마지막 페이지까지 완료.")
                 break
 
     finally:
         driver.quit()
 
 
-db_config_path = "C:\\jeolloga\\data\\db_config.yaml"
+db_config_path = "C:\\team\\sopt-jeolloga\\data\\db_config.yaml"
 db_config = load_db_config(db_config_path)
 
 if not db_config:
@@ -106,11 +104,11 @@ try:
         host=db_config["host"],
         user=db_config["user"],
         password=db_config["password"],
-        database=db_config["name"]
+        database=db_config["database"]
     )
     print("DB 연결 성공")
 
-    url = "https://www.templestay.com/reserv_search.aspx"
+    url = "https://www.templestay.com/fe/MI000000000000000062/templestay/prgList.do"
     extract_templestay_data_with_paging(url, connection)
 
 finally:
