@@ -1,14 +1,17 @@
 package sopt.jeolloga.common;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 
 @Component
+@Slf4j
 public class FilterUtil {
 
     private static Map<String, Map<String, Integer>> categoryBitmask;
@@ -17,7 +20,19 @@ public class FilterUtil {
     static {
         try {
             ObjectMapper objectMapper = new ObjectMapper();
-            categoryBitmask = objectMapper.readValue(Paths.get("src/main/java/sopt/jeolloga/common/Categories.json").toFile(), Map.class);
+            String currentDir = System.getProperty("user.dir");
+            Path path = Paths.get(System.getProperty("user.dir"))
+                    .resolve("src")
+                    .resolve("main")
+                    .resolve("java")
+                    .resolve("sopt")
+                    .resolve("jeolloga")
+                    .resolve("common")
+                    .resolve("Categories.json");
+
+            log.info("현재 작업 디렉토리 >>>>>>>>>>>>>>>>>>>>>> " + path.toString());
+
+            categoryBitmask = objectMapper.readValue(Paths.get(path.toString()).toFile(), Map.class);
         } catch (IOException e) {
             throw new RuntimeException("Failed to load category bitmask configuration", e);
         }
