@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Map;
@@ -18,18 +19,20 @@ public class FilterUtil {
     // JSON 파일 로드
     static {
         try {
+            // ObjectMapper 생성
             ObjectMapper objectMapper = new ObjectMapper();
-            String currentDir = System.getProperty("user.dir");
-            Path path = Paths.get(System.getProperty("user.dir"))
-                    .resolve("src")
-                    .resolve("main")
-                    .resolve("resources")
-                    .resolve("common")
-                    .resolve("Categories.json");
 
-            log.info("현재 작업 디렉토리 >>>>>>>>>>>>>>>>>>>>>> " + path.toString());
+            // 클래스패스에서 Categories.json 파일을 읽어옴
+            InputStream inputStream = FilterUtil.class.getClassLoader().getResourceAsStream("common/Categories.json");
 
-            categoryBitmask = objectMapper.readValue(Paths.get(path.toString()).toFile(), Map.class);
+            if (inputStream == null) {
+                throw new RuntimeException("Categories.json 파일을 찾을 수 없습니다.");
+            }
+
+            log.info("현재 작업 디렉토리 >>>>>>>>>>>>>>>>>>>>>> " + System.getProperty("user.dir"));
+
+            // JSON 파일을 Map으로 변환
+            categoryBitmask = objectMapper.readValue(inputStream, Map.class);
         } catch (IOException e) {
             throw new RuntimeException("Failed to load category bitmask configuration", e);
         }
