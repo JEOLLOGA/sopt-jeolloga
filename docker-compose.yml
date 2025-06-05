@@ -8,8 +8,6 @@ services:
     restart: always
     env_file:
       - .env
-    volumes:
-      - ./ssl:/ssl
     networks:
       - templenet
 
