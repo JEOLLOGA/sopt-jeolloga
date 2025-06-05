@@ -62,6 +62,9 @@ tasks.named('test') {
 }
 
 bootJar {
-	archiveFileName = 'app.jar' // docker와 일치하게
-	mainClass.set('com.jeolloga.JeollogaApplication')
+	archiveFileName = 'app.jar'
+}
+
+springBoot {
+	mainClass = 'com.jeolloga.JeollogaApplication'
 }
