@@ -41,3 +41,5 @@ out/
 crawling/*.yaml
 crawling/db_config.yaml
 C:\\jeolloga\\data\\db_config.yaml
+
+.env
