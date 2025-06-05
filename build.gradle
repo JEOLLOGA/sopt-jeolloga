@@ -62,6 +62,6 @@ tasks.named('test') {
 }
 
 bootJar {
-	archiveBaseName.set("jeolloga-${project.version}-${System.env.BRANCH_NAME ?: 'default'}")
-	archiveVersion.set("")
+	archiveFileName = 'app.jar' // docker와 일치하게
+	mainClass.set('com.jeolloga.JeollogaApplication')
 }
