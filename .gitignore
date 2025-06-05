@@ -6,7 +6,6 @@ build/
 !**/src/test/**/build/
 
 ### STS ###
-application.yml
 .apt_generated
 .classpath
 .factorypath
@@ -36,10 +35,5 @@ out/
 
 ### VS Code ###
 .vscode/
-
-# crawling 폴더 안의 yaml 파일 무시
-crawling/*.yaml
-crawling/db_config.yaml
-C:\\jeolloga\\data\\db_config.yaml
 
 .env

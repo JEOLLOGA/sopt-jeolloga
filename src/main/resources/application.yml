@@ -1,0 +1,43 @@
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+
+  jpa:
+    show-sql: false
+    hibernate:
+      ddl-auto: none
+
+kakao:
+  client:
+    client-id: ${KAKAO_CLIENT_ID}
+    admin-key: ${KAKAO_ADMIN_KEY}
+    client-secret: ${KAKAO_CLIENT_SECRET}
+    client-authentication-method: ${KAKAO_CLIENT_AUTHENTICATION_METHOD}
+    authorization-grant-type: ${KAKAO_AUTHORIZATION_GRANT_TYPE}
+    redirect-uri: ${KAKAO_REDIRECT_URI}
+    scope: ${KAKAO_SCOPE:profile_nickname,account_email}
+
+jwt:
+  secret: ${JWT_SECRET}
+
+naver:
+  api:
+    client-id: ${NAVER_API_CLIENT_ID}
+    client-secret: ${NAVER_API_CLIENT_SECRET}
+
+geocoding:
+  api:
+    key: ${GEOCODING_API_KEY}
+
+redis:
+  host: ${REDIS_HOST}
+  port: ${REDIS_PORT}
+  password: ${REDIS_PASSWORD}
+
+server:
+  port: 8080
+  ssl:
+    enabled: false
