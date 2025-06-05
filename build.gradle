@@ -66,5 +66,5 @@ bootJar {
 }
 
 springBoot {
-	mainClass = 'com.jeolloga.JeollogaApplication'
+	mainClass = 'sopt.jeolloga.JeollogaApplication'
 }
