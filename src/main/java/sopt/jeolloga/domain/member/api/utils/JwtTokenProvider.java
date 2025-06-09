@@ -83,6 +83,9 @@ public class JwtTokenProvider { // Jwt Token 생성
 
         // roles 클레임에서 권한 추출
         List<String> roles = claims.get("roles", List.class);
+        if (roles == null) {
+            roles = List.of("ROLE_USER");
+        }
 
         // 고정된 권한 생성
         List<GrantedAuthority> authorities = roles.stream()
