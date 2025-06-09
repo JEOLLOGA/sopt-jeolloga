@@ -88,7 +88,7 @@ public class JwtTokenProvider { // Jwt Token 생성
         List<GrantedAuthority> authorities = roles.stream()
                 .map(role -> new SimpleGrantedAuthority(role))
                 .collect(Collectors.toList());
-        
+
         return new UsernamePasswordAuthenticationToken(userId, null, authorities);
     }
 
