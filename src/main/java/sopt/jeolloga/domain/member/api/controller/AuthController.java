@@ -12,7 +12,7 @@ import sopt.jeolloga.domain.member.api.service.MemberService;
 import sopt.jeolloga.domain.member.api.service.TokenService;
 import sopt.jeolloga.domain.member.core.MemberRepository;
 
-@Controller
+@RestController
 public class AuthController {
 
     private final AuthService authService;

@@ -1,76 +1,67 @@
 package sopt.jeolloga.domain.member.api.service;
 
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import sopt.jeolloga.domain.member.api.utils.JwtTokenProvider;
-import sopt.jeolloga.domain.member.core.RefreshToken;
-import sopt.jeolloga.domain.member.core.RefreshTokenRepository;
 import sopt.jeolloga.domain.member.core.exception.MemberCoreException;
 import sopt.jeolloga.exception.ErrorCode;
 
+import java.util.concurrent.TimeUnit;
+
 @Service
+@RequiredArgsConstructor
 public class TokenService {
-    private final RefreshTokenRepository refreshTokenRepository;
+
     private final JwtTokenProvider jwtTokenProvider;
+    private final RedisTemplate<String, String> redisTemplate;
 
-    public TokenService(RefreshTokenRepository refreshTokenRepository, JwtTokenProvider jwtTokenProvider) {
-        this.refreshTokenRepository = refreshTokenRepository;
-        this.jwtTokenProvider = jwtTokenProvider;
-    }
+    private static final long REFRESH_TOKEN_EXPIRATION_DAYS = 14;
 
-    public String createAccessToken(String userId){
+    public String createAccessToken(String userId) {
         return jwtTokenProvider.createAccessToken(userId);
     }
 
-    public String createRefreshToken(String userId){
-        return jwtTokenProvider.createRefreshToken(userId);
-    }
-
-    public void updateRefreshToken(String userId, String refreshToken){
-
-        if(getRefreshToken(userId) != null){
-            deleteRefreshToken(userId);
-        }
+    public String createRefreshToken(String userId) {
+        String refreshToken = jwtTokenProvider.createRefreshToken(userId);
         saveRefreshToken(userId, refreshToken);
+        return refreshToken;
     }
 
-    public String reissueAccessToken(String refreshToken){
+    public void saveRefreshToken(String userId, String token) {
+        redisTemplate.opsForValue().set("refreshToken:" + userId, token, REFRESH_TOKEN_EXPIRATION_DAYS, TimeUnit.DAYS);
+    }
 
+    public String getRefreshToken(String userId) {
+        return redisTemplate.opsForValue().get("refreshToken:" + userId);
+    }
+
+    public void deleteRefreshToken(String userId) {
+        redisTemplate.delete("refreshToken:" + userId);
+    }
+
+    public void updateRefreshToken(String userId, String newToken) {
+        deleteRefreshToken(userId);
+        saveRefreshToken(userId, newToken);
+    }
+
+    public String reissueAccessToken(String refreshToken) {
         String userId = jwtTokenProvider.getUserIdFromToken(refreshToken);
-        String oldRefreshToken = getRefreshToken(userId);
+        String storedToken = getRefreshToken(userId);
 
-        // 저장된 refreshToken이 없는 경우
-        if (oldRefreshToken == null) {
+        if (storedToken == null) {
             throw new MemberCoreException(ErrorCode.EXPIRED_REFRESH_TOKEN);
         }
 
-        // 입력된 refreshToken이 저장된 토큰과 일치하지 않는 경우
-        if (!oldRefreshToken.equals(refreshToken)) {
+        if (!storedToken.equals(refreshToken)) {
             throw new MemberCoreException(ErrorCode.INVALID_TOKEN);
         }
 
         return jwtTokenProvider.createAccessToken(userId);
     }
 
-    public void logout(String accessToken){
+    public void logout(String accessToken) {
         String userId = jwtTokenProvider.getUserIdFromToken(accessToken);
         deleteRefreshToken(userId);
-    }
-
-    // Refresh Token 저장
-    public void saveRefreshToken(String userId, String token) {
-        RefreshToken refreshToken = new RefreshToken(userId, token);
-        refreshTokenRepository.save(refreshToken);
-    }
-
-    // Refresh Token 조회
-    public String getRefreshToken(String userId) {
-        return refreshTokenRepository.findById(userId)
-                .map(RefreshToken::getRefreshToken)
-                .orElse(null);
-    }
-
-    // Refresh Token 삭제
-    public void deleteRefreshToken(String userId) {
-        refreshTokenRepository.deleteById(userId);
     }
 }
