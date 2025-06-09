@@ -19,6 +19,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class JwtTokenProvider { // Jwt Token 생성
@@ -84,8 +85,10 @@ public class JwtTokenProvider { // Jwt Token 생성
         List<String> roles = claims.get("roles", List.class);
 
         // 고정된 권한 생성
-        List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_USER"));
-
+        List<GrantedAuthority> authorities = roles.stream()
+                .map(role -> new SimpleGrantedAuthority(role))
+                .collect(Collectors.toList());
+        
         return new UsernamePasswordAuthenticationToken(userId, null, authorities);
     }
 
