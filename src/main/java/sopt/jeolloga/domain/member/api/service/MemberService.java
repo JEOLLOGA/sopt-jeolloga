@@ -11,13 +11,14 @@ import sopt.jeolloga.exception.ErrorCode;
 public class MemberService {
 
     private final MemberRepository memberRepository;
+    private final WebhookService webhookService;
 
-    public MemberService(MemberRepository memberRepository){
+    public MemberService(MemberRepository memberRepository, WebhookService webhookService) {
+        this.webhookService = webhookService;
         this.memberRepository = memberRepository;
     }
 
     public LoginRes findOrCreateUser(MemberRes memberInfo) {
-
         // kakao user id 기반으로 서비스 가입 여부 판단 후 유저 조회 or 생성
         return memberRepository.findByKakaoUserId(memberInfo.userId())
                 .map(existingMember -> new LoginRes(existingMember.getId(), existingMember.getNickname()))
@@ -29,6 +30,7 @@ public class MemberService {
                             null, null, null, null
                     );
                     memberRepository.save(newMember);
+                    webhookService.sendDiscordNotification();
                     return new LoginRes(newMember.getId(), null);
                 });
     }
