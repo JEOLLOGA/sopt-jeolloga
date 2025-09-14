@@ -49,7 +49,10 @@ public class Templestay {
     @Column(name = "tag", length = 255)
     private String tag;
 
-    public Templestay(String templestayName, String organizedName, String phoneNumber, String introduction, String address, String youtube, String templeName, String schedule, BigDecimal latitude, BigDecimal longitude, String tag) {
+    @Column(name = "view")
+    private Long view;
+
+    public Templestay(String templestayName, String organizedName, String phoneNumber, String introduction, String address, String youtube, String templeName, String schedule, BigDecimal latitude, BigDecimal longitude, String tag, Long view) {
         this.templestayName = templestayName;
         this.organizedName = organizedName;
         this.phoneNumber = phoneNumber;
@@ -61,5 +64,6 @@ public class Templestay {
         this.latitude = latitude;
         this.longitude = longitude;
         this.tag = tag;
+        this.view = view;
     }
 }
