@@ -8,7 +8,7 @@ import sopt.jeolloga.domain.templestay.core.Category;
 import java.util.*;
 import java.util.stream.Collectors;
 
-@Component
+//@Component
 public class Filters {
 
     private static final int DEFAULT_MAX_PRICE = Integer.MAX_VALUE;

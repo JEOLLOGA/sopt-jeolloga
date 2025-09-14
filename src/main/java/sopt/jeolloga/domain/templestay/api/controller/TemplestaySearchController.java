@@ -18,18 +18,19 @@ public class TemplestaySearchController {
 
     @PostMapping("/search")
     public ResponseEntity<PageTemplestaySearchRes<?>> searchWithFilters(
-            @RequestParam(value = "userId", required = false) Long userId,
             @RequestBody FilterReq filter,
-            @RequestParam(value = "page", defaultValue = "1") int page,
-            @RequestParam(value = "pageSize", defaultValue = "10") int pageSize) {
+            @RequestParam(value = "userId", required = false) Long userId,
+            @RequestParam(value = "sort", defaultValue = "random", required = false) String sort,
+            @RequestParam(value = "page", defaultValue = "1", required = false) int page,
+            @RequestParam(value = "pageSize", defaultValue = "10", required = false) int pageSize) {
 
         String authenticatedUser = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         PageTemplestaySearchRes<TemplestayRes> templestaySearchRes;
 
         if("anonymousUser".equals(authenticatedUser)){
-            templestaySearchRes = templestaySearchService.searchFilteredTemplestay(filter, page, pageSize, null);
+            templestaySearchRes = templestaySearchService.searchFilteredTemplestay(filter, sort, page, pageSize, null);
         } else if (Long.parseLong(authenticatedUser) == userId) {
-            templestaySearchRes = templestaySearchService.searchFilteredTemplestay(filter, page, pageSize, userId);
+            templestaySearchRes = templestaySearchService.searchFilteredTemplestay(filter, sort, page, pageSize, userId);
         } else {
             throw new MemberCoreException(ErrorCode.TOKEN_MISMATCH);
         }

@@ -58,7 +58,7 @@ public class TemplestaySearchService {
         }
     }
 
-    public PageTemplestaySearchRes<TemplestayRes> searchFilteredTemplestay(FilterReq filter, int page, int pageSize, Long userId){
+    public PageTemplestaySearchRes<TemplestayRes> searchFilteredTemplestay(FilterReq filter, String sort, int page, int pageSize, Long userId){
 
         String content = (filter.content() == null || filter.content().isBlank()) ? "" : filter.content().replaceAll("\\s+", "").trim();
         Integer binaryRegionFilter = FilterUtil.convertRegion(filter.region());
@@ -75,8 +75,19 @@ public class TemplestaySearchService {
         }
 
         Pageable pageable = PageRequest.of(page-1, pageSize);
-        Page<Object[]> searchFilteredTemplestayPage = templestayRepository.searchFilteredTemplestay(content, binaryRegionFilter, binaryTypeFilter,
-                binaryPurposeFilter,binaryActivityFilter, minPrice, maxPrice, binaryEtcFilter, userId, pageable);
+        Page<Object[]> searchFilteredTemplestayPage = null;
+
+        if(sort.equals("random")){
+            searchFilteredTemplestayPage = templestayRepository.searchFilteredTemplestay(content, binaryRegionFilter, binaryTypeFilter,
+                    binaryPurposeFilter,binaryActivityFilter, minPrice, maxPrice, binaryEtcFilter, userId, pageable);
+        } else if(sort.equals("like")){
+            searchFilteredTemplestayPage = templestayRepository.searchFilteredTemplestaySortByLike(content, binaryRegionFilter, binaryTypeFilter,
+                    binaryPurposeFilter,binaryActivityFilter, minPrice, maxPrice, binaryEtcFilter, userId, pageable);
+        } else if(sort.equals("price")){
+            searchFilteredTemplestayPage = templestayRepository.searchFilteredTemplestaySortByPrice(content, binaryRegionFilter, binaryTypeFilter,
+                    binaryPurposeFilter,binaryActivityFilter, minPrice, maxPrice, binaryEtcFilter, userId, pageable);
+        }
+
 
         List<TemplestayRes> templestayList = searchFilteredTemplestayPage.getContent().stream()
                 .map(row -> new TemplestayRes(

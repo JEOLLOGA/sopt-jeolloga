@@ -28,16 +28,17 @@ public class FilterController {
     public ResponseEntity<PageTemplestayRes> getFilteredTemplestay(
             @RequestBody FilterReq filter,
             @RequestParam (value = "userId", required = false) Long userId,
-            @RequestParam (value = "page") int page,
-            @RequestParam (value="pageSize", defaultValue = "10") int pageSize){
+            @RequestParam(value = "sort", defaultValue = "random", required = false) String sort,
+            @RequestParam (value = "page", defaultValue = "1", required = false) int page,
+            @RequestParam (value="pageSize", defaultValue = "10", required = false) int pageSize){
 
         String authenticatedUser = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         PageTemplestayRes templestayList;
 
         if("anonymousUser".equals(authenticatedUser)){
-            templestayList = filterService.getTemplestayList(filter, page, pageSize, null);
+            templestayList = filterService.getTemplestayList(filter, sort, page, pageSize, null);
         } else if (Long.parseLong(authenticatedUser) == userId) {
-            templestayList = filterService.getTemplestayList(filter, page, pageSize, userId);
+            templestayList = filterService.getTemplestayList(filter, sort, page, pageSize, userId);
         } else {
             throw new MemberCoreException(ErrorCode.TOKEN_MISMATCH);
         }

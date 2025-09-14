@@ -1,5 +1,6 @@
 package sopt.jeolloga.domain.templestay.api.service;
 
+import net.minidev.json.JSONUtil;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -37,7 +38,7 @@ public class FilterService {
                 binaryPurposeFilter,binaryActivityFilter, minPrice, maxPrice, binaryEtcFilter);
     }
 
-    public PageTemplestayRes getTemplestayList(FilterReq filter, int page, int pageSize, Long userId){
+    public PageTemplestayRes getTemplestayList(FilterReq filter, String sort, int page, int pageSize, Long userId){
 
         Pageable pageable = PageRequest.of(page-1, pageSize);
 
@@ -50,9 +51,19 @@ public class FilterService {
         int minPrice = filter.price().minPrice();
         int maxPrice = (filter.price().maxPrice() >= 300000) ? Integer.MAX_VALUE : filter.price().maxPrice();
 
-        Page<Object[]> filteredTemplestayPage = templestayRepository.findFilteredTemplestay(binaryRegionFilter, binaryTypeFilter,
-                binaryPurposeFilter,binaryActivityFilter, minPrice, maxPrice, binaryEtcFilter, userId, pageable);
+        Page<Object[]> filteredTemplestayPage = null;
+        
+        if(sort.equals("random")){
+            filteredTemplestayPage = templestayRepository.findFilteredTemplestay(binaryRegionFilter, binaryTypeFilter,
+                    binaryPurposeFilter,binaryActivityFilter, minPrice, maxPrice, binaryEtcFilter, userId, pageable);
+        } else if (sort.equals("like")) {
 
+            filteredTemplestayPage = templestayRepository.findFilteredTemplestaySortByLike(binaryRegionFilter, binaryTypeFilter,
+                    binaryPurposeFilter,binaryActivityFilter, minPrice, maxPrice, binaryEtcFilter, userId, pageable);
+        } else if(sort.equals("price")){
+            filteredTemplestayPage = templestayRepository.findFilteredTemplestaySortByPrice(binaryRegionFilter, binaryTypeFilter,
+                    binaryPurposeFilter,binaryActivityFilter, minPrice, maxPrice, binaryEtcFilter, userId, pageable);
+        }
 
         List<TemplestayRes> content = filteredTemplestayPage.getContent().stream()
                 .map(row -> new TemplestayRes(
@@ -69,4 +80,6 @@ public class FilterService {
 
         return new PageTemplestayRes(page, pageSize, filteredTemplestayPage.getTotalPages(), content);
     }
+
+
 }
